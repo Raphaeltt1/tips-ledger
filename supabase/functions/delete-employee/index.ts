@@ -54,8 +54,8 @@ Deno.serve(async (req) => {
     const { data: runner, error: runnerError } = await admin
       .from("profiles").select("id,full_name,role")
       .eq("id", runnerId).maybeSingle();
-    if (runnerError || !runner || runner.role !== "runner") {
-      return json({ error: "Runner not found" }, 404);
+    if (runnerError || !runner || !["runner", "manager"].includes(runner.role)) {
+      return json({ error: "Employee not found" }, 404);
     }
     if (runner.full_name.trim() !== confirmation.trim()) {
       return json({ error: "Name confirmation did not match. Nothing was deleted." }, 400);
