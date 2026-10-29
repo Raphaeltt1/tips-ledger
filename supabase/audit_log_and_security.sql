@@ -20,6 +20,8 @@ CREATE INDEX IF NOT EXISTS audit_log_entity_idx ON public.audit_log (entity_type
 ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.audit_log FROM PUBLIC, anon;
 GRANT SELECT ON TABLE public.audit_log TO authenticated;
+GRANT INSERT ON TABLE public.audit_log TO service_role;
+GRANT USAGE, SELECT ON SEQUENCE public.audit_log_id_seq TO service_role;
 DROP POLICY IF EXISTS "Admins read audit log" ON public.audit_log;
 CREATE POLICY "Admins read audit log"
   ON public.audit_log FOR SELECT TO authenticated
