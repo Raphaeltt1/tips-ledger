@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { data: actor, error: actorError } = await admin
-      .from("profiles").select("id,role,active")
+      .from("profiles").select("id,full_name,role,active")
       .eq("id", authData.user.id).maybeSingle();
     if (actorError || !actor?.active || actor.role !== "admin") {
       return json({ error: "Admin access required" }, 403);
@@ -72,6 +72,24 @@ Deno.serve(async (req) => {
       await admin.auth.admin.deleteUser(created.user.id);
       console.error("Profile creation failed:", profileError.message);
       return json({ error: "Could not create employee profile. The login creation was rolled back." }, 500);
+    }
+
+    const { error: auditError } = await admin.from("audit_log").insert({
+      actor_id: actor.id,
+      actor_name: actor.full_name,
+      actor_role: actor.role,
+      action: "employee.created",
+      entity_type: "profiles",
+      entity_id: created.user.id,
+      target_user_id: created.user.id,
+      target_name: fullName,
+      details: { role },
+    });
+    if (auditError) {
+      await admin.from("profiles").delete().eq("id", created.user.id);
+      await admin.auth.admin.deleteUser(created.user.id);
+      console.error("Employee audit log failed:", auditError.message);
+      return json({ error: "Could not record employee creation. The account creation was rolled back." }, 500);
     }
 
     return json({ success: true, employee: { id: created.user.id, full_name: fullName, role } }, 200);
