@@ -1,0 +1,18 @@
+{
+  "name": "Tips Ledger",
+  "short_name": "Tips Ledger",
+  "description": "Weekly tips and payment confirmations",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fc",
+  "theme_color": "#142846",
+  "icons": [
+    {
+      "src": "./tips-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
