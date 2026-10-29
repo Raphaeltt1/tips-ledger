@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Local VAPID Key Generator</title>
+<style>body{font:16px/1.5 system-ui,-apple-system,sans-serif;max-width:760px;margin:30px auto;padding:0 16px;color:#142846;background:#f3f6fc}main{background:white;border:1px solid #dce6f3;border-radius:18px;padding:22px}button{padding:12px 16px;background:#2563eb;color:white;border:0;border-radius:10px;font:inherit;font-weight:700}label{display:block;font-weight:700;margin:18px 0 6px}textarea{width:100%;min-height:84px;box-sizing:border-box;border:1px solid #cbd8e8;border-radius:9px;padding:10px;font:13px ui-monospace,monospace;overflow-wrap:anywhere}p{color:#526783}.warn{background:#fff4d8;padding:12px;border-radius:10px;color:#734b00}</style></head>
+<body><main><h1>🔐 Local VAPID Key Generator</h1><p>Generates a Web Push key pair in this browser only. This page does not send keys anywhere.</p><p class="warn"><b>Keep the private key secret.</b> Never send it in chat or put it in website code.</p><button id="generate">Generate key pair on this device</button><div id="results" hidden><label>Public key (safe to share with your app)</label><textarea id="pub" readonly></textarea><button id="copyPub">Copy public key</button><label>Private key (SECRET — save only in Supabase Edge Function secrets)</label><textarea id="priv" readonly></textarea><button id="copyPriv">Copy private key</button><p id="status" aria-live="polite"></p></div><script>
+const b64url = bytes => { let bin=''; for(const b of bytes) bin+=String.fromCharCode(b); return btoa(bin).replace(/=/g,'').replace(/\\+/g,'-').replace(/\\//g,'_'); };
+document.getElementById('generate').onclick=async()=>{
+ try{
+  const pair=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
+  const jwk=await crypto.subtle.exportKey('jwk',pair.privateKey);
+  const pub=await crypto.subtle.exportKey('raw',pair.publicKey);
+  if(pub.byteLength!==65||pub[0]!==4||!jwk.d) throw new Error('Unexpected key format');
+  document.getElementById('pub').value=b64url(new Uint8Array(pub));
+  document.getElementById('priv').value=jwk.d;
+  document.getElementById('results').hidden=false;
+  document.getElementById('status').textContent='Generated locally. Save the private key directly into Supabase secrets.';
+ }catch(e){alert('Key generation failed: '+e.message)}
+};
+document.getElementById('copyPub').onclick=async()=>{await navigator.clipboard.writeText(document.getElementById('pub').value);document.getElementById('status').textContent='Public key copied.'};
+document.getElementById('copyPriv').onclick=async()=>{await navigator.clipboard.writeText(document.getElementById('priv').value);document.getElementById('status').textContent='Private key copied. Paste it only into Supabase secrets.'};
+</script></main></body></html>
