@@ -5,7 +5,7 @@ self.addEventListener('push', event => {
   const title = String(data.title || 'Tips Ledger');
   const body = String(data.body || 'You have a new notification.');
   event.waitUntil(self.registration.showNotification(title, {
-    body, icon: './icon.png', badge: './icon.png',
+    body, icon: './tips-icon.svg', badge: './tips-icon.svg',
     tag: data.tag || 'tips-ledger', renotify: true,
     data: {url: new URL('./', self.registration.scope).href}
   }));
