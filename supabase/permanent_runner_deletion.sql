@@ -44,10 +44,10 @@ BEGIN
 
   SELECT full_name INTO v_runner_name
   FROM public.profiles
-  WHERE id = p_runner_id AND role = 'runner';
+  WHERE id = p_runner_id AND role IN ('runner', 'manager');
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'Runner not found';
+    RAISE EXCEPTION 'Employee not found';
   END IF;
 
   -- Transaction-local switch: only this admin-only function sets it.
