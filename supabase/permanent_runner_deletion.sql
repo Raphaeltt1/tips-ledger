@@ -53,6 +53,15 @@ BEGIN
   -- Transaction-local switch: only this admin-only function sets it.
   PERFORM set_config('app.allow_permanent_runner_delete', 'on', true);
 
+  INSERT INTO public.audit_log
+    (actor_id, actor_name, actor_role, action, entity_type, entity_id,
+     target_user_id, target_name, details)
+  SELECT p.id, p.full_name, p.role, 'employee.permanently_deleted',
+         'profiles', p_runner_id, p_runner_id, v_runner_name,
+         jsonb_build_object('permanent', true, 'related_history_removed', true)
+  FROM public.profiles p
+  WHERE p.id = auth.uid();
+
   DELETE FROM public.receipt_confirmations
   WHERE runner_id = p_runner_id OR weekly_tip_id IN (
     SELECT id FROM public.weekly_tips WHERE runner_id = p_runner_id
