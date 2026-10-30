@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
 
     const { data: actor, error: actorError } = await admin
       .from("profiles")
-      .select("id,role,active")
+      .select("id,full_name,role,active")
       .eq("id", authData.user.id)
       .maybeSingle();
 
@@ -107,13 +107,15 @@ Deno.serve(async (req) => {
       .eq("id", runnerId)
       .maybeSingle();
 
-    // Admin and Superuser accounts cannot be deleted here.
+    const allowedTargets = actor.role === "superuser"
+      ? ["admin", "manager", "runner"]
+      : ["manager", "runner"];
     if (
       runnerError ||
       !runner ||
-      !["runner", "manager"].includes(runner.role)
+      !allowedTargets.includes(runner.role)
     ) {
-      return json({ error: "Employee not found" }, 404);
+      return json({ error: "Employee not found or your role cannot delete this employee" }, 403);
     }
 
     if (runner.full_name.trim() !== confirmation.trim()) {
@@ -128,8 +130,8 @@ Deno.serve(async (req) => {
 
     // Cleanup runs with the authenticated user's permissions.
     const { error: cleanupError } = await authClient.rpc(
-      "admin_permanently_delete_runner",
-      { p_runner_id: runnerId }
+      "admin_permanently_delete_employee",
+      { p_employee_id: runnerId }
     );
 
     if (cleanupError) {
@@ -167,10 +169,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Keep the actor and target identified in the Audit Log after Auth removal.
+    const { error: auditError } = await admin.from("audit_log").insert({
+      actor_id: actor.id,
+      actor_name: actor.full_name,
+      actor_role: actor.role,
+      action: "employee.permanently_deleted",
+      entity_type: "profiles",
+      entity_id: runnerId,
+      target_user_id: runnerId,
+      target_name: runner.full_name,
+      details: { deleted_role: runner.role, permanent: true },
+    });
+    if (auditError) {
+      console.error("Permanent deletion succeeded but audit attribution failed:", auditError.message);
+    }
+
     return json({
       success: true,
-      message:
-        "Employee account and related history permanently deleted.",
+      message: "Employee account and related history permanently deleted.",
+      auditRecorded: !auditError,
     });
   } catch (error) {
     console.error("delete-employee failed:", error);
