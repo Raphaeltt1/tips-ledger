@@ -4,7 +4,18 @@
 BEGIN;
 
 -- Existing RLS still applies; permit deleting notifications owned by the logged-in user only.
-ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+DO $rls$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class
+    WHERE oid = 'public.notifications'::pg_catalog.regclass
+      AND relrowsecurity = true
+  ) THEN
+    RAISE EXCEPTION
+      'Notifications RLS is not enabled. Review its existing policies before applying this migration.';
+  END IF;
+END;
+$rls$;
 DO $policy$
 BEGIN
   IF NOT EXISTS (
