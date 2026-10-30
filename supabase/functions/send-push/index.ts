@@ -48,15 +48,20 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const eventType = body?.event_type;
     const weeklyTipId = body?.weekly_tip_id;
-    if (!weeklyTipId || !["published", "received"].includes(eventType)) {
+    if (!["published", "received", "test"].includes(eventType) || (eventType !== "test" && !weeklyTipId)) {
       return json({ error: "Invalid event" }, 400);
     }
 
     let recipientIds: string[] = [];
     let title = "";
     let message = "";
-    if (eventType === "published") {
-      if (!["admin", "manager"].includes(profile.role)) return json({ error: "Not authorized to publish notifications" }, 403);
+    if (eventType === "test") {
+      // A signed-in user may only test notifications to their own devices.
+      recipientIds = [profile.id];
+      title = "🔔 Tips Ledger Test";
+      message = "Background push is working on this device.";
+    } else if (eventType === "published") {
+      if (!["admin", "superuser", "manager"].includes(profile.role)) return json({ error: "Not authorized to publish notifications" }, 403);
       const { data: payment, error } = await admin.from("weekly_tips")
         .select("id,runner_id,week_start,published").eq("id", weeklyTipId).maybeSingle();
       if (error || !payment?.published) return json({ error: "Published payment not found" }, 404);
@@ -70,18 +75,19 @@ Deno.serve(async (req) => {
         .eq("runner_id", profile.id).maybeSingle();
       if (error || !receipt) return json({ error: "Receipt confirmation not found" }, 404);
       const { data: admins, error: adminsError } = await admin.from("profiles")
-        .select("id").eq("role", "admin").eq("active", true);
+        .select("id").in("role", ["admin", "superuser"]).eq("active", true);
       if (adminsError) return json({ error: "Could not load administrators" }, 500);
       recipientIds = (admins || []).map((x: { id: string }) => x.id);
       title = "✅ Payment Received";
       message = `Runner ${profile.full_name || "Unknown"} confirmed receiving their weekly payment.`;
     }
 
-    if (!recipientIds.length) return json({ sent: 0, reason: "No recipients" });
+    if (!recipientIds.length) return json({ sent: 0, failed: 0, reason: "No active recipients" });
     webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
     const { data: subscriptions, error: subError } = await admin.from("push_subscriptions")
       .select("id,user_id,endpoint,subscription").in("user_id", recipientIds);
     if (subError) return json({ error: "Could not load push subscriptions" }, 500);
+    if (!subscriptions?.length) return json({sent: 0, failed: 0, reason: "No registered device subscriptions for the recipient(s). Enable or re-register push on each device."});
 
     let sent = 0;
     let failed = 0;
@@ -89,7 +95,7 @@ Deno.serve(async (req) => {
     await Promise.all((subscriptions || []).map(async (row: { id: string; endpoint: string; subscription: Record<string, unknown> }) => {
       try {
         await webpush.sendNotification(row.subscription, JSON.stringify({
-          title, body: message, tag: `tips-ledger-${eventType}-${weeklyTipId}`,
+          title, body: message, tag: `tips-ledger-${eventType}-${weeklyTipId || profile.id}`,
           url: "https://raphaeltt1.github.io/tips-ledger/"
         }));
         sent++;
@@ -101,7 +107,7 @@ Deno.serve(async (req) => {
       }
     }));
     if (staleIds.length) await admin.from("push_subscriptions").delete().in("id", staleIds);
-    return json({ sent, failed, staleSubscriptionsRemoved: staleIds.length });
+    return json({ sent, failed, reason: sent === 0 ? "All push attempts failed. Check Supabase Edge Function logs and VAPID configuration." : null, staleSubscriptionsRemoved: staleIds.length });
   } catch (error) {
     console.error("send-push failed", error);
     return json({ error: "Push notification delivery failed" }, 500);
