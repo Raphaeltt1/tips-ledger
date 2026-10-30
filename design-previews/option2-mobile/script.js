@@ -244,3 +244,135 @@ function createEmployeeSheet(){
 function passwordSheet(){
  sheet("Change password",'<p class="small-sub">This form is for visual exploration only. Your real password is never read or changed.</p><form id="passwordForm" class="form-stack section-gap"><div class="field"><label for="oldPassword">Current password</label><input id="oldPassword" required type="password"></div><div class="field"><label for="newPassword">New password (12+ characters)</label><input id="newPassword" required type="password" minlength="12"></div><div class="field"><label for="confirmNewPassword">Confirm password</label><input id="confirmNewPassword" required type="password" minlength="12"></div><button type="submit" class="btn-primary brand-btn">Preview save</button></form>',"password");
 }
+
+
+function act(type,id,roleChoice){
+ if(type==="newDraft"){draftSheet();return}
+ if(type==="notifications"){notificationSheet();return}
+ if(type==="pending"){statusFilter="published";renderPayments();go("payments");return}
+ if(type==="graphRange"){graphRange=graphRange===6?52:6;renderHome();return}
+ if(type==="viewToggle"){tableMode=!tableMode;renderPayments();return}
+ if(type==="close"){closeSheet();return}
+ if(type==="role"){
+  if(!personas[roleChoice])return;
+  role=roleChoice;page="home";statusFilter="";auditLimit=10;closeSheet();renderAll();
+  toast("Now previewing "+roleName(role)+". Real roles unchanged.");return;
+ }
+ if(type==="markAll"){notifications.forEach(n=>n.read=true);closeSheet();renderAll();toast("Sample notifications marked read.");return}
+ if(type==="deleteNotice"){notifications=notifications.filter(n=>String(n.id)!==String(id));notificationSheet();renderAll();return}
+ if(type==="publish"||type==="confirm"||type==="edit"){paymentSheet(type,id);return}
+ if(type==="doPublish"){
+  const p=payments.find(x=>x.id===id);
+  if(!p||role==="runner"||p.status!=="draft")return;
+  p.status="published";pushAudit("payment.published",p.runnerId,"Fictional payout published");
+  closeSheet();renderAll();toast("Sample payment published. No push sent.");return;
+ }
+ if(type==="doConfirm"){
+  const p=payments.find(x=>x.id===id);
+  if(!p||role!=="runner"||p.runnerId!==self().id||p.status!=="published")return;
+  p.status="received";pushAudit("payment.receipt_confirmed",p.runnerId,"Fictional receipt confirmed");
+  closeSheet();renderAll();toast("Sample receipt confirmed. No push sent.");return;
+ }
+ if(type==="manage"){employeeSheet(id);return}
+ if(type==="rate"){rateSheet(id);return}
+ if(type==="deleteEmployee"){deleteSheet(id);return}
+ if(type==="toggleEmployee"){
+  const p=person(id);if(!canManage(p))return;
+  p.active=!p.active;pushAudit(p.active?"employee.activated":"employee.deactivated",id,"Fictional employee status");
+  closeSheet();renderAll();toast("Sample employee "+(p.active?"reactivated.":"deactivated."));return;
+ }
+}
+document.addEventListener("click",function(e){
+ const nav=e.target.closest("[data-page]");
+ if(nav){go(nav.dataset.page);return}
+ const status=e.target.closest("[data-status]");
+ if(status){statusFilter=status.dataset.status;renderPayments();return}
+ const button=e.target.closest("[data-act]");
+ if(button){act(button.dataset.act,button.dataset.id,button.dataset.role);return}
+ const demo=e.target.closest("[data-simulate]");
+ if(demo){toast(demo.dataset.simulate)}
+});
+document.addEventListener("input",function(e){
+ if(["draftRunner","draftTips","draftAdvance"].includes(e.target.id))updateDraftTotal();
+ if(e.target.id==="teamSearch")renderTeam();
+ if(["paymentFrom","paymentTo"].includes(e.target.id))renderPayments();
+});
+document.addEventListener("change",function(e){
+ if(e.target.id==="draftRunner")updateDraftTotal();
+ if(e.target.id==="paymentRunner")renderPayments();
+});
+$("newDraftTop").onclick=draftSheet;
+$("addEmployeeButton").onclick=createEmployeeSheet;
+$("exportButton").onclick=()=>toast("Excel export is in the real app. Preview doesn't export data.");
+$("clearPaymentFilters").onclick=()=>{
+ statusFilter="";["paymentFrom","paymentTo","paymentRunner"].forEach(id=>$(id).value="");renderPayments();
+};
+$("auditSearch").onclick=()=>{auditLimit=10;renderAudit();toast("Sample audit filters applied.")};
+$("auditClear").onclick=()=>{
+ ["auditAction","auditActor","auditEmployee","auditFrom","auditTo"].forEach(id=>$(id).value="");auditLimit=10;renderAudit();
+};
+$("auditShowMore").onclick=()=>{auditLimit+=10;renderAudit()};
+$("profileButton").onclick=roleSheet;
+$("rolePickerButton").onclick=roleSheet;
+$("notificationsButton").onclick=notificationSheet;
+$("passwordButton").onclick=passwordSheet;
+$("signOutButton").onclick=()=>toast("This is a visual preview; no real login session.");
+$("themeSwitch").onclick=()=>{
+ document.documentElement.dataset.theme=document.documentElement.dataset.theme==="dark"?"light":"dark";
+ renderProfile();
+};
+$("closeSheet").onclick=closeSheet;
+$("sheetOverlay").onclick=e=>{if(e.target===$("sheetOverlay"))closeSheet()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("sheetOverlay").classList.contains("open"))closeSheet()});
+document.addEventListener("submit",function(e){
+ const form=e.target;if(!form||!form.id)return;e.preventDefault();
+ if(form.id==="draftForm"){
+  if(role==="runner")return;
+  const rid=$("draftRunner").value,week=$("draftWeek").value,hours=Number($("draftHours").value),tips=Number($("draftTips").value),advance=Number($("draftAdvance").value),p=person(rid);
+  if(!p||!week||[hours,tips,advance].some(n=>!Number.isFinite(n)||n<0))return;
+  if(payments.some(x=>x.runnerId===rid&&x.week===week)){toast("This runner already has a sample record for this week.");return}
+  payments.unshift({id:"new-"+Date.now(),runnerId:rid,week,hours,tips,advance,status:"draft",rate:p.rate});
+  pushAudit("payment.draft_created",rid,"Fictional weekly draft saved");
+  closeSheet();statusFilter="draft";renderAll();go("payments");toast("Sample draft saved, hidden from Runners.");return;
+ }
+ if(form.id==="editPaymentForm"){
+  const p=payments.find(x=>x.id===sheetId);
+  if(!p||!privileged()||p.status==="received")return;
+  const hours=Number($("editHours").value),tips=Number($("editTips").value),advance=Number($("editAdvance").value);
+  if([hours,tips,advance].some(n=>!Number.isFinite(n)||n<0))return;
+  p.hours=hours;p.tips=tips;p.advance=advance;pushAudit("payment.edited",p.runnerId,"Fictional payment edited");
+  closeSheet();renderAll();toast("Sample payment updated.");return;
+ }
+ if(form.id==="rateForm"){
+  const p=person(sheetId),rate=Number($("rateValue").value);
+  if(!canManage(p)||p.role!=="runner"||!Number.isFinite(rate)||rate<0)return;
+  p.rate=rate;pushAudit("hourly_rate.update",p.id,"Sample rate updated; saved payments retain original rates");
+  closeSheet();renderAll();toast("Sample hourly rate updated.");return;
+ }
+ if(form.id==="deleteForm"){
+  const p=person(sheetId);
+  if(!canManage(p))return;
+  if($("deleteName").value.trim()!==p.name){toast("Name didn't match. Nothing deleted.");return}
+  const id=p.id;
+  people.splice(people.findIndex(x=>x.id===id),1);
+  payments=payments.filter(x=>x.runnerId!==id);
+  pushAudit("employee.permanently_deleted",id,"Fictional account deleted; audit history preserved");
+  closeSheet();renderAll();toast("Only the fictional account was deleted.");return;
+ }
+ if(form.id==="createEmployeeForm"){
+  if(!privileged())return;
+  const name=$("newName").value.trim(),newRole=$("newRole").value;
+  const allowedRoles=["runner","manager"].concat(role==="superuser"?["admin"]:[]);
+  if(!name||!allowedRoles.includes(newRole))return;
+  const id="demo-"+Date.now();
+  people.push({id,name,role:newRole,rate:newRole==="runner"?0:null,active:true});
+  pushAudit("employee.created",id,"Fictional user added");
+  closeSheet();renderAll();toast("Sample "+roleName(newRole)+" added. No login created.");return;
+ }
+ if(form.id==="passwordForm"){
+  if($("newPassword").value!==$("confirmNewPassword").value){toast("Passwords must match.");return}
+  closeSheet();toast("Preview only. Real password unchanged.");return;
+ }
+});
+renderAll();
+})();
