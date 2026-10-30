@@ -135,7 +135,7 @@ function renderRunnerTipsGraph(){
  for(const x of chosen)weeks.set(x.week_start,(weeks.get(x.week_start)||0)+Number(x.tips_amount||0));
  const data=[...weeks].map(([week,tips])=>({week,tips}));const el=$('runnerTipsGraphContent');
  if(!data.length){el.innerHTML='<p class="muted">No published tips for the selected dates.</p>';return}
- const w=760,h=280,left=72,right=32,top=40,bottom=54,areaBottom=h-bottom;
+ const w=Math.max(760,data.length*54+104),h=280,left=72,right=32,top=40,bottom=54,areaBottom=h-bottom;
  const max=Math.max(1,...data.map(x=>x.tips))*1.22;
  const xAt=i=>left+(data.length===1?(w-left-right)/2:i*(w-left-right)/(data.length-1));
  const yAt=v=>areaBottom-(v/max)*(areaBottom-top);
@@ -150,7 +150,7 @@ function renderRunnerTipsGraph(){
  const single=data.length===1?'<text x="'+xAt(0)+'" y="'+(yAt(data[0].tips)-18)+'" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor">'+esc(money(data[0].tips))+'</text>':'';
  const total=data.reduce((sum,x)=>sum+x.tips,0);
  const note=data.length===1?'One published week so far. The trend line will connect the weeks once a second payment week is published.':data.length+' published weeks · Connecting actual weekly totals only.';
- el.innerHTML='<div class="graph-shell"><div class="graph-header"><div><div class="muted" style="font-size:12px">Published total tips</div><div class="graph-kpi">'+esc(money(total))+'</div></div><div class="graph-legend"><span class="graph-legend-dot"></span>Weekly tips</div></div><div style="overflow-x:auto"><svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Weekly published total tips trend"><defs><linearGradient id="tipsTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".22"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>'+ticks+poly+circles+single+labels+'</svg></div><p class="muted graph-note">'+esc(note)+'</p></div>';
+ el.innerHTML='<div class="graph-shell"><div class="graph-header"><div><div class="muted" style="font-size:12px">Published total tips</div><div class="graph-kpi">'+esc(money(total))+'</div></div><div class="graph-legend"><span class="graph-legend-dot"></span>Weekly tips</div></div><div style="overflow-x:auto"><svg viewBox="0 0 '+w+' '+h+'" style="min-width:'+(data.length>12?w+'px':'290px')+'" role="img" aria-label="Weekly published total tips trend"><defs><linearGradient id="tipsTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".22"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>'+ticks+poly+circles+single+labels+'</svg></div><p class="muted graph-note">'+esc(note)+'</p></div>';
 }
 async function loadEmployeeRates(people){
   if(!['admin','superuser'].includes(profile?.role))return;
