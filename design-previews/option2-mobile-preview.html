@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f8f9">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Tips Ledger Option 2 mobile-first design concept. Static demo with fictional data; not connected to the real app.">
+<title>Tips Ledger — Option 2 Mobile App Preview</title>
+<style>
+
+:root{
+ --bg:#f5f8f9;--paper:#fff;--ink:#122d35;--muted:#758791;--line:#e5edf0;--teal:#007e78;
+ --teal-light:#e4f6f2;--mint:#c4f0df;--hero:#12313b;--hero-end:#17565a;
+ --orange:#a76b24;--orange-bg:#fff4e3;--positive:#087a64;--positive-bg:#e5f7f0;
+ --red:#ab5261;--red-bg:#fbeaf0;--nav:#fff;--shadow:0 10px 38px rgba(17,50,62,.055);
+ --svg-grid:#e6edf0;--svg-line:#007e78;--cream:#f3f3ed;--chip:#f3f6f6;--modal-bg:#ffffff;
+ color-scheme:light;
+}
+html[data-theme="dark"]{
+ --bg:#101b21;--paper:#19292f;--ink:#edf6f3;--muted:#a0b1b4;--line:#31454b;--teal:#6ed9c2;
+ --teal-light:#24413f;--mint:#173f39;--hero:#173d43;--hero-end:#23636a;
+ --orange:#e9b878;--orange-bg:#46392e;--positive:#91e6c7;--positive-bg:#25463f;
+ --red:#f5a5b1;--red-bg:#4a3038;--nav:#18292f;--shadow:0 10px 38px rgba(0,0,0,.12);
+ --svg-grid:#33494e;--svg-line:#81e4ca;--cream:#24363a;--chip:#27383d;--modal-bg:#1a2b31;
+ color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:#e4ecef;color:var(--ink);font-size:14px;line-height:1.46}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+button:disabled{opacity:.46;cursor:not-allowed}
+svg.i{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+svg.i.sm{width:15px;height:15px}svg.i.lg{width:24px;height:24px}
+.stage{min-height:100dvh;display:flex;align-items:center;justify-content:center;gap:65px;max-width:1100px;margin:auto;padding:25px}
+.outside{width:360px;max-width:40%;color:#183642}
+.outside .mono{font:700 12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:2px;color:#337b70}
+.outside h1{font-size:clamp(32px,3.6vw,49px);line-height:1.12;letter-spacing:-1.8px;margin:17px 0}
+.outside p{font-size:15px;line-height:1.75;color:#576e78}
+.outside .feature{border-top:1px solid #bed0d2;padding:16px 0;font-weight:650;font-size:13px;display:flex;gap:12px;align-items:center}
+.outside .feature svg{width:21px;height:21px;color:#007e78}
+.outside .subnote{font-size:12px;line-height:1.6;margin-top:28px;color:#607a80}
+.phone{position:relative;background:var(--bg);width:430px;max-width:100%;height:min(910px,calc(100dvh - 50px));min-height:630px;display:flex;flex-direction:column;overflow:hidden;border-radius:41px;border:7px solid #172e38;box-shadow:0 34px 90px #102b3a35,0 3px 9px #0a222835}
+.topbar{flex-shrink:0;background:var(--paper);padding:14px 20px 12px;z-index:10;border-bottom:1px solid var(--line)}
+.demo-strip{font-size:9px;letter-spacing:1.7px;font-weight:850;color:var(--teal);text-align:center;padding-bottom:10px}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:34px;height:34px;border-radius:11px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:900;font-size:15px;letter-spacing:-1px;flex-shrink:0}
+.brand-t{font-size:16px;font-weight:820;line-height:1.1;letter-spacing:-.6px}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:.6px;margin-top:4px}
+.top-actions{display:flex;align-items:center;gap:9px}
+.icon-btn{height:38px;width:38px;border:1px solid var(--line);background:var(--paper);border-radius:12px;display:grid;place-items:center;color:var(--ink);position:relative}
+.icon-btn .dot{position:absolute;right:8px;top:7px;height:7px;width:7px;background:#f5a866;border-radius:50%;border:1.5px solid var(--paper)}
+.avatar{width:37px;height:37px;border-radius:13px;background:var(--teal-light);display:grid;place-items:center;color:var(--teal);font-weight:820;font-size:11px;flex-shrink:0}
+.phone-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#a9c9c6 transparent;padding:23px 20px 30px}
+.phone-scroll::-webkit-scrollbar{width:4px}.phone-scroll::-webkit-scrollbar-thumb{background:#b6cccb;border-radius:10px}
+.screen-page{display:none;animation:rise .22s ease-out}
+.screen-page.active{display:block}
+@keyframes rise{from{opacity:.65;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.bottom-nav{background:var(--nav);border-top:1px solid var(--line);flex-shrink:0;display:flex;justify-content:space-around;gap:1px;padding:10px 10px calc(11px + env(safe-area-inset-bottom));z-index:12;box-shadow:0 -10px 25px #142e3710}
+.nav-item{position:relative;border:0;background:transparent;min-width:0;flex:1;padding:6px 2px 3px;color:var(--muted);border-radius:11px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;font-weight:700}
+.nav-item .i{height:21px;width:21px}
+.nav-item.active{color:var(--teal);background:var(--teal-light)}
+.nav-item.active:before{content:"";position:absolute;top:-10px;left:36%;right:36%;height:3px;background:var(--teal);border-radius:0 0 5px 5px}
+.nav-item[hidden]{display:none}
+h1,h2,h3,p{margin-top:0}
+.page-overline{text-transform:uppercase;letter-spacing:1.45px;color:var(--teal);font-size:10px;font-weight:850;margin-bottom:6px}
+.page-title{font-weight:820;font-size:27px;line-height:1.13;letter-spacing:-1.05px;margin:0 0 9px}
+.page-sub{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+.section-title{font-size:17px;font-weight:800;letter-spacing:-.5px;margin:0}
+.small-sub{font-size:11px;color:var(--muted);line-height:1.6}
+.heading-row{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:14px}
+.stack{display:grid;gap:13px}.section-gap{margin-top:26px}
+.row{display:flex;align-items:center;gap:10px}.space{justify-content:space-between}.end{justify-content:flex-end}
+.btn-primary{border:0;border-radius:13px;background:var(--ink);color:var(--paper);padding:12px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:750;min-height:43px}
+.btn-primary.brand-btn{background:var(--teal);color:#fff}
+.btn-soft{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:760;font-size:11px;display:inline-flex;align-items:center;gap:6px;min-height:38px}
+.btn-quiet{color:var(--teal);background:none;border:0;font-size:12px;font-weight:800;padding:8px 0;display:inline-flex;align-items:center;gap:5px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid transparent;min-height:37px;border-radius:10px;padding:8px 12px;font-size:11px;font-weight:760}
+.btn-small{min-height:33px!important;font-size:11px;padding:8px 11px}
+.pill{border-radius:99px;padding:5px 9px;display:inline-flex;align-items:center;gap:5px;font-weight:780;font-size:10px;line-height:1.3;white-space:nowrap}
+.pill i{height:6px;width:6px;background:currentColor;border-radius:99px}
+.pill.received,.pill.active{color:var(--positive);background:var(--positive-bg)}
+.pill.published{color:var(--orange);background:var(--orange-bg)}
+.pill.draft,.pill.inactive{color:var(--muted);background:var(--chip)}
+.pill.superuser,.pill.admin{color:var(--teal);background:var(--teal-light)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,var(--hero),var(--hero-end));border:1px solid #356d6e;color:white;border-radius:22px;padding:20px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-74px;top:-100px;height:250px;width:250px;border-radius:50%;border:1px solid #ffffff25;box-shadow:0 0 0 35px #ffffff05,0 0 0 73px #ffffff05;pointer-events:none}
+.hero .micro{font-size:11px;font-weight:650;color:#b9d6d5;letter-spacing:.25px}
+.hero .value{font-size:clamp(31px,8vw,38px);font-weight:830;letter-spacing:-1.5px;line-height:1.2;margin:12px 0 17px;font-variant-numeric:tabular-nums}
+.hero .hero-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hero .small-white{font-size:11px;color:#bedbd9}
+.hero .hero-pill{border:1px solid #ffffff35;background:#ffffff13;color:#edfffa;font-weight:700;border-radius:99px;padding:7px 10px;font-size:10px}
+.progress-track{height:6px;background:#ffffff35;border-radius:99px;overflow:hidden;margin:16px 0 9px}
+.progress-track span{height:100%;display:block;width:75%;background:#a2e9d3;border-radius:inherit}
+.metrics-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:12px}
+.metric-tile{border-radius:16px;background:var(--paper);border:1px solid var(--line);padding:16px;min-width:0}
+.metric-tile .label{font-size:11px;color:var(--muted);font-weight:660}
+.metric-tile .value{font-size:23px;line-height:1.2;letter-spacing:-.9px;font-weight:800;margin:9px 0}
+.metric-tile .caption{color:var(--positive);font-size:10px;font-weight:700}
+.metric-tile .caption.warn{color:var(--orange)}
+.metric-tile .icon-box{width:31px;height:31px;border-radius:10px;background:var(--teal-light);display:grid;place-items:center;color:var(--teal);margin-bottom:13px}
+.metric-tile .icon-box .i{height:16px;width:16px}
+.quick-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.quick{min-width:0;border:1px solid var(--line);background:var(--paper);border-radius:16px;padding:15px 7px 13px;display:flex;align-items:center;flex-direction:column;gap:10px;color:var(--ink);font-size:11px;font-weight:740}
+.quick .quick-ico{height:39px;width:39px;display:grid;place-items:center;background:var(--teal-light);color:var(--teal);border-radius:13px}
+.quick .quick-ico .i{height:19px;width:19px}
+.quick:disabled{opacity:.5}
+.graph-card{padding:17px 15px 10px}
+.graph-card .headline{font-size:19px;letter-spacing:-.55px;font-weight:800;margin:4px 0}
+.graph-svg{width:100%;height:auto;display:block;overflow:visible}
+.graph-axis{font-size:10px;fill:var(--muted);font-family:inherit}
+.graph-grid{stroke:var(--svg-grid);stroke-width:1;stroke-dasharray:3 5}
+.chart-line{stroke:var(--svg-line);stroke-width:3.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.legend-item{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px;font-weight:650}
+.legend-item:before{content:"";height:7px;width:7px;border-radius:50%;background:var(--teal)}
+.payment-card{background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}
+.payment-head{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:15px}
+.payment-icon{width:37px;height:37px;background:var(--teal-light);color:var(--teal);display:grid;place-items:center;border-radius:12px;flex-shrink:0}
+.payment-name{font-size:14px;font-weight:800;line-height:1.2;margin-bottom:4px}
+.payment-date{font-size:11px;color:var(--muted)}
+.payment-amount{font-size:22px;letter-spacing:-.6px;font-weight:850;font-variant-numeric:tabular-nums}
+.payment-amount small{display:block;font-size:10px;color:var(--muted);font-weight:550;letter-spacing:0;text-align:right}
+.payment-separator{height:1px;background:var(--line);margin:14px 0 11px}
+.payment-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.payment-breakdown span{display:block;color:var(--muted);font-size:10px}
+.payment-breakdown strong{display:block;font-size:12px;margin-top:4px;font-weight:780;font-variant-numeric:tabular-nums}
+.payment-actions{display:flex;gap:7px;margin-top:13px}
+.payment-actions button{flex:1}
+.compact-filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.compact-filters::-webkit-scrollbar{display:none}
+.filter-chip{border:1px solid var(--line);border-radius:99px;padding:9px 15px;color:var(--muted);background:var(--paper);font-size:11px;font-weight:730;white-space:nowrap;flex-shrink:0}
+.filter-chip.selected{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.split-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--teal-light);border:1px solid var(--line);border-radius:15px;padding:14px}
+.split-banner strong{display:block;font-size:12px}
+.split-banner small{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.split-banner .i{color:var(--teal)}
+.ghost-line{height:1px;background:var(--line)}
+.person-row{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:14px;display:flex;align-items:center;gap:11px}
+.person-row .person-data{flex:1;min-width:0}
+.person-row .person-name{font-size:12px;font-weight:790;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-row .person-meta{color:var(--muted);font-size:10px;margin-top:4px}
+.person-row .avatar{width:39px;height:39px}
+.person-row .right{display:flex;align-items:end;flex-direction:column;gap:6px}
+.person-row .rate{font-weight:760;font-size:12px}
+.person-row .actions{display:flex;gap:6px;margin-top:9px}
+.section-note{font-size:11px;line-height:1.6;background:var(--cream);color:var(--muted);padding:13px 14px;border-radius:12px}
+.audit-entry{position:relative;display:flex;gap:12px;padding:2px 0 22px}
+.audit-entry:after{position:absolute;content:"";top:27px;bottom:0;left:14px;width:1px;background:var(--line)}
+.audit-entry:last-child:after{display:none}
+.audit-icon{height:29px;width:29px;border-radius:10px;display:grid;place-items:center;color:var(--teal);background:var(--teal-light);flex-shrink:0}
+.audit-icon .i{height:15px;width:15px}
+.audit-body{flex:1;min-width:0;padding-top:1px}
+.audit-title{font-size:12px;font-weight:750}
+.audit-meta{color:var(--muted);font-size:10px;margin-top:4px}
+.audit-description{background:var(--bg);padding:10px 11px;border-radius:9px;font-size:11px;color:var(--muted);margin-top:9px}
+.audit-when{font-size:10px;color:var(--muted);white-space:nowrap}
+.field{display:grid;gap:6px;min-width:0}
+.field label,.field-label{font-size:11px;font-weight:770;color:var(--ink)}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);outline:0;border-radius:11px;min-height:44px;padding:10px 12px;font-size:13px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-light)}
+.form-stack{display:grid;gap:13px}
+.filter-box{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--paper)}
+.filter-box .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.settings-row{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}
+.settings-row:last-child{border-bottom:0}
+.setting-icon{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;color:var(--teal);background:var(--teal-light)}
+.settings-row .details{min-width:0;flex:1}
+.settings-row .details strong{display:block;font-size:12px}
+.settings-row .details small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.switch{border:0;height:27px;width:47px;border-radius:99px;background:#aab9b9;padding:3px;transition:.2s;display:flex;align-items:center}
+.switch:after{content:"";width:21px;height:21px;border-radius:50%;background:white;box-shadow:0 2px 4px #0002;transition:.2s}
+.switch.on{background:var(--teal)}
+.switch.on:after{transform:translateX(20px)}
+.labelled-select{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:10px;color:var(--ink);font-weight:700;font-size:11px;max-width:145px}
+details{border-top:1px solid var(--line);padding:14px 0}
+details summary{cursor:pointer;font-weight:750;font-size:12px}
+details p{color:var(--muted);font-size:11px;line-height:1.6;margin:8px 0}
+.empty{text-align:center;padding:33px 18px;color:var(--muted);border:1px dashed var(--line);border-radius:16px;background:var(--paper)}
+.empty .i{height:26px;width:26px;color:var(--teal);margin-bottom:9px}
+.empty strong{display:block;color:var(--ink);margin-bottom:6px}
+.empty p{font-size:12px}
+.overlay{position:fixed;inset:0;background:#0b2029ad;display:none;align-items:flex-end;justify-content:center;z-index:55;padding:0}
+.overlay.open{display:flex}
+.sheet{background:var(--modal-bg);color:var(--ink);border-radius:25px 25px 0 0;width:min(460px,100%);max-height:88dvh;overflow:auto;padding:10px 20px calc(23px + env(safe-area-inset-bottom));box-shadow:0 -20px 55px #0003;animation:slideup .22s ease-out}
+@keyframes slideup{from{transform:translateY(24px);opacity:.75}to{transform:translateY(0);opacity:1}}
+.handle{background:var(--line);height:4px;width:42px;border-radius:99px;margin:2px auto 19px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px}
+.sheet-head h2{font-size:22px;letter-spacing:-.8px;margin:0}
+.close-btn{border:0;height:34px;width:34px;background:var(--chip);border-radius:10px;display:grid;place-items:center;color:var(--ink)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.total-preview{background:var(--teal-light);padding:15px;border-radius:13px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.total-preview span{font-size:11px;color:var(--muted)}
+.total-preview b{font-size:20px;color:var(--ink)}
+.sheet-footer{display:flex;gap:9px;margin-top:17px}
+.sheet-footer button{flex:1}
+.toast{position:fixed;bottom:103px;left:50%;transform:translate(-50%,15px);width:calc(100% - 38px);max-width:398px;opacity:0;pointer-events:none;transition:.2s;z-index:90;background:#12313a;color:#fff;padding:13px 16px;border-radius:13px;font-size:12px;font-weight:650;box-shadow:0 12px 40px #0003}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.demo-only{font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+.badge-number{display:grid;place-items:center;background:#df866b;border-radius:99px;color:#fff;font-size:9px;font-weight:850;width:16px;height:16px;position:absolute;top:0;right:9px}
+@media(min-width:720px){
+ .sheet{border-radius:23px;max-height:80dvh}
+ .overlay{align-items:center;padding:25px}
+}
+@media(max-width:740px){
+ body{background:var(--bg)}
+ .stage{padding:0;display:block;min-height:100dvh}
+ .outside{display:none}
+ .phone{height:100dvh;width:100%;border:0;border-radius:0;min-height:0;box-shadow:none}
+ .phone-scroll{padding:22px 18px 26px}
+}
+@media(max-width:365px){
+ .phone-scroll{padding:18px 13px 25px}
+ .hero{padding:17px}
+ .page-title{font-size:24px}
+ .bottom-nav{padding-left:4px;padding-right:4px}
+ .nav-item{font-size:9px}
+ .payment-amount{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
+</style>
+
+</head>
+<body>
+<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="position:absolute;height:0;width:0;overflow:hidden">
+<symbol id="ic-home" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></symbol>
+<symbol id="ic-wallet" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="15" rx="3"/><path d="M3 9V5a2 2 0 012-2h13M15.5 14h5.5"/><path d="M16 14.5h.01"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0112 0v2M17 11a3 3 0 000-6M17 15c2 0 4 2 4 5"/></symbol>
+<symbol id="ic-activity" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+<symbol id="ic-arrow-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+<symbol id="ic-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6l6-6 6 6"/></symbol>
+<symbol id="ic-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="ic-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></symbol>
+<symbol id="ic-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3 9-8 11-5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M10 2h4l.7 2.3 2 1.2 2.3-.6 2 3.6-1.7 1.7v2.6l1.7 1.7-2 3.6-2.3-.6-2 1.2L14 22h-4l-.7-2.3-2-1.2-2.3.6-2-3.6 1.7-1.7v-2.6L3 9.5l2-3.6 2.3.6 2-1.2z"/></symbol>
+<symbol id="ic-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5l5 5 5-5M4 17v4h16v-4"/></symbol>
+<symbol id="ic-edit" viewBox="0 0 24 24"><path d="M4 17l-1 4 4-1L20 7l-3-3L4 17zM14 7l3 3"/></symbol>
+<symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4 6h16M9 6V4h6v2M6 6l1 15h10l1-15M10 10v7m4-7v7"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14-5L4 8M4 4v4h4M4 13a8 8 0 0014 5l2-2m0 4v-4h-4"/></symbol>
+<symbol id="ic-chart" viewBox="0 0 24 24"><path d="M3 20h18M5 16l5-6 4 4 6-9"/></symbol>
+<symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20 16a8 8 0 01-12-12 8 8 0 1012 12z"/></symbol>
+<symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.5"/></symbol>
+<symbol id="ic-log-out" viewBox="0 0 24 24"><path d="M10 4H5a2 2 0 00-2 2v12a2 2 0 002 2h5M13 8l4 4-4 4m4-4H8"/></symbol>
+<symbol id="ic-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></symbol>
+<symbol id="ic-sparkles" viewBox="0 0 24 24"><path d="M12 2l2 7 7 2-7 2-2 7-2-7-7-2 7-2zM19 18l.8 2.2L22 21l-2.2.8L19 24l-.8-2.2L16 21l2.2-.8z"/></symbol>
+<symbol id="ic-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-6 20-5-9-9-5z"/></symbol>
+<symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M5 3l2 2 3-2 2 2 3-2 3 2 1-2v18l-2-2-3 2-2-2-3 2-2-2-2 2zM8 10h8M8 14h6"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></symbol>
+<symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="ic-rotate" viewBox="0 0 24 24"><path d="M5 12a7 7 0 017-7 8 8 0 018 8M20 5v8h-8M19 12a7 7 0 01-7 7 8 8 0 01-8-8M4 19v-8h8"/></symbol>
+</svg>
+<div class="stage">
+ <aside class="outside">
+  <div class="mono">OPTION 02 / NEW DESIGN DIRECTION</div>
+  <h1>Tips Ledger.<br>Now in your pocket.</h1>
+  <p>An entirely different navigation and page layout, designed around how the team uses Tips Ledger on an iPhone.</p>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Native-style bottom navigation</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Swipe-like cards and bottom-sheet forms</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Interactive role previews and filters</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> All existing feature areas represented</div>
+  <p class="subnote">This is an isolated, front-end-only design prototype. All names and amounts are fictional. Your production application, database and backups are unchanged.</p>
+ </aside>
+ <div class="phone" id="phone">
+  <header class="topbar">
+   <div class="demo-strip">INTERACTIVE DESIGN PREVIEW • NOT THE LIVE APP</div>
+   <div class="topbar-row">
+    <div class="brand">
+     <div class="logo">TL<span style="color:#6ed9c2">.</span></div>
+     <div><div class="brand-t">Tips Ledger</div><div class="brand-sub" id="roleHeader">SUPERUSER WORKSPACE</div></div>
+    </div>
+    <div class="top-actions">
+     <button type="button" id="notificationsButton" class="icon-btn" aria-label="Preview notifications"><svg class="i"><use href="#ic-bell"></use></svg><span class="dot" aria-hidden="true"></span></button>
+     <button type="button" id="profileButton" aria-label="Switch preview role" class="avatar">RA</button>
+    </div>
+   </div>
+  </header>
+  <div class="phone-scroll" id="scroller">
+   <section id="screen-home" class="screen-page active" aria-label="Overview">
+    <div class="heading-row" style="margin-bottom:19px;align-items:flex-start">
+     <div><div class="page-overline" id="greetingDate">SATURDAY · OCT 31</div><h1 id="welcomeTitle" class="page-title">Good evening, Raphael 👋</h1><p id="welcomeSub" class="page-sub">Here’s where your team stands this week.</p></div>
+    </div>
+    <div id="homeContent"></div>
+   </section>
+   <section id="screen-payments" class="screen-page" aria-label="Payments">
+    <div class="heading-row" style="align-items:flex-start">
+     <div><div class="page-overline">WEEKLY LEDGER</div><h1 class="page-title">Payments</h1><p class="page-sub">Every payout, beautifully organized.</p></div>
+     <button id="newDraftTop" class="btn-primary brand-btn btn-small" type="button"><svg class="i sm"><use href="#ic-plus"></use></svg> New</button>
+    </div>
+    <div id="paymentTopSummary"></div>
+    <div class="heading-row section-gap" style="margin-bottom:12px"><h2 class="section-title">Payment history</h2><button id="exportButton" class="btn-soft" type="button"><svg class="i sm"><use href="#ic-download"></use></svg> Excel</button></div>
+    <div class="compact-filters" id="paymentStatusTabs" aria-label="Filter payments by status">
+     <button class="filter-chip selected" data-status="" type="button">All</button>
+     <button class="filter-chip" data-status="draft" type="button">Drafts</button>
+     <button class="filter-chip" data-status="published" type="button">Published</button>
+     <button class="filter-chip" data-status="received" type="button">Received</button>
+    </div>
+    <div class="filter-box section-gap" style="margin-top:13px;margin-bottom:13px">
+     <div class="form-grid">
+      <div class="field"><label for="paymentFrom">From</label><input id="paymentFrom" type="date"></div>
+      <div class="field"><label for="paymentTo">To</label><input id="paymentTo" type="date"></div>
+      <div class="field full" id="runnerFilterWrap"><label for="paymentRunner">Runner</label><select id="paymentRunner"><option value="">All runners</option></select></div>
+     </div>
+     <div class="row space" style="margin-top:9px"><span id="paymentsCount" class="small-sub"></span><button id="clearPaymentFilters" type="button" class="btn-quiet">Clear filters</button></div>
+    </div>
+    <div id="paymentList" class="stack"></div>
+   </section>
+   <section id="screen-team" class="screen-page" aria-label="Employees">
+    <div class="heading-row" style="align-items:flex-start">
+     <div><div class="page-overline">OUR PEOPLE</div><h1 class="page-title">The team</h1><p class="page-sub">People, permissions and hourly rates.</p></div>
+     <button id="addEmployeeButton" class="btn-primary brand-btn btn-small" type="button"><svg class="i sm"><use href="#ic-plus"></use></svg> Add</button>
+    </div>
+    <div id="teamStats"></div>
+    <div class="section-gap">
+     <div class="field" style="position:relative">
+      <label for="teamSearch">Search people</label>
+      <input id="teamSearch" type="search" placeholder="Find a team member…">
+     </div>
+    </div>
+    <div class="row space" style="margin:16px 0 11px">
+     <h2 class="section-title">Employee directory</h2><span class="small-sub" id="teamCount"></span>
+    </div>
+    <div id="teamList" class="stack"></div>
+    <div class="section-gap section-note"><svg class="i sm" style="vertical-align:-3px"><use href="#ic-shield"></use></svg> Role permissions are the same as the current app. Superuser manages Admins, Managers and Runners; Admin manages Managers and Runners; Managers and Runners cannot manage staff.</div>
+   </section>
+   <section id="screen-audit" class="screen-page" aria-label="Audit Log">
+    <div class="page-overline">CONTROL & ACCOUNTABILITY</div><h1 class="page-title">Activity log</h1><p class="page-sub">Every important change, in one clear timeline.</p>
+    <div class="filter-box section-gap">
+     <div class="heading-row" style="margin-bottom:11px"><h2 class="section-title" style="font-size:14px">Search audit log</h2><svg class="i sm" style="color:var(--muted)"><use href="#ic-filter"></use></svg></div>
+     <div class="form-stack">
+      <div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee permanently deleted</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.update">Rate updated</option></select></div>
+      <div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div>
+      <div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div>
+      <div class="form-grid"><div class="field"><label for="auditFrom">From</label><input type="date" id="auditFrom"></div><div class="field"><label for="auditTo">To</label><input type="date" id="auditTo"></div></div>
+     </div>
+     <div class="row space" style="margin-top:11px"><button type="button" class="btn-primary brand-btn btn-small" id="auditSearch"><svg class="i sm"><use href="#ic-search"></use></svg> Search</button><button id="auditClear" type="button" class="btn-quiet">Clear filters</button></div>
+    </div>
+    <div class="heading-row section-gap"><h2 class="section-title">Timeline</h2><span class="small-sub" id="auditCount"></span></div>
+    <div class="card" style="padding:18px 13px">
+      <div id="auditList"></div>
+      <button type="button" id="auditShowMore" class="btn-soft" style="width:100%;justify-content:center;margin-top:4px">Show 10 more <svg class="i sm"><use href="#ic-chevron-down"></use></svg></button>
+    </div>
+   </section>
+   <section id="screen-profile" class="screen-page" aria-label="Account">
+    <div class="page-overline">YOUR WORKSPACE</div><h1 class="page-title">Account</h1><p class="page-sub">Your profile and personal preferences.</p>
+    <div id="profileCard" class="card section-gap"></div>
+    <div class="section-gap heading-row"><h2 class="section-title">Preview settings</h2><span class="demo-only">Safe to explore</span></div>
+    <div class="card" style="padding:4px 16px">
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-users"></use></svg></span><div class="details"><strong>Preview as a different role</strong><small>See the exact visibility rules</small></div><button id="rolePickerButton" class="btn-soft btn-small" type="button">Switch <svg class="i sm"><use href="#ic-chevron-down"></use></svg></button></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-moon"></use></svg></span><div class="details"><strong>Dark appearance</strong><small>Try a dark version of this layout</small></div><button id="themeSwitch" type="button" class="switch" aria-label="Toggle dark mode" aria-pressed="false"></button></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-bell"></use></svg></span><div class="details"><strong>Push notifications</strong><small>Enabled • Preview status only</small></div><span class="pill received"><i></i>On</span></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-lock"></use></svg></span><div class="details"><strong>Change password</strong><small>12 character minimum in the real app</small></div><button class="icon-btn" style="height:32px;width:32px" id="passwordButton" aria-label="Preview password settings"><svg class="i sm"><use href="#ic-chevron-right"></use></svg></button></div>
+    </div>
+    <div class="card section-gap">
+     <h2 class="section-title" style="font-size:14px">Notification troubleshooting</h2><p class="small-sub" style="margin-top:7px">The production version supports re-registering the device, sending a test push, and disabling notifications.</p>
+     <details id="troubleshooting"><summary>Open troubleshooting options</summary><p>This preview never requests notification permission or sends real push messages.</p><div class="stack" style="gap:8px"><button class="btn-soft" data-simulate="Device re-registration is available in the real app.">Re-register device</button><button class="btn-soft" data-simulate="Test push is available in the real app.">Send test push</button><button class="btn-soft" data-simulate="Notifications were not changed in this demo.">Disable on this device</button></div></details>
+    </div>
+    <button class="btn-soft section-gap" id="signOutButton" style="width:100%;justify-content:center"><svg class="i sm"><use href="#ic-log-out"></use></svg> Sign out (preview)</button>
+    <p class="small-sub" style="text-align:center;margin:17px 0 0">Concept 02 · Mobile First · Fictional demo</p>
+   </section>
+  </div>
+  <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
+   <button type="button" data-page="home" class="nav-item active" aria-current="page"><svg class="i"><use href="#ic-home"></use></svg>Home</button>
+   <button type="button" data-page="payments" class="nav-item"><svg class="i"><use href="#ic-wallet"></use></svg>Payments</button>
+   <button type="button" data-page="team" class="nav-item"><svg class="i"><use href="#ic-users"></use></svg>Team</button>
+   <button type="button" data-page="audit" class="nav-item"><svg class="i"><use href="#ic-activity"></use></svg>Activity</button>
+   <button type="button" data-page="profile" class="nav-item"><svg class="i"><use href="#ic-user"></use></svg>Account</button>
+  </nav>
+ </div>
+</div>
+<div class="overlay" id="sheetOverlay" role="presentation" aria-hidden="true">
+ <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="handle"></div>
+  <div class="sheet-head"><h2 id="sheetTitle">Preview</h2><button type="button" id="closeSheet" class="close-btn" aria-label="Close dialog"><svg class="i"><use href="#ic-x"></use></svg></button></div>
+  <div id="sheetBody"></div>
+ </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+
+(function(){
+"use strict";
+// DEMO ONLY: fictional in-memory data, no network requests or persistence.
+const people=[
+{id:"su",name:"Raphael",role:"superuser",active:true,rate:null},
+{id:"ad",name:"Lea Mansour",role:"admin",active:true,rate:null},
+{id:"mg",name:"Omar Haddad",role:"manager",active:true,rate:null},
+{id:"mg2",name:"Talia Nassar",role:"manager",active:true,rate:null},
+{id:"r1",name:"Maya Salem",role:"runner",active:true,rate:4.5},
+{id:"r2",name:"Nour Farah",role:"runner",active:true,rate:4.25},
+{id:"r3",name:"Samir Karam",role:"runner",active:true,rate:4.75},
+{id:"r4",name:"Dina Khalil",role:"runner",active:true,rate:4.2},
+{id:"r5",name:"Jad Youssef",role:"runner",active:false,rate:4}
+];
+let payments=[
+["r1","2026-10-26",38,720,55,"published"],
+["r2","2026-10-26",36,580,0,"published"],
+["r3","2026-10-26",40,680,50,"received"],
+["r4","2026-10-26",30,425,20,"draft"],
+["r1","2026-10-19",37,670,40,"received"],
+["r2","2026-10-19",40,635,0,"received"],
+["r3","2026-10-19",36,590,25,"received"],
+["r4","2026-10-19",32,470,0,"received"],
+["r1","2026-10-12",39,545,0,"received"],
+["r2","2026-10-12",35,595,45,"received"],
+["r3","2026-10-12",35,605,0,"received"],
+["r1","2026-10-05",41,610,60,"received"],
+["r2","2026-10-05",36,550,15,"received"],
+["r1","2026-09-28",34,520,0,"received"],
+["r3","2026-09-28",37,640,30,"received"],
+["r1","2026-09-21",38,485,20,"received"],
+["r4","2026-09-21",31,455,0,"received"]
+].map((a,i)=>({id:"p"+i,runnerId:a[0],week:a[1],hours:a[2],tips:a[3],advance:a[4],status:a[5],rate:people.find(p=>p.id===a[0]).rate}));
+const acts=["payment.published","payment.receipt_confirmed","payment.draft_created","hourly_rate.update","employee.activated","payment.edited","employee.created","employee.deactivated"];
+let audit=Array.from({length:37},(_,i)=>({id:"a"+i,date:new Date(Date.UTC(2026,9,31,9,0)-i*43200000).toISOString(),actorId:["su","ad","mg","su","ad","mg","su","ad"][i%8],targetId:["r2","r1","r4","r3","r5","r2","r4","mg2"][i%8],action:acts[i%8],note:"Sample activity · fictional data"}));
+let notifications=[
+{id:1,title:"Payment confirmed",body:"Maya Salem confirmed her weekly payment.",read:false},
+{id:2,title:"Payment published",body:"Nour Farah's weekly payment was published.",read:false},
+{id:3,title:"Rate updated",body:"A sample hourly rate was updated.",read:true}
+];
+const personas={superuser:"su",admin:"ad",manager:"mg",runner:"r1"};
+let role="superuser",page="home",statusFilter="",auditLimit=10,sheetMode="",sheetId="",graphRange=6,tableMode=false,timer=0;
+const $=id=>document.getElementById(id);
+const person=id=>people.find(p=>p.id===id);
+const self=()=>person(personas[role]);
+const roleName=r=>({superuser:"Superuser",admin:"Admin",manager:"Manager",runner:"Runner"}[r]||r);
+const money=n=>"$"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ico=(name,extra="")=>'<svg class="i '+extra+'" aria-hidden="true"><use href="#ic-'+name+'"></use></svg>';
+const initials=s=>String(s).split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const day=s=>new Date(s+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const privileged=()=>role==="superuser"||role==="admin";
+const canManage=p=>!!p&&p.id!==self().id&&(role==="superuser"?["admin","manager","runner"].includes(p.role):role==="admin"?["manager","runner"].includes(p.role):false);
+const visiblePayment=p=>role!=="runner"||(p.runnerId===self().id&&p.status!=="draft");
+function toast(message){$("toast").textContent=message;$("toast").classList.add("show");clearTimeout(timer);timer=setTimeout(()=>$("toast").classList.remove("show"),2900)}
+function go(where){
+ if((where==="team"||where==="audit")&&!privileged()){toast("This screen is unavailable to "+roleName(role)+".");return}
+ page=where;
+ document.querySelectorAll(".screen-page").forEach(x=>x.classList.toggle("active",x.id==="screen-"+where));
+ document.querySelectorAll(".nav-item").forEach(x=>{let on=x.dataset.page===where;x.classList.toggle("active",on);if(on)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current")});
+ $("scroller").scrollTop=0;
+}
+function pushAudit(action,id,note){audit.unshift({id:"new"+Date.now(),date:new Date().toISOString(),actorId:self().id,targetId:id,action,note:note||"Sample change"});auditLimit=10}
+function paymentStatus(p){return p.status[0].toUpperCase()+p.status.slice(1)}
+function cardPayment(p,compact=false){
+ const remaining=p.tips-p.advance,runner=person(p.runnerId);
+ let buttons="";
+ if(!compact){
+  if(role==="runner"&&p.status==="published")buttons='<button class="btn-primary brand-btn btn-small" data-act="confirm" data-id="'+p.id+'">'+ico("check-circle","sm")+' Confirm payment received</button>';
+  if(role!=="runner"&&p.status==="draft")buttons='<button class="btn-primary brand-btn btn-small" data-act="publish" data-id="'+p.id+'">'+ico("send","sm")+' Publish payment</button>';
+  if(privileged()&&p.status!=="received")buttons+='<button class="btn-soft btn-small" data-act="edit" data-id="'+p.id+'">'+ico("edit","sm")+' Edit</button>';
+ }
+ return '<article class="payment-card"><div class="payment-head"><div class="row" style="align-items:start"><span class="payment-icon">'+ico("receipt")+'</span><div><div class="payment-name">'+esc(role==="runner"?"My payout":runner?runner.name:"Former Runner")+'</div><div class="payment-date">Week of '+day(p.week)+' · '+p.hours+' hours</div></div></div><span class="pill '+p.status+'"><i></i>'+paymentStatus(p)+'</span></div><div class="row space"><div><span class="small-sub">Remaining tips</span><div class="payment-amount">'+money(remaining)+'</div></div><div style="text-align:right"><span class="small-sub">Rate at time</span><div class="payment-name" style="margin-top:4px">'+money(p.rate)+'/hr</div></div></div>'+(!compact?'<div class="payment-separator"></div><div class="payment-breakdown"><div><span>Tips</span><strong>'+money(p.tips)+'</strong></div><div><span>Advance</span><strong>'+money(p.advance)+'</strong></div><div><span>Hours</span><strong>'+p.hours+'</strong></div></div>':"")+(buttons?'<div class="payment-actions">'+buttons+'</div>':"")+'</article>';
+}
+function chart(){
+ const groups={};payments.filter(p=>p.status!=="draft"&&(role!=="runner"||p.runnerId===self().id)).forEach(p=>groups[p.week]=(groups[p.week]||0)+p.tips);
+ const data=Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0])).slice(-graphRange);
+ if(!data.length)return "";
+ const high=Math.max(...data.map(x=>x[1]))*1.15;
+ const points=data.map((x,i)=>[data.length===1?175:38+290*i/(data.length-1),139-120*x[1]/high,x[0]]);
+ const path=points.length===1?"M "+(points[0][0]-14)+" "+points[0][1]+" h28":"M "+points.map(p=>p[0]+" "+p[1]).join(" L ");
+ const area=points.length>1?'<path fill="var(--teal-light)" d="'+path+" L "+points.at(-1)[0]+" 139 L "+points[0][0]+' 139 Z"/>':"";
+ const marks=points.map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4.2" stroke="var(--paper)" stroke-width="2" fill="var(--svg-line)"/>').join("");
+ const labels=points.map(p=>'<text class="graph-axis" x="'+p[0]+'" y="160" text-anchor="middle">'+day(p[2])+"</text>").join("");
+ return '<div class="card graph-card"><div class="row space"><div><div class="page-overline">PERFORMANCE</div><h2 class="section-title">'+(role==="runner"?"Your tips trend":"Weekly tips trend")+'</h2></div><span class="pill received">'+ico("chart","sm")+' Published</span></div><div class="row space" style="margin:10px 0"><span class="small-sub">Tips before advances</span><button class="btn-quiet" data-act="graphRange">'+(graphRange===6?"Last 6 weeks":"All weeks")+" "+ico("chevron-down","sm")+'</button></div><svg class="graph-svg" viewBox="0 0 350 168" role="img" aria-label="Sample weekly published tips line graph"><path class="graph-grid" d="M38 139H328M38 79H328M38 19H328"/>'+area+'<path class="chart-line" d="'+path+'"/>'+marks+labels+'</svg><div class="small-sub" style="text-align:center;padding:4px 0 10px">Real trend lines connect actual published weeks only.</div></div>';
+}
+function renderHome(){
+ const last=payments.filter(p=>visiblePayment(p)&&p.week==="2026-10-26");
+ const net=last.reduce((sum,p)=>sum+p.tips-p.advance,0);
+ const published=last.filter(p=>p.status!=="draft"),received=last.filter(p=>p.status==="received"),pending=last.filter(p=>p.status==="published");
+ const pc=published.length?Math.round(100*received.length/published.length):0;
+ const runner=role==="runner";
+ let out='<div class="hero"><div class="hero-row"><span class="micro">'+(runner?"YOUR WEEKLY TIPS":"THIS WEEK'S TEAM TIPS")+'</span><span class="hero-pill">Week of Oct 26</span></div><div class="value">'+money(net)+'</div><div class="hero-row"><span class="small-white">Tips after advances</span><span class="hero-pill">'+(runner?"Your payment summary":received.length+" of "+published.length+" receipts confirmed")+'</span></div><div class="progress-track"><span style="width:'+pc+'%"></span></div><div class="small-white">'+(runner?"Based on your published payments":pc+"% of published payments received")+'</div></div>';
+ const metrics=runner?[["Hours worked",last[0]?last[0].hours:"—","Latest published week","clock"],["Hourly rate",money(self().rate),"Read-only for Runners","wallet"]]:[["Awaiting receipt",pending.length,"Published but unconfirmed","clock"],["Active runners",people.filter(p=>p.role==="runner"&&p.active).length,"Sample team members","users"]];
+ out+='<div class="metrics-two">'+metrics.map(m=>'<div class="metric-tile"><div class="icon-box">'+ico(m[3])+'</div><div class="label">'+m[0]+'</div><div class="value">'+m[1]+'</div><span class="caption">'+m[2]+'</span></div>').join("")+'</div>';
+ out+='<div class="heading-row section-gap"><h2 class="section-title">Quick actions</h2><span class="demo-only">Tap to try</span></div><div class="quick-row">';
+ let quick=runner?[["My payments","wallet","page","payments"],["My account","user","page","profile"],["Notifications","bell","act","notifications"]]:[["New draft","plus","act","newDraft"],["Pending","clock","act","pending"],[privileged()?"Audit log":"Payments",privileged()?"activity":"wallet","page",privileged()?"audit":"payments"]];
+ out+=quick.map(q=>'<button class="quick" '+(q[2]==="page"?'data-page="':'data-act="')+q[3]+'"><span class="quick-ico">'+ico(q[1])+'</span>'+q[0]+'</button>').join("")+'</div><div class="section-gap">'+chart()+'</div>';
+ out+='<div class="heading-row section-gap"><h2 class="section-title">'+(runner?"My latest payments":"Recent payments")+'</h2><button class="btn-quiet" data-page="payments">See all '+ico("arrow-right","sm")+'</button></div>';
+ const recent=payments.filter(visiblePayment).sort((a,b)=>b.week.localeCompare(a.week)).slice(0,2);
+ out+='<div class="stack">'+recent.map(p=>cardPayment(p,true)).join("")+'</div>';
+ if(!runner)out+='<p class="section-note section-gap">Draft payments stay hidden from Runners until published. Published payouts can be confirmed by the Runner.</p>';
+ $("homeContent").innerHTML=out;
+}
+function renderPayments(){
+ const runners=people.filter(p=>p.role==="runner"),old=$("paymentRunner").value;
+ $("paymentRunner").innerHTML='<option value="">All runners</option>'+runners.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+ if(runners.some(p=>p.id===old))$("paymentRunner").value=old;
+ const all=payments.filter(visiblePayment),pending=all.filter(p=>p.status==="published").length,drafts=all.filter(p=>p.status==="draft").length;
+ $("paymentTopSummary").innerHTML='<div class="split-banner" style="margin-top:16px"><div><strong>'+all.length+' payment records</strong><small>'+pending+' awaiting receipt'+(role==="runner"?"":" · "+drafts+" drafts")+'</small></div><span class="setting-icon">'+ico("wallet")+'</span></div>';
+ const from=$("paymentFrom").value,to=$("paymentTo").value,rid=$("paymentRunner").value;
+ const filtered=all.filter(p=>(!statusFilter||p.status===statusFilter)&&(!from||p.week>=from)&&(!to||p.week<=to)&&(role==="runner"||!rid||rid===p.runnerId)).sort((a,b)=>b.week.localeCompare(a.week));
+ $("paymentsCount").textContent=filtered.length+" matching";
+ document.querySelectorAll("[data-status]").forEach(b=>b.classList.toggle("selected",b.dataset.status===statusFilter));
+ if(!filtered.length){$("paymentList").innerHTML='<div class="empty">'+ico("search")+'<strong>No matching payments</strong><p>Try another status, date or runner.</p></div>';return}
+ if(tableMode){
+  $("paymentList").innerHTML='<div class="card" style="overflow:auto"><table style="width:100%;min-width:560px;border-collapse:collapse;font-size:11px"><thead><tr><th>Week</th><th>Runner</th><th>Tips</th><th>Advance</th><th>Remaining</th><th>Status</th></tr></thead><tbody>'+filtered.map(p=>'<tr><td>'+day(p.week)+'</td><td>'+esc(person(p.runnerId)?.name||"—")+'</td><td>'+money(p.tips)+'</td><td>'+money(p.advance)+'</td><td>'+money(p.tips-p.advance)+'</td><td>'+paymentStatus(p)+'</td></tr>').join("")+'</tbody></table></div><button class="btn-soft" data-act="viewToggle">Switch to cards</button>';
+ }else $("paymentList").innerHTML=filtered.map(p=>cardPayment(p)).join("")+'<button class="btn-soft" data-act="viewToggle" style="justify-content:center">'+ico("activity","sm")+' Switch to table view</button>';
+}
+
+
+function renderTeam(){
+ if(!privileged())return;
+ const targets=people.filter(canManage),text=$("teamSearch").value.trim().toLowerCase();
+ const filtered=targets.filter(p=>p.name.toLowerCase().includes(text)||p.role.includes(text));
+ const active=people.filter(p=>p.role==="runner"&&p.active).length;
+ $("teamStats").innerHTML='<div class="metrics-two"><div class="metric-tile"><div class="label">Active Runners</div><div class="value">'+active+'</div><span class="caption">Eligible for weekly tips</span></div><div class="metric-tile"><div class="label">Manageable accounts</div><div class="value">'+targets.length+'</div><span class="caption">'+roleName(role)+' permissions</span></div></div>';
+ $("teamCount").textContent=filtered.length+" team members";
+ $("teamList").innerHTML=filtered.length?filtered.map(p=>'<div class="person-row"><div class="avatar">'+initials(p.name)+'</div><div class="person-data"><div class="person-name">'+esc(p.name)+'</div><div class="person-meta">'+roleName(p.role)+(p.role==="runner"?" · "+money(p.rate)+"/hr":"")+'</div><div class="actions"><button class="btn-soft btn-small" data-act="manage" data-id="'+p.id+'">Manage '+ico("chevron-right","sm")+'</button>'+(p.role==="runner"?'<button class="btn-quiet" data-act="rate" data-id="'+p.id+'">Edit rate</button>':"")+'</div></div><div class="right"><span class="pill '+(p.active?"active":"inactive")+'"><i></i>'+(p.active?"Active":"Inactive")+'</span></div></div>').join(""):'<div class="empty">'+ico("users")+'<strong>No matches</strong><p>Try a different name or role.</p></div>';
+}
+const actionNames={"employee.created":"Employee created","employee.activated":"Employee activated","employee.deactivated":"Employee deactivated","employee.permanently_deleted":"Employee permanently deleted","payment.draft_created":"Payment draft created","payment.edited":"Payment edited","payment.published":"Payment published","payment.receipt_confirmed":"Payment receipt confirmed","hourly_rate.update":"Hourly rate updated"};
+function updateAuditSelectors(){
+ const oldActor=$("auditActor").value,oldTarget=$("auditEmployee").value;
+ const actors=people.filter(p=>["superuser","admin","manager"].includes(p.role));
+ const targets=people.filter(p=>p.role!=="superuser");
+ $("auditActor").innerHTML='<option value="">All Managers, Admins &amp; Superuser</option>'+actors.map(p=>'<option value="'+p.id+'">'+esc(p.name)+' · '+roleName(p.role)+'</option>').join("");
+ $("auditEmployee").innerHTML='<option value="">All employees (except Superuser)</option>'+targets.map(p=>'<option value="'+p.id+'">'+esc(p.name)+' · '+roleName(p.role)+'</option>').join("");
+ if(actors.some(p=>p.id===oldActor))$("auditActor").value=oldActor;
+ if(targets.some(p=>p.id===oldTarget))$("auditEmployee").value=oldTarget;
+}
+function filteredAudit(){
+ const a=$("auditAction").value,actorFilter=$("auditActor").value,target=$("auditEmployee").value,from=$("auditFrom").value,to=$("auditTo").value;
+ return audit.filter(l=>(!a||l.action===a)&&(!actorFilter||l.actorId===actorFilter)&&(!target||l.targetId===target)&&(!from||l.date.slice(0,10)>=from)&&(!to||l.date.slice(0,10)<=to)).sort((a,b)=>b.date.localeCompare(a.date));
+}
+function renderAudit(){
+ if(!privileged())return;
+ updateAuditSelectors();
+ const matched=filteredAudit(),shown=matched.slice(0,auditLimit);
+ $("auditCount").textContent="Showing "+shown.length+" of "+matched.length;
+ $("auditShowMore").hidden=shown.length>=matched.length;
+ $("auditList").innerHTML=shown.length?shown.map(l=>{
+  const actorPerson=person(l.actorId),target=person(l.targetId),when=new Date(l.date).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  return '<div class="audit-entry"><span class="audit-icon">'+ico(l.action.startsWith("employee")?"users":l.action.startsWith("hourly")?"edit":"wallet")+'</span><div class="audit-body"><div class="audit-title">'+esc(actionNames[l.action]||l.action)+'</div><div class="audit-meta">'+esc(actorPerson?.name||"System")+' · '+esc(roleName(actorPerson?.role||""))+'</div><div class="audit-description">Employee: '+esc(target?.name||"Former employee")+'<br>'+esc(l.note)+'</div></div><span class="audit-when">'+when+'</span></div>';
+ }).join(""):'<div class="empty">'+ico("search")+'<strong>No matching activity</strong><p>Clear filters or choose another action.</p></div>';
+}
+function renderProfile(){
+ const a=self();
+ $("profileCard").innerHTML='<div class="row" style="gap:14px"><div class="avatar" style="height:58px;width:58px;border-radius:18px;font-size:17px">'+initials(a.name)+'</div><div><h2 class="section-title" style="font-size:21px;margin-bottom:5px">'+esc(a.name)+'</h2><span class="pill superuser">'+roleName(a.role)+'</span></div></div>'+(a.role==="runner"?'<div class="ghost-line" style="margin:17px 0"></div><div class="row space"><span class="small-sub">Your hourly rate · Read-only</span><strong>'+money(a.rate)+'/hr</strong></div>':"")+'<div class="ghost-line" style="margin:17px 0"></div><p class="small-sub" style="margin:0">This is a demo persona. Switching roles never changes your real account.</p>';
+ const isDark=document.documentElement.dataset.theme==="dark";
+ $("themeSwitch").classList.toggle("on",isDark);
+ $("themeSwitch").setAttribute("aria-pressed",String(isDark));
+}
+function renderAll(){
+ const a=self();
+ $("roleHeader").textContent=roleName(role).toUpperCase()+" WORKSPACE";
+ $("profileButton").textContent=initials(a.name);
+ $("welcomeTitle").textContent=(role==="runner"?"Hello, ":"Good evening, ")+a.name.split(" ")[0]+" 👋";
+ $("welcomeSub").textContent=role==="runner"?"Your tips, hours and receipts in one place.":"Here's where your team stands this week.";
+ $("newDraftTop").hidden=role==="runner";
+ $("exportButton").hidden=role==="runner";
+ $("runnerFilterWrap").hidden=role==="runner";
+ $("notificationsButton").querySelector(".dot").style.display=notifications.some(n=>!n.read)?"block":"none";
+ document.querySelectorAll(".nav-item").forEach(b=>b.hidden=(b.dataset.page==="team"||b.dataset.page==="audit")&&!privileged());
+ if(!privileged()&&(page==="team"||page==="audit"))page="home";
+ renderHome();renderPayments();renderTeam();renderAudit();renderProfile();go(page);
+}
+function closeSheet(){
+ $("sheetOverlay").classList.remove("open");
+ $("sheetOverlay").setAttribute("aria-hidden","true");
+ sheetMode="";sheetId="";
+}
+function sheet(title,html,mode="",id=""){
+ sheetMode=mode;sheetId=id;
+ $("sheetTitle").textContent=title;
+ $("sheetBody").innerHTML=html;
+ $("sheetOverlay").classList.add("open");
+ $("sheetOverlay").setAttribute("aria-hidden","false");
+ $("sheet").scrollTop=0;
+ setTimeout(()=>{const first=$("sheetBody").querySelector("input,select,button");if(first)first.focus()},45);
+}
+function roleSheet(){
+ sheet("Explore each role",'<p class="small-sub">Choose a sample role to see what that person can access. This never signs you into a real account.</p><div class="stack section-gap">'+Object.entries(personas).map(([r,id])=>{const a=person(id);return '<button class="person-row" data-act="role" data-role="'+r+'" style="text-align:left;width:100%"><span class="avatar">'+initials(a.name)+'</span><span class="person-data"><span class="person-name" style="display:block">'+roleName(r)+'</span><span class="person-meta" style="display:block">'+esc(a.name)+'</span></span>'+(r===role?'<span class="pill received">'+ico("check","sm")+' Selected</span>':ico("chevron-right"))+'</button>'}).join("")+'</div>',"role");
+}
+function notificationSheet(){
+ sheet("Notifications",'<p class="small-sub">Sample inbox. No real push alert is sent from this preview.</p><div class="row space section-gap"><h2 class="section-title" style="font-size:14px">Inbox</h2><button class="btn-quiet" data-act="markAll">Mark all read</button></div><div class="stack">'+(notifications.length?notifications.map(n=>'<div class="card" style="padding:14px"><div class="row space"><strong>'+esc(n.title)+'</strong><span class="pill '+(n.read?"inactive":"published")+'">'+(n.read?"Read":"New")+'</span></div><p class="small-sub" style="margin:9px 0">'+esc(n.body)+'</p><button class="btn-quiet" data-act="deleteNotice" data-id="'+n.id+'">Delete</button></div>').join(""):'<div class="empty"><strong>Inbox empty</strong></div>')+'</div>',"notifications");
+}
+function draftSheet(){
+ if(role==="runner")return;
+ const active=people.filter(p=>p.role==="runner"&&p.active);
+ sheet("Create weekly draft",'<p class="small-sub">New drafts are invisible to Runners until published. All changes in this preview are temporary.</p><form id="draftForm" class="form-stack section-gap"><div class="field"><label for="draftRunner">Runner</label><select id="draftRunner" required>'+active.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("")+'</select></div><div class="field"><label for="draftWeek">Week starting</label><input id="draftWeek" type="date" value="2026-11-02" required></div><div class="form-grid"><div class="field"><label for="draftHours">Hours worked</label><input id="draftHours" type="number" min="0" step=".25" value="40" required></div><div class="field"><label for="draftTips">Tips ($)</label><input id="draftTips" type="number" min="0" step=".01" value="600" required></div><div class="field"><label for="draftAdvance">Advance ($)</label><input id="draftAdvance" type="number" min="0" step=".01" value="50" required></div><div class="field"><label>Hourly rate</label><div id="draftRate" class="small-sub" style="padding:12px 4px">Based on selected Runner</div></div></div><div class="total-preview"><div><span>Remaining tips</span><p class="small-sub" style="margin:2px 0 0">Tips minus advance</p></div><b id="draftTotal">$550.00</b></div><button type="submit" class="btn-primary brand-btn">Save sample draft</button></form>',"draft");
+ updateDraftTotal();
+}
+function updateDraftTotal(){
+ if(!$("draftTotal"))return;
+ const runner=person($("draftRunner").value);
+ $("draftRate").textContent=runner?money(runner.rate)+"/hr":"—";
+ $("draftTotal").textContent=money(Number($("draftTips").value||0)-Number($("draftAdvance").value||0));
+}
+function paymentSheet(type,id){
+ const p=payments.find(x=>x.id===id);
+ if(!p)return;
+ const runner=person(p.runnerId);
+ if(type==="publish"&&role!=="runner"&&p.status==="draft"){
+  sheet("Publish payment",'<p class="small-sub">In the real app, publishing makes this visible to the Runner and can send a push notification.</p><div class="card section-gap"><strong>'+esc(runner.name)+'</strong><p class="small-sub" style="margin:5px 0">Week of '+day(p.week)+'</p><div class="payment-amount">'+money(p.tips-p.advance)+'</div></div><div class="sheet-footer"><button class="btn-soft" data-act="close">Cancel</button><button class="btn-primary brand-btn" data-act="doPublish" data-id="'+id+'">Publish in demo</button></div>',"publish",id);
+ }
+ if(type==="confirm"&&role==="runner"&&p.runnerId===self().id&&p.status==="published"){
+  sheet("Confirm payment received",'<p class="small-sub">Confirming in the real app records the receipt and alerts management.</p><div class="card section-gap"><p class="small-sub">Week of '+day(p.week)+'</p><div class="payment-amount">'+money(p.tips-p.advance)+'</div></div><div class="sheet-footer"><button class="btn-soft" data-act="close">Cancel</button><button class="btn-primary brand-btn" data-act="doConfirm" data-id="'+id+'">Confirm in demo</button></div>',"confirm",id);
+ }
+ if(type==="edit"&&privileged()&&p.status!=="received"){
+  sheet("Edit weekly payment",'<p class="small-sub">Admin/Superuser can edit before the receipt is confirmed. Existing rate is preserved.</p><form class="form-stack section-gap" id="editPaymentForm"><p class="section-note">'+esc(runner.name)+' · Week of '+day(p.week)+'</p><div class="field"><label for="editHours">Hours worked</label><input id="editHours" type="number" min="0" step=".25" value="'+p.hours+'" required></div><div class="field"><label for="editTips">Tips ($)</label><input id="editTips" type="number" min="0" step=".01" value="'+p.tips+'" required></div><div class="field"><label for="editAdvance">Advance ($)</label><input id="editAdvance" type="number" min="0" step=".01" value="'+p.advance+'" required></div><button type="submit" class="btn-primary brand-btn">Save sample changes</button></form>',"edit",id);
+ }
+}
+function employeeSheet(id){
+ const p=person(id);
+ if(!canManage(p))return;
+ sheet("Manage employee",'<div class="row"><div class="avatar" style="width:47px;height:47px">'+initials(p.name)+'</div><div><strong>'+esc(p.name)+'</strong><p class="small-sub" style="margin:4px 0">'+roleName(p.role)+' · '+(p.active?"Active":"Inactive")+'</p></div></div><p class="section-note section-gap">'+roleName(role)+' is permitted to manage this '+roleName(p.role)+' account. All actions below affect fictional data only.</p><div class="stack section-gap"><button class="btn-primary" data-act="toggleEmployee" data-id="'+id+'">'+ico(p.active?"clock":"check-circle")+' '+(p.active?"Deactivate":"Reactivate")+'</button>'+(p.role==="runner"?'<button class="btn-soft" data-act="rate" data-id="'+id+'">'+ico("edit","sm")+' Update hourly rate</button>':"")+'<button class="btn-danger" data-act="deleteEmployee" data-id="'+id+'">'+ico("trash","sm")+' Delete permanently</button></div><p class="small-sub section-gap">The live app requires entering the employee name to confirm deletion.</p>',"employee",id);
+}
+function rateSheet(id){
+ const p=person(id);
+ if(!canManage(p)||p.role!=="runner")return;
+ sheet("Update hourly rate",'<p class="small-sub">New rates apply to future payment drafts. Previously saved payments retain their rate.</p><form id="rateForm" class="form-stack section-gap"><p class="section-note">'+esc(p.name)+'</p><div class="field"><label for="rateValue">Hourly rate ($)</label><input id="rateValue" type="number" min="0" step=".01" value="'+p.rate+'" required></div><button type="submit" class="btn-primary brand-btn">Save sample rate</button></form>',"rate",id);
+}
+function deleteSheet(id){
+ const p=person(id);
+ if(!canManage(p))return;
+ sheet("Permanent deletion",'<p class="section-note">In the real app, deleting a Runner also deletes their payment and rate history. Audit history remains. This demo has no real records.</p><form id="deleteForm" class="form-stack section-gap"><div class="field"><label for="deleteName">Type '+esc(p.name)+' exactly</label><input id="deleteName" required autocomplete="off"></div><button class="btn-danger" type="submit">Delete fictional employee</button></form>',"delete",id);
+}
+function createEmployeeSheet(){
+ if(!privileged())return;
+ let opts=["runner","manager"].concat(role==="superuser"?["admin"]:[]);
+ sheet("Add employee",'<p class="small-sub">Preview-only account creation. The real app requires a unique email and 12-character temporary password.</p><form id="createEmployeeForm" class="form-stack section-gap"><div class="field"><label for="newName">Full name</label><input id="newName" required maxlength="100" placeholder="e.g. Alex Example"></div><div class="field"><label for="newEmail">Email</label><input id="newEmail" type="email" required placeholder="alex@example.com"></div><div class="field"><label for="newRole">Role</label><select id="newRole">'+opts.map(x=>'<option value="'+x+'">'+roleName(x)+'</option>').join("")+'</select></div><div class="field"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" required minlength="12"></div><button type="submit" class="btn-primary brand-btn">Create fictional account</button></form>',"createEmployee");
+}
+function passwordSheet(){
+ sheet("Change password",'<p class="small-sub">This form is for visual exploration only. Your real password is never read or changed.</p><form id="passwordForm" class="form-stack section-gap"><div class="field"><label for="oldPassword">Current password</label><input id="oldPassword" required type="password"></div><div class="field"><label for="newPassword">New password (12+ characters)</label><input id="newPassword" required type="password" minlength="12"></div><div class="field"><label for="confirmNewPassword">Confirm password</label><input id="confirmNewPassword" required type="password" minlength="12"></div><button type="submit" class="btn-primary brand-btn">Preview save</button></form>',"password");
+}
+
+
+function act(type,id,roleChoice){
+ if(type==="newDraft"){draftSheet();return}
+ if(type==="notifications"){notificationSheet();return}
+ if(type==="pending"){statusFilter="published";renderPayments();go("payments");return}
+ if(type==="graphRange"){graphRange=graphRange===6?52:6;renderHome();return}
+ if(type==="viewToggle"){tableMode=!tableMode;renderPayments();return}
+ if(type==="close"){closeSheet();return}
+ if(type==="role"){
+  if(!personas[roleChoice])return;
+  role=roleChoice;page="home";statusFilter="";auditLimit=10;closeSheet();renderAll();
+  toast("Now previewing "+roleName(role)+". Real roles unchanged.");return;
+ }
+ if(type==="markAll"){notifications.forEach(n=>n.read=true);closeSheet();renderAll();toast("Sample notifications marked read.");return}
+ if(type==="deleteNotice"){notifications=notifications.filter(n=>String(n.id)!==String(id));notificationSheet();renderAll();return}
+ if(type==="publish"||type==="confirm"||type==="edit"){paymentSheet(type,id);return}
+ if(type==="doPublish"){
+  const p=payments.find(x=>x.id===id);
+  if(!p||role==="runner"||p.status!=="draft")return;
+  p.status="published";pushAudit("payment.published",p.runnerId,"Fictional payout published");
+  closeSheet();renderAll();toast("Sample payment published. No push sent.");return;
+ }
+ if(type==="doConfirm"){
+  const p=payments.find(x=>x.id===id);
+  if(!p||role!=="runner"||p.runnerId!==self().id||p.status!=="published")return;
+  p.status="received";pushAudit("payment.receipt_confirmed",p.runnerId,"Fictional receipt confirmed");
+  closeSheet();renderAll();toast("Sample receipt confirmed. No push sent.");return;
+ }
+ if(type==="manage"){employeeSheet(id);return}
+ if(type==="rate"){rateSheet(id);return}
+ if(type==="deleteEmployee"){deleteSheet(id);return}
+ if(type==="toggleEmployee"){
+  const p=person(id);if(!canManage(p))return;
+  p.active=!p.active;pushAudit(p.active?"employee.activated":"employee.deactivated",id,"Fictional employee status");
+  closeSheet();renderAll();toast("Sample employee "+(p.active?"reactivated.":"deactivated."));return;
+ }
+}
+document.addEventListener("click",function(e){
+ const nav=e.target.closest("[data-page]");
+ if(nav){go(nav.dataset.page);return}
+ const status=e.target.closest("[data-status]");
+ if(status){statusFilter=status.dataset.status;renderPayments();return}
+ const button=e.target.closest("[data-act]");
+ if(button){act(button.dataset.act,button.dataset.id,button.dataset.role);return}
+ const demo=e.target.closest("[data-simulate]");
+ if(demo){toast(demo.dataset.simulate)}
+});
+document.addEventListener("input",function(e){
+ if(["draftRunner","draftTips","draftAdvance"].includes(e.target.id))updateDraftTotal();
+ if(e.target.id==="teamSearch")renderTeam();
+ if(["paymentFrom","paymentTo"].includes(e.target.id))renderPayments();
+});
+document.addEventListener("change",function(e){
+ if(e.target.id==="draftRunner")updateDraftTotal();
+ if(e.target.id==="paymentRunner")renderPayments();
+});
+$("newDraftTop").onclick=draftSheet;
+$("addEmployeeButton").onclick=createEmployeeSheet;
+$("exportButton").onclick=()=>toast("Excel export is in the real app. Preview doesn't export data.");
+$("clearPaymentFilters").onclick=()=>{
+ statusFilter="";["paymentFrom","paymentTo","paymentRunner"].forEach(id=>$(id).value="");renderPayments();
+};
+$("auditSearch").onclick=()=>{auditLimit=10;renderAudit();toast("Sample audit filters applied.")};
+$("auditClear").onclick=()=>{
+ ["auditAction","auditActor","auditEmployee","auditFrom","auditTo"].forEach(id=>$(id).value="");auditLimit=10;renderAudit();
+};
+$("auditShowMore").onclick=()=>{auditLimit+=10;renderAudit()};
+$("profileButton").onclick=roleSheet;
+$("rolePickerButton").onclick=roleSheet;
+$("notificationsButton").onclick=notificationSheet;
+$("passwordButton").onclick=passwordSheet;
+$("signOutButton").onclick=()=>toast("This is a visual preview; no real login session.");
+$("themeSwitch").onclick=()=>{
+ document.documentElement.dataset.theme=document.documentElement.dataset.theme==="dark"?"light":"dark";
+ renderProfile();
+};
+$("closeSheet").onclick=closeSheet;
+$("sheetOverlay").onclick=e=>{if(e.target===$("sheetOverlay"))closeSheet()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("sheetOverlay").classList.contains("open"))closeSheet()});
+document.addEventListener("submit",function(e){
+ const form=e.target;if(!form||!form.id)return;e.preventDefault();
+ if(form.id==="draftForm"){
+  if(role==="runner")return;
+  const rid=$("draftRunner").value,week=$("draftWeek").value,hours=Number($("draftHours").value),tips=Number($("draftTips").value),advance=Number($("draftAdvance").value),p=person(rid);
+  if(!p||!week||[hours,tips,advance].some(n=>!Number.isFinite(n)||n<0))return;
+  if(payments.some(x=>x.runnerId===rid&&x.week===week)){toast("This runner already has a sample record for this week.");return}
+  payments.unshift({id:"new-"+Date.now(),runnerId:rid,week,hours,tips,advance,status:"draft",rate:p.rate});
+  pushAudit("payment.draft_created",rid,"Fictional weekly draft saved");
+  closeSheet();statusFilter="draft";renderAll();go("payments");toast("Sample draft saved, hidden from Runners.");return;
+ }
+ if(form.id==="editPaymentForm"){
+  const p=payments.find(x=>x.id===sheetId);
+  if(!p||!privileged()||p.status==="received")return;
+  const hours=Number($("editHours").value),tips=Number($("editTips").value),advance=Number($("editAdvance").value);
+  if([hours,tips,advance].some(n=>!Number.isFinite(n)||n<0))return;
+  p.hours=hours;p.tips=tips;p.advance=advance;pushAudit("payment.edited",p.runnerId,"Fictional payment edited");
+  closeSheet();renderAll();toast("Sample payment updated.");return;
+ }
+ if(form.id==="rateForm"){
+  const p=person(sheetId),rate=Number($("rateValue").value);
+  if(!canManage(p)||p.role!=="runner"||!Number.isFinite(rate)||rate<0)return;
+  p.rate=rate;pushAudit("hourly_rate.update",p.id,"Sample rate updated; saved payments retain original rates");
+  closeSheet();renderAll();toast("Sample hourly rate updated.");return;
+ }
+ if(form.id==="deleteForm"){
+  const p=person(sheetId);
+  if(!canManage(p))return;
+  if($("deleteName").value.trim()!==p.name){toast("Name didn't match. Nothing deleted.");return}
+  const id=p.id;
+  people.splice(people.findIndex(x=>x.id===id),1);
+  payments=payments.filter(x=>x.runnerId!==id);
+  pushAudit("employee.permanently_deleted",id,"Fictional account deleted; audit history preserved");
+  closeSheet();renderAll();toast("Only the fictional account was deleted.");return;
+ }
+ if(form.id==="createEmployeeForm"){
+  if(!privileged())return;
+  const name=$("newName").value.trim(),newRole=$("newRole").value;
+  const allowedRoles=["runner","manager"].concat(role==="superuser"?["admin"]:[]);
+  if(!name||!allowedRoles.includes(newRole))return;
+  const id="demo-"+Date.now();
+  people.push({id,name,role:newRole,rate:newRole==="runner"?0:null,active:true});
+  pushAudit("employee.created",id,"Fictional user added");
+  closeSheet();renderAll();toast("Sample "+roleName(newRole)+" added. No login created.");return;
+ }
+ if(form.id==="passwordForm"){
+  if($("newPassword").value!==$("confirmNewPassword").value){toast("Passwords must match.");return}
+  closeSheet();toast("Preview only. Real password unchanged.");return;
+ }
+});
+renderAll();
+})();
+
+</script>
+</body>
+</html>
