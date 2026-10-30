@@ -98,6 +98,7 @@ END;
 $function$;
 
 REVOKE ALL ON FUNCTION public.set_runner_hourly_rate_today(uuid, numeric) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.set_runner_hourly_rate_today(uuid, numeric) FROM anon;
 GRANT EXECUTE ON FUNCTION public.set_runner_hourly_rate_today(uuid, numeric)
 TO authenticated;
 
