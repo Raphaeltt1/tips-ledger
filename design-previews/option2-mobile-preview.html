@@ -748,11 +748,9 @@ document.addEventListener("submit",function(e){
   const p=person(sheetId);
   if(!canManage(p))return;
   if($("deleteName").value.trim()!==p.name){toast("Name didn't match. Nothing deleted.");return}
-  const id=p.id;
-  people.splice(people.findIndex(x=>x.id===id),1);
-  payments=payments.filter(x=>x.runnerId!==id);
-  pushAudit("employee.permanently_deleted",id,"Fictional account deleted; audit history preserved");
-  closeSheet();renderAll();toast("Only the fictional account was deleted.");return;
+  // Display the confirmation journey without removing any of the demo personas.
+  // Keeping sample records intact makes every preview role always accessible.
+  closeSheet();toast("Deletion confirmation previewed. All sample accounts remain intact.");return;
  }
  if(form.id==="createEmployeeForm"){
   if(!privileged())return;
