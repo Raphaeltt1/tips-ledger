@@ -964,6 +964,12 @@ GRANT ALL PRIVILEGES ON public."weekly_tips" TO service_role;
 
 GRANT USAGE, SELECT ON SEQUENCE public.audit_log_id_seq TO service_role;
 
+-- Browser payments list reads weekly_tips directly; grant only SELECT to
+-- authenticated users. Existing row-level policies still ensure Managers/Admins
+-- see team data and Runners see only their own PUBLISHED payments.
+-- (The live ACL snapshot lacks this grant, despite the browser requiring it.)
+GRANT SELECT ON TABLE public.weekly_tips TO authenticated;
+
 -- 8. Add audit/notification/immutability triggers last.
 
 CREATE TRIGGER audit_profiles AFTER DELETE OR UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION write_tips_ledger_audit();
