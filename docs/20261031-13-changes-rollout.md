@@ -1,6 +1,6 @@
 # Tips Ledger — 13 Changes rollout (staged, not live)
 
-> **Safety:** Do not publish the GitHub Pages UI before the SQL migration is applied. Do not deploy **all** Edge Functions from this GitHub branch; the checked-in `create-employee-` and `delete-employee` files predate the live Supabase console deployments and must be reconciled separately. Deploy **send-push only**.
+> **Safety:** The Supabase migration was applied and the `send-push` function was deployed through the connected Supabase project before publishing the website. The checked-in `create-employee-` and `delete-employee` files have been reconciled with the live deployed versions; do not deploy them unnecessarily.
 
 ## Changes in this feature branch
 
@@ -21,8 +21,8 @@
 ## Deployment order (important)
 
 1. Back up the production Supabase database. GitHub backup ref: `backup/tips-ledger-before-13-2026-10-31`.
-2. Review existing RLS state and run `supabase/migrations/20261031_tips_ledger_rate_notifications.sql` in Supabase SQL Editor. The script stops if notification RLS isn't enabled already.
-3. Open/deploy **only** `supabase/functions/send-push/index.ts` through the Supabase function editor or CLI. The checked-in `create-employee-` and `delete-employee` functions are older than the currently deployed live copies; **do not replace them**.
+2. ✅ Confirmed RLS was already enabled and applied the notification-deletion/hourly-rate migration. Explicitly revoked `anon` access to the new rate RPC after verifying grants.
+3. ✅ Deployed **only** `supabase/functions/send-push/index.ts` (live version 3). Synced `create-employee-` and `delete-employee` GitHub copies to their live version 4 source, without redeploying them.
 4. Verify Supabase Edge Function secrets `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` (never paste private keys into chat or GitHub). Public key must match the website's VAPID public key.
 5. Test the Edge Function `test` event using the in-app "Send test push" action from an installed Home Screen PWA with notifications enabled; inspect server logs if `sent=0` or delivery fails.
 6. Merge this feature branch into `main` to publish the website. Hard refresh/reopen the Home Screen PWA.
@@ -44,4 +44,4 @@ iPhone web push requires a supported iOS version, the app added to the Home Scre
 - Verified Runner payment queries include both `runner_id = profile.id` and `published = true`.
 - Verified Excel visibility is restricted to `manager`, `admin`, `superuser`.
 
-**Not yet completed:** Live Supabase migration, Edge Function deployment, browser-based UI testing, device push test, and GitHub Pages release. Do not label the full change set as production-complete before these steps.
+**Done:** Live Supabase migration and Edge Function deployment. **Not yet completed:** Browser-based UI testing, device push test, and GitHub Pages release. A successful push gateway response is not proof a device displays the alert. Do not label the full change set as fully tested before these steps.
