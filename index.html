@@ -118,7 +118,7 @@ function populateAuditPeople(people){
 }
 const AUDIT_PAGE_SIZE=10,AUDIT_BATCH_SIZE=50;
 let auditPaging={records:[],offset:0,shown:0,exhausted:false,loading:false,filters:null};
-const auditLabel=a=>String(a||'unknown').replace(/[._]/g,' ').replace(/\\b\\w/g,c=>c.toUpperCase());
+const auditLabel=a=>String(a||'unknown').replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 const auditSafeSummary=(before,after)=>{const keys=[...new Set([...Object.keys(before||{}),...Object.keys(after||{})])].filter(k=>!['id','runner_id','user_id','weekly_tip_id','created_at','updated_at'].includes(k));return keys.slice(0,4).map(k=>k.replace(/_/g,' ')).join(', ')};
 function auditDetail(d){
  if(!d||typeof d!=='object')return '';
