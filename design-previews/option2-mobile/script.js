@@ -118,3 +118,129 @@ function renderPayments(){
   $("paymentList").innerHTML='<div class="card" style="overflow:auto"><table style="width:100%;min-width:560px;border-collapse:collapse;font-size:11px"><thead><tr><th>Week</th><th>Runner</th><th>Tips</th><th>Advance</th><th>Remaining</th><th>Status</th></tr></thead><tbody>'+filtered.map(p=>'<tr><td>'+day(p.week)+'</td><td>'+esc(person(p.runnerId)?.name||"—")+'</td><td>'+money(p.tips)+'</td><td>'+money(p.advance)+'</td><td>'+money(p.tips-p.advance)+'</td><td>'+paymentStatus(p)+'</td></tr>').join("")+'</tbody></table></div><button class="btn-soft" data-act="viewToggle">Switch to cards</button>';
  }else $("paymentList").innerHTML=filtered.map(p=>cardPayment(p)).join("")+'<button class="btn-soft" data-act="viewToggle" style="justify-content:center">'+ico("activity","sm")+' Switch to table view</button>';
 }
+
+
+function renderTeam(){
+ if(!privileged())return;
+ const targets=people.filter(canManage),text=$("teamSearch").value.trim().toLowerCase();
+ const filtered=targets.filter(p=>p.name.toLowerCase().includes(text)||p.role.includes(text));
+ const active=people.filter(p=>p.role==="runner"&&p.active).length;
+ $("teamStats").innerHTML='<div class="metrics-two"><div class="metric-tile"><div class="label">Active Runners</div><div class="value">'+active+'</div><span class="caption">Eligible for weekly tips</span></div><div class="metric-tile"><div class="label">Manageable accounts</div><div class="value">'+targets.length+'</div><span class="caption">'+roleName(role)+' permissions</span></div></div>';
+ $("teamCount").textContent=filtered.length+" team members";
+ $("teamList").innerHTML=filtered.length?filtered.map(p=>'<div class="person-row"><div class="avatar">'+initials(p.name)+'</div><div class="person-data"><div class="person-name">'+esc(p.name)+'</div><div class="person-meta">'+roleName(p.role)+(p.role==="runner"?" · "+money(p.rate)+"/hr":"")+'</div><div class="actions"><button class="btn-soft btn-small" data-act="manage" data-id="'+p.id+'">Manage '+ico("chevron-right","sm")+'</button>'+(p.role==="runner"?'<button class="btn-quiet" data-act="rate" data-id="'+p.id+'">Edit rate</button>':"")+'</div></div><div class="right"><span class="pill '+(p.active?"active":"inactive")+'"><i></i>'+(p.active?"Active":"Inactive")+'</span></div></div>').join(""):'<div class="empty">'+ico("users")+'<strong>No matches</strong><p>Try a different name or role.</p></div>';
+}
+const actionNames={"employee.created":"Employee created","employee.activated":"Employee activated","employee.deactivated":"Employee deactivated","employee.permanently_deleted":"Employee permanently deleted","payment.draft_created":"Payment draft created","payment.edited":"Payment edited","payment.published":"Payment published","payment.receipt_confirmed":"Payment receipt confirmed","hourly_rate.update":"Hourly rate updated"};
+function updateAuditSelectors(){
+ const oldActor=$("auditActor").value,oldTarget=$("auditEmployee").value;
+ const actors=people.filter(p=>["superuser","admin","manager"].includes(p.role));
+ const targets=people.filter(p=>p.role!=="superuser");
+ $("auditActor").innerHTML='<option value="">All Managers, Admins &amp; Superuser</option>'+actors.map(p=>'<option value="'+p.id+'">'+esc(p.name)+' · '+roleName(p.role)+'</option>').join("");
+ $("auditEmployee").innerHTML='<option value="">All employees (except Superuser)</option>'+targets.map(p=>'<option value="'+p.id+'">'+esc(p.name)+' · '+roleName(p.role)+'</option>').join("");
+ if(actors.some(p=>p.id===oldActor))$("auditActor").value=oldActor;
+ if(targets.some(p=>p.id===oldTarget))$("auditEmployee").value=oldTarget;
+}
+function filteredAudit(){
+ const a=$("auditAction").value,actorFilter=$("auditActor").value,target=$("auditEmployee").value,from=$("auditFrom").value,to=$("auditTo").value;
+ return audit.filter(l=>(!a||l.action===a)&&(!actorFilter||l.actorId===actorFilter)&&(!target||l.targetId===target)&&(!from||l.date.slice(0,10)>=from)&&(!to||l.date.slice(0,10)<=to)).sort((a,b)=>b.date.localeCompare(a.date));
+}
+function renderAudit(){
+ if(!privileged())return;
+ updateAuditSelectors();
+ const matched=filteredAudit(),shown=matched.slice(0,auditLimit);
+ $("auditCount").textContent="Showing "+shown.length+" of "+matched.length;
+ $("auditShowMore").hidden=shown.length>=matched.length;
+ $("auditList").innerHTML=shown.length?shown.map(l=>{
+  const actorPerson=person(l.actorId),target=person(l.targetId),when=new Date(l.date).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+  return '<div class="audit-entry"><span class="audit-icon">'+ico(l.action.startsWith("employee")?"users":l.action.startsWith("hourly")?"edit":"wallet")+'</span><div class="audit-body"><div class="audit-title">'+esc(actionNames[l.action]||l.action)+'</div><div class="audit-meta">'+esc(actorPerson?.name||"System")+' · '+esc(roleName(actorPerson?.role||""))+'</div><div class="audit-description">Employee: '+esc(target?.name||"Former employee")+'<br>'+esc(l.note)+'</div></div><span class="audit-when">'+when+'</span></div>';
+ }).join(""):'<div class="empty">'+ico("search")+'<strong>No matching activity</strong><p>Clear filters or choose another action.</p></div>';
+}
+function renderProfile(){
+ const a=self();
+ $("profileCard").innerHTML='<div class="row" style="gap:14px"><div class="avatar" style="height:58px;width:58px;border-radius:18px;font-size:17px">'+initials(a.name)+'</div><div><h2 class="section-title" style="font-size:21px;margin-bottom:5px">'+esc(a.name)+'</h2><span class="pill superuser">'+roleName(a.role)+'</span></div></div>'+(a.role==="runner"?'<div class="ghost-line" style="margin:17px 0"></div><div class="row space"><span class="small-sub">Your hourly rate · Read-only</span><strong>'+money(a.rate)+'/hr</strong></div>':"")+'<div class="ghost-line" style="margin:17px 0"></div><p class="small-sub" style="margin:0">This is a demo persona. Switching roles never changes your real account.</p>';
+ const isDark=document.documentElement.dataset.theme==="dark";
+ $("themeSwitch").classList.toggle("on",isDark);
+ $("themeSwitch").setAttribute("aria-pressed",String(isDark));
+}
+function renderAll(){
+ const a=self();
+ $("roleHeader").textContent=roleName(role).toUpperCase()+" WORKSPACE";
+ $("profileButton").textContent=initials(a.name);
+ $("welcomeTitle").textContent=(role==="runner"?"Hello, ":"Good evening, ")+a.name.split(" ")[0]+" 👋";
+ $("welcomeSub").textContent=role==="runner"?"Your tips, hours and receipts in one place.":"Here's where your team stands this week.";
+ $("newDraftTop").hidden=role==="runner";
+ $("exportButton").hidden=role==="runner";
+ $("runnerFilterWrap").hidden=role==="runner";
+ $("notificationsButton").querySelector(".dot").style.display=notifications.some(n=>!n.read)?"block":"none";
+ document.querySelectorAll(".nav-item").forEach(b=>b.hidden=(b.dataset.page==="team"||b.dataset.page==="audit")&&!privileged());
+ if(!privileged()&&(page==="team"||page==="audit"))page="home";
+ renderHome();renderPayments();renderTeam();renderAudit();renderProfile();go(page);
+}
+function closeSheet(){
+ $("sheetOverlay").classList.remove("open");
+ $("sheetOverlay").setAttribute("aria-hidden","true");
+ sheetMode="";sheetId="";
+}
+function sheet(title,html,mode="",id=""){
+ sheetMode=mode;sheetId=id;
+ $("sheetTitle").textContent=title;
+ $("sheetBody").innerHTML=html;
+ $("sheetOverlay").classList.add("open");
+ $("sheetOverlay").setAttribute("aria-hidden","false");
+ $("sheet").scrollTop=0;
+ setTimeout(()=>{const first=$("sheetBody").querySelector("input,select,button");if(first)first.focus()},45);
+}
+function roleSheet(){
+ sheet("Explore each role",'<p class="small-sub">Choose a sample role to see what that person can access. This never signs you into a real account.</p><div class="stack section-gap">'+Object.entries(personas).map(([r,id])=>{const a=person(id);return '<button class="person-row" data-act="role" data-role="'+r+'" style="text-align:left;width:100%"><span class="avatar">'+initials(a.name)+'</span><span class="person-data"><span class="person-name" style="display:block">'+roleName(r)+'</span><span class="person-meta" style="display:block">'+esc(a.name)+'</span></span>'+(r===role?'<span class="pill received">'+ico("check","sm")+' Selected</span>':ico("chevron-right"))+'</button>'}).join("")+'</div>',"role");
+}
+function notificationSheet(){
+ sheet("Notifications",'<p class="small-sub">Sample inbox. No real push alert is sent from this preview.</p><div class="row space section-gap"><h2 class="section-title" style="font-size:14px">Inbox</h2><button class="btn-quiet" data-act="markAll">Mark all read</button></div><div class="stack">'+(notifications.length?notifications.map(n=>'<div class="card" style="padding:14px"><div class="row space"><strong>'+esc(n.title)+'</strong><span class="pill '+(n.read?"inactive":"published")+'">'+(n.read?"Read":"New")+'</span></div><p class="small-sub" style="margin:9px 0">'+esc(n.body)+'</p><button class="btn-quiet" data-act="deleteNotice" data-id="'+n.id+'">Delete</button></div>').join(""):'<div class="empty"><strong>Inbox empty</strong></div>')+'</div>',"notifications");
+}
+function draftSheet(){
+ if(role==="runner")return;
+ const active=people.filter(p=>p.role==="runner"&&p.active);
+ sheet("Create weekly draft",'<p class="small-sub">New drafts are invisible to Runners until published. All changes in this preview are temporary.</p><form id="draftForm" class="form-stack section-gap"><div class="field"><label for="draftRunner">Runner</label><select id="draftRunner" required>'+active.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("")+'</select></div><div class="field"><label for="draftWeek">Week starting</label><input id="draftWeek" type="date" value="2026-11-02" required></div><div class="form-grid"><div class="field"><label for="draftHours">Hours worked</label><input id="draftHours" type="number" min="0" step=".25" value="40" required></div><div class="field"><label for="draftTips">Tips ($)</label><input id="draftTips" type="number" min="0" step=".01" value="600" required></div><div class="field"><label for="draftAdvance">Advance ($)</label><input id="draftAdvance" type="number" min="0" step=".01" value="50" required></div><div class="field"><label>Hourly rate</label><div id="draftRate" class="small-sub" style="padding:12px 4px">Based on selected Runner</div></div></div><div class="total-preview"><div><span>Remaining tips</span><p class="small-sub" style="margin:2px 0 0">Tips minus advance</p></div><b id="draftTotal">$550.00</b></div><button type="submit" class="btn-primary brand-btn">Save sample draft</button></form>',"draft");
+ updateDraftTotal();
+}
+function updateDraftTotal(){
+ if(!$("draftTotal"))return;
+ const runner=person($("draftRunner").value);
+ $("draftRate").textContent=runner?money(runner.rate)+"/hr":"—";
+ $("draftTotal").textContent=money(Number($("draftTips").value||0)-Number($("draftAdvance").value||0));
+}
+function paymentSheet(type,id){
+ const p=payments.find(x=>x.id===id);
+ if(!p)return;
+ const runner=person(p.runnerId);
+ if(type==="publish"&&role!=="runner"&&p.status==="draft"){
+  sheet("Publish payment",'<p class="small-sub">In the real app, publishing makes this visible to the Runner and can send a push notification.</p><div class="card section-gap"><strong>'+esc(runner.name)+'</strong><p class="small-sub" style="margin:5px 0">Week of '+day(p.week)+'</p><div class="payment-amount">'+money(p.tips-p.advance)+'</div></div><div class="sheet-footer"><button class="btn-soft" data-act="close">Cancel</button><button class="btn-primary brand-btn" data-act="doPublish" data-id="'+id+'">Publish in demo</button></div>',"publish",id);
+ }
+ if(type==="confirm"&&role==="runner"&&p.runnerId===self().id&&p.status==="published"){
+  sheet("Confirm payment received",'<p class="small-sub">Confirming in the real app records the receipt and alerts management.</p><div class="card section-gap"><p class="small-sub">Week of '+day(p.week)+'</p><div class="payment-amount">'+money(p.tips-p.advance)+'</div></div><div class="sheet-footer"><button class="btn-soft" data-act="close">Cancel</button><button class="btn-primary brand-btn" data-act="doConfirm" data-id="'+id+'">Confirm in demo</button></div>',"confirm",id);
+ }
+ if(type==="edit"&&privileged()&&p.status!=="received"){
+  sheet("Edit weekly payment",'<p class="small-sub">Admin/Superuser can edit before the receipt is confirmed. Existing rate is preserved.</p><form class="form-stack section-gap" id="editPaymentForm"><p class="section-note">'+esc(runner.name)+' · Week of '+day(p.week)+'</p><div class="field"><label for="editHours">Hours worked</label><input id="editHours" type="number" min="0" step=".25" value="'+p.hours+'" required></div><div class="field"><label for="editTips">Tips ($)</label><input id="editTips" type="number" min="0" step=".01" value="'+p.tips+'" required></div><div class="field"><label for="editAdvance">Advance ($)</label><input id="editAdvance" type="number" min="0" step=".01" value="'+p.advance+'" required></div><button type="submit" class="btn-primary brand-btn">Save sample changes</button></form>',"edit",id);
+ }
+}
+function employeeSheet(id){
+ const p=person(id);
+ if(!canManage(p))return;
+ sheet("Manage employee",'<div class="row"><div class="avatar" style="width:47px;height:47px">'+initials(p.name)+'</div><div><strong>'+esc(p.name)+'</strong><p class="small-sub" style="margin:4px 0">'+roleName(p.role)+' · '+(p.active?"Active":"Inactive")+'</p></div></div><p class="section-note section-gap">'+roleName(role)+' is permitted to manage this '+roleName(p.role)+' account. All actions below affect fictional data only.</p><div class="stack section-gap"><button class="btn-primary" data-act="toggleEmployee" data-id="'+id+'">'+ico(p.active?"clock":"check-circle")+' '+(p.active?"Deactivate":"Reactivate")+'</button>'+(p.role==="runner"?'<button class="btn-soft" data-act="rate" data-id="'+id+'">'+ico("edit","sm")+' Update hourly rate</button>':"")+'<button class="btn-danger" data-act="deleteEmployee" data-id="'+id+'">'+ico("trash","sm")+' Delete permanently</button></div><p class="small-sub section-gap">The live app requires entering the employee name to confirm deletion.</p>',"employee",id);
+}
+function rateSheet(id){
+ const p=person(id);
+ if(!canManage(p)||p.role!=="runner")return;
+ sheet("Update hourly rate",'<p class="small-sub">New rates apply to future payment drafts. Previously saved payments retain their rate.</p><form id="rateForm" class="form-stack section-gap"><p class="section-note">'+esc(p.name)+'</p><div class="field"><label for="rateValue">Hourly rate ($)</label><input id="rateValue" type="number" min="0" step=".01" value="'+p.rate+'" required></div><button type="submit" class="btn-primary brand-btn">Save sample rate</button></form>',"rate",id);
+}
+function deleteSheet(id){
+ const p=person(id);
+ if(!canManage(p))return;
+ sheet("Permanent deletion",'<p class="section-note">In the real app, deleting a Runner also deletes their payment and rate history. Audit history remains. This demo has no real records.</p><form id="deleteForm" class="form-stack section-gap"><div class="field"><label for="deleteName">Type '+esc(p.name)+' exactly</label><input id="deleteName" required autocomplete="off"></div><button class="btn-danger" type="submit">Delete fictional employee</button></form>',"delete",id);
+}
+function createEmployeeSheet(){
+ if(!privileged())return;
+ let opts=["runner","manager"].concat(role==="superuser"?["admin"]:[]);
+ sheet("Add employee",'<p class="small-sub">Preview-only account creation. The real app requires a unique email and 12-character temporary password.</p><form id="createEmployeeForm" class="form-stack section-gap"><div class="field"><label for="newName">Full name</label><input id="newName" required maxlength="100" placeholder="e.g. Alex Example"></div><div class="field"><label for="newEmail">Email</label><input id="newEmail" type="email" required placeholder="alex@example.com"></div><div class="field"><label for="newRole">Role</label><select id="newRole">'+opts.map(x=>'<option value="'+x+'">'+roleName(x)+'</option>').join("")+'</select></div><div class="field"><label for="temporaryPassword">Temporary password</label><input id="temporaryPassword" type="password" required minlength="12"></div><button type="submit" class="btn-primary brand-btn">Create fictional account</button></form>',"createEmployee");
+}
+function passwordSheet(){
+ sheet("Change password",'<p class="small-sub">This form is for visual exploration only. Your real password is never read or changed.</p><form id="passwordForm" class="form-stack section-gap"><div class="field"><label for="oldPassword">Current password</label><input id="oldPassword" required type="password"></div><div class="field"><label for="newPassword">New password (12+ characters)</label><input id="newPassword" required type="password" minlength="12"></div><div class="field"><label for="confirmNewPassword">Confirm password</label><input id="confirmNewPassword" required type="password" minlength="12"></div><button type="submit" class="btn-primary brand-btn">Preview save</button></form>',"password");
+}
