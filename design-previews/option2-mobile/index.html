@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f8f9">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Tips Ledger Option 2 mobile-first design concept. Static demo with fictional data; not connected to the real app.">
+<title>Tips Ledger — Option 2 Mobile App Preview</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="./script.js" defer></script>
+</head>
+<body>
+<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="position:absolute;height:0;width:0;overflow:hidden">
+<symbol id="ic-home" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></symbol>
+<symbol id="ic-wallet" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="15" rx="3"/><path d="M3 9V5a2 2 0 012-2h13M15.5 14h5.5"/><path d="M16 14.5h.01"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0112 0v2M17 11a3 3 0 000-6M17 15c2 0 4 2 4 5"/></symbol>
+<symbol id="ic-activity" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 9a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+<symbol id="ic-arrow-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+<symbol id="ic-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6l6-6 6 6"/></symbol>
+<symbol id="ic-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="ic-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></symbol>
+<symbol id="ic-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3 9-8 11-5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M10 2h4l.7 2.3 2 1.2 2.3-.6 2 3.6-1.7 1.7v2.6l1.7 1.7-2 3.6-2.3-.6-2 1.2L14 22h-4l-.7-2.3-2-1.2-2.3.6-2-3.6 1.7-1.7v-2.6L3 9.5l2-3.6 2.3.6 2-1.2z"/></symbol>
+<symbol id="ic-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+<symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5l5 5 5-5M4 17v4h16v-4"/></symbol>
+<symbol id="ic-edit" viewBox="0 0 24 24"><path d="M4 17l-1 4 4-1L20 7l-3-3L4 17zM14 7l3 3"/></symbol>
+<symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4 6h16M9 6V4h6v2M6 6l1 15h10l1-15M10 10v7m4-7v7"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14-5L4 8M4 4v4h4M4 13a8 8 0 0014 5l2-2m0 4v-4h-4"/></symbol>
+<symbol id="ic-chart" viewBox="0 0 24 24"><path d="M3 20h18M5 16l5-6 4 4 6-9"/></symbol>
+<symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20 16a8 8 0 01-12-12 8 8 0 1012 12z"/></symbol>
+<symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+<symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.5"/></symbol>
+<symbol id="ic-log-out" viewBox="0 0 24 24"><path d="M10 4H5a2 2 0 00-2 2v12a2 2 0 002 2h5M13 8l4 4-4 4m4-4H8"/></symbol>
+<symbol id="ic-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></symbol>
+<symbol id="ic-sparkles" viewBox="0 0 24 24"><path d="M12 2l2 7 7 2-7 2-2 7-2-7-7-2 7-2zM19 18l.8 2.2L22 21l-2.2.8L19 24l-.8-2.2L16 21l2.2-.8z"/></symbol>
+<symbol id="ic-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-6 20-5-9-9-5z"/></symbol>
+<symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M5 3l2 2 3-2 2 2 3-2 3 2 1-2v18l-2-2-3 2-2-2-3 2-2-2-2 2zM8 10h8M8 14h6"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></symbol>
+<symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="ic-rotate" viewBox="0 0 24 24"><path d="M5 12a7 7 0 017-7 8 8 0 018 8M20 5v8h-8M19 12a7 7 0 01-7 7 8 8 0 01-8-8M4 19v-8h8"/></symbol>
+</svg>
+<div class="stage">
+ <aside class="outside">
+  <div class="mono">OPTION 02 / NEW DESIGN DIRECTION</div>
+  <h1>Tips Ledger.<br>Now in your pocket.</h1>
+  <p>An entirely different navigation and page layout, designed around how the team uses Tips Ledger on an iPhone.</p>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Native-style bottom navigation</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Swipe-like cards and bottom-sheet forms</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> Interactive role previews and filters</div>
+  <div class="feature"><svg class="i"><use href="#ic-check-circle"></use></svg> All existing feature areas represented</div>
+  <p class="subnote">This is an isolated, front-end-only design prototype. All names and amounts are fictional. Your production application, database and backups are unchanged.</p>
+ </aside>
+ <div class="phone" id="phone">
+  <header class="topbar">
+   <div class="demo-strip">INTERACTIVE DESIGN PREVIEW • NOT THE LIVE APP</div>
+   <div class="topbar-row">
+    <div class="brand">
+     <div class="logo">TL<span style="color:#6ed9c2">.</span></div>
+     <div><div class="brand-t">Tips Ledger</div><div class="brand-sub" id="roleHeader">SUPERUSER WORKSPACE</div></div>
+    </div>
+    <div class="top-actions">
+     <button type="button" id="notificationsButton" class="icon-btn" aria-label="Preview notifications"><svg class="i"><use href="#ic-bell"></use></svg><span class="dot" aria-hidden="true"></span></button>
+     <button type="button" id="profileButton" aria-label="Switch preview role" class="avatar">RA</button>
+    </div>
+   </div>
+  </header>
+  <div class="phone-scroll" id="scroller">
+   <section id="screen-home" class="screen-page active" aria-label="Overview">
+    <div class="heading-row" style="margin-bottom:19px;align-items:flex-start">
+     <div><div class="page-overline" id="greetingDate">SATURDAY · OCT 31</div><h1 id="welcomeTitle" class="page-title">Good evening, Raphael 👋</h1><p id="welcomeSub" class="page-sub">Here’s where your team stands this week.</p></div>
+    </div>
+    <div id="homeContent"></div>
+   </section>
+   <section id="screen-payments" class="screen-page" aria-label="Payments">
+    <div class="heading-row" style="align-items:flex-start">
+     <div><div class="page-overline">WEEKLY LEDGER</div><h1 class="page-title">Payments</h1><p class="page-sub">Every payout, beautifully organized.</p></div>
+     <button id="newDraftTop" class="btn-primary brand-btn btn-small" type="button"><svg class="i sm"><use href="#ic-plus"></use></svg> New</button>
+    </div>
+    <div id="paymentTopSummary"></div>
+    <div class="heading-row section-gap" style="margin-bottom:12px"><h2 class="section-title">Payment history</h2><button id="exportButton" class="btn-soft" type="button"><svg class="i sm"><use href="#ic-download"></use></svg> Excel</button></div>
+    <div class="compact-filters" id="paymentStatusTabs" aria-label="Filter payments by status">
+     <button class="filter-chip selected" data-status="" type="button">All</button>
+     <button class="filter-chip" data-status="draft" type="button">Drafts</button>
+     <button class="filter-chip" data-status="published" type="button">Published</button>
+     <button class="filter-chip" data-status="received" type="button">Received</button>
+    </div>
+    <div class="filter-box section-gap" style="margin-top:13px;margin-bottom:13px">
+     <div class="form-grid">
+      <div class="field"><label for="paymentFrom">From</label><input id="paymentFrom" type="date"></div>
+      <div class="field"><label for="paymentTo">To</label><input id="paymentTo" type="date"></div>
+      <div class="field full" id="runnerFilterWrap"><label for="paymentRunner">Runner</label><select id="paymentRunner"><option value="">All runners</option></select></div>
+     </div>
+     <div class="row space" style="margin-top:9px"><span id="paymentsCount" class="small-sub"></span><button id="clearPaymentFilters" type="button" class="btn-quiet">Clear filters</button></div>
+    </div>
+    <div id="paymentList" class="stack"></div>
+   </section>
+   <section id="screen-team" class="screen-page" aria-label="Employees">
+    <div class="heading-row" style="align-items:flex-start">
+     <div><div class="page-overline">OUR PEOPLE</div><h1 class="page-title">The team</h1><p class="page-sub">People, permissions and hourly rates.</p></div>
+     <button id="addEmployeeButton" class="btn-primary brand-btn btn-small" type="button"><svg class="i sm"><use href="#ic-plus"></use></svg> Add</button>
+    </div>
+    <div id="teamStats"></div>
+    <div class="section-gap">
+     <div class="field" style="position:relative">
+      <label for="teamSearch">Search people</label>
+      <input id="teamSearch" type="search" placeholder="Find a team member…">
+     </div>
+    </div>
+    <div class="row space" style="margin:16px 0 11px">
+     <h2 class="section-title">Employee directory</h2><span class="small-sub" id="teamCount"></span>
+    </div>
+    <div id="teamList" class="stack"></div>
+    <div class="section-gap section-note"><svg class="i sm" style="vertical-align:-3px"><use href="#ic-shield"></use></svg> Role permissions are the same as the current app. Superuser manages Admins, Managers and Runners; Admin manages Managers and Runners; Managers and Runners cannot manage staff.</div>
+   </section>
+   <section id="screen-audit" class="screen-page" aria-label="Audit Log">
+    <div class="page-overline">CONTROL & ACCOUNTABILITY</div><h1 class="page-title">Activity log</h1><p class="page-sub">Every important change, in one clear timeline.</p>
+    <div class="filter-box section-gap">
+     <div class="heading-row" style="margin-bottom:11px"><h2 class="section-title" style="font-size:14px">Search audit log</h2><svg class="i sm" style="color:var(--muted)"><use href="#ic-filter"></use></svg></div>
+     <div class="form-stack">
+      <div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee permanently deleted</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.update">Rate updated</option></select></div>
+      <div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div>
+      <div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div>
+      <div class="form-grid"><div class="field"><label for="auditFrom">From</label><input type="date" id="auditFrom"></div><div class="field"><label for="auditTo">To</label><input type="date" id="auditTo"></div></div>
+     </div>
+     <div class="row space" style="margin-top:11px"><button type="button" class="btn-primary brand-btn btn-small" id="auditSearch"><svg class="i sm"><use href="#ic-search"></use></svg> Search</button><button id="auditClear" type="button" class="btn-quiet">Clear filters</button></div>
+    </div>
+    <div class="heading-row section-gap"><h2 class="section-title">Timeline</h2><span class="small-sub" id="auditCount"></span></div>
+    <div class="card" style="padding:18px 13px">
+      <div id="auditList"></div>
+      <button type="button" id="auditShowMore" class="btn-soft" style="width:100%;justify-content:center;margin-top:4px">Show 10 more <svg class="i sm"><use href="#ic-chevron-down"></use></svg></button>
+    </div>
+   </section>
+   <section id="screen-profile" class="screen-page" aria-label="Account">
+    <div class="page-overline">YOUR WORKSPACE</div><h1 class="page-title">Account</h1><p class="page-sub">Your profile and personal preferences.</p>
+    <div id="profileCard" class="card section-gap"></div>
+    <div class="section-gap heading-row"><h2 class="section-title">Preview settings</h2><span class="demo-only">Safe to explore</span></div>
+    <div class="card" style="padding:4px 16px">
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-users"></use></svg></span><div class="details"><strong>Preview as a different role</strong><small>See the exact visibility rules</small></div><button id="rolePickerButton" class="btn-soft btn-small" type="button">Switch <svg class="i sm"><use href="#ic-chevron-down"></use></svg></button></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-moon"></use></svg></span><div class="details"><strong>Dark appearance</strong><small>Try a dark version of this layout</small></div><button id="themeSwitch" type="button" class="switch" aria-label="Toggle dark mode" aria-pressed="false"></button></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-bell"></use></svg></span><div class="details"><strong>Push notifications</strong><small>Enabled • Preview status only</small></div><span class="pill received"><i></i>On</span></div>
+     <div class="settings-row"><span class="setting-icon"><svg class="i"><use href="#ic-lock"></use></svg></span><div class="details"><strong>Change password</strong><small>12 character minimum in the real app</small></div><button class="icon-btn" style="height:32px;width:32px" id="passwordButton" aria-label="Preview password settings"><svg class="i sm"><use href="#ic-chevron-right"></use></svg></button></div>
+    </div>
+    <div class="card section-gap">
+     <h2 class="section-title" style="font-size:14px">Notification troubleshooting</h2><p class="small-sub" style="margin-top:7px">The production version supports re-registering the device, sending a test push, and disabling notifications.</p>
+     <details id="troubleshooting"><summary>Open troubleshooting options</summary><p>This preview never requests notification permission or sends real push messages.</p><div class="stack" style="gap:8px"><button class="btn-soft" data-simulate="Device re-registration is available in the real app.">Re-register device</button><button class="btn-soft" data-simulate="Test push is available in the real app.">Send test push</button><button class="btn-soft" data-simulate="Notifications were not changed in this demo.">Disable on this device</button></div></details>
+    </div>
+    <button class="btn-soft section-gap" id="signOutButton" style="width:100%;justify-content:center"><svg class="i sm"><use href="#ic-log-out"></use></svg> Sign out (preview)</button>
+    <p class="small-sub" style="text-align:center;margin:17px 0 0">Concept 02 · Mobile First · Fictional demo</p>
+   </section>
+  </div>
+  <nav class="bottom-nav" id="bottomNav" aria-label="Main navigation">
+   <button type="button" data-page="home" class="nav-item active" aria-current="page"><svg class="i"><use href="#ic-home"></use></svg>Home</button>
+   <button type="button" data-page="payments" class="nav-item"><svg class="i"><use href="#ic-wallet"></use></svg>Payments</button>
+   <button type="button" data-page="team" class="nav-item"><svg class="i"><use href="#ic-users"></use></svg>Team</button>
+   <button type="button" data-page="audit" class="nav-item"><svg class="i"><use href="#ic-activity"></use></svg>Activity</button>
+   <button type="button" data-page="profile" class="nav-item"><svg class="i"><use href="#ic-user"></use></svg>Account</button>
+  </nav>
+ </div>
+</div>
+<div class="overlay" id="sheetOverlay" role="presentation" aria-hidden="true">
+ <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="handle"></div>
+  <div class="sheet-head"><h2 id="sheetTitle">Preview</h2><button type="button" id="closeSheet" class="close-btn" aria-label="Close dialog"><svg class="i"><use href="#ic-x"></use></svg></button></div>
+  <div id="sheetBody"></div>
+ </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
