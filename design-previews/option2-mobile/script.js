@@ -14,7 +14,7 @@ const people=[
 {id:"r5",name:"Jad Youssef",role:"runner",active:false,rate:4}
 ];
 let payments=[
-["r1","2026-10-26",38,720,55,"received"],
+["r1","2026-10-26",38,720,55,"published"],
 ["r2","2026-10-26",36,580,0,"published"],
 ["r3","2026-10-26",40,680,50,"received"],
 ["r4","2026-10-26",30,425,20,"draft"],
