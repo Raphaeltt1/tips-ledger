@@ -27,7 +27,7 @@ BEGIN
     EXECUTE $create$
       CREATE POLICY "Users can delete own notifications"
       ON public.notifications FOR DELETE TO authenticated
-      USING (recipient_id = (SELECT auth.uid()))
+      USING (recipient_id = (SELECT auth.uid()) AND public.current_user_role() IS NOT NULL)
     $create$;
   END IF;
 END;
