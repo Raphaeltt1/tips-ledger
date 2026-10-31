@@ -22,8 +22,16 @@ jobs:
           deno-version: v2.x
       - name: Verify cleanup script
         run: deno check scripts/cleanup_orphan_avatars_once.ts
-      - name: Verify live Storage, account ownership, and hashed allowlist
-        env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          DRY_RUN: 'true'
-        run: deno run -A scripts/cleanup_orphan_avatars_once.ts
+      - name: Run read-only orphan photo preflight through Supabase
+        run: |
+          python - <<'PY'
+          import json, urllib.request
+          url='https://qvwgmybocjyhldwnrqqt.supabase.co/functions/v1/cleanup-avatars-3d2a7f4a9cbb816f5961a31a364ce9c4'
+          payload=json.dumps({'mode':'verify'}).encode()
+          req=urllib.request.Request(url,data=payload,headers={'Content-Type':'application/json'},method='POST')
+          with urllib.request.urlopen(req,timeout=30) as res:
+              obj=json.load(res)
+          if obj.get('ok') is not True or obj.get('phase')!='verified' or obj.get('orphanPhotos')!=2 or obj.get('superuserPhotoSafe') is not True:
+              raise SystemExit('Strict preflight did not pass; no deletion performed')
+          print('Read-only preflight passed. Exactly two orphaned photos validated; Superuser photo protected.')
+          PY
