@@ -53,7 +53,7 @@ BEGIN
     VALUES (p_runner_id, p_hourly_rate, v_effective);
   END IF;
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.set_runner_hourly_rate_today(uuid,numeric) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.set_runner_hourly_rate_today(uuid,numeric) FROM anon;
