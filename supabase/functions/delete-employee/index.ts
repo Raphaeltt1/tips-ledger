@@ -1,4 +1,7 @@
-
+// Check the user session using Supabase Auth.getUser(token) and verify their
+// active server-side role before any deletion. This function runs with
+// verify_jwt=false at the gateway because the gateway rejected valid signed-in
+// ES256 user tokens. NEVER skip the getUser and role checks below.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const cors = {
