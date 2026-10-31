@@ -668,7 +668,16 @@ $('people').onclick=async e=>{
   b.disabled=true;
   try{
    const {data,error}=await db.functions.invoke('delete-employee',{body:{runner_id:target.id,confirm_name:typed}});
-   if(error)throw error;
+   if(error){
+    let message=error.message||'Could not permanently delete employee.';
+    try{
+     if(error.context?.json){
+      const details=await error.context.json();
+      message=details?.error||details?.message||message;
+     }
+    }catch(_){}
+    throw Error(message);
+   }
    if(!data?.success)throw Error(data?.error||'Could not permanently delete employee');
    await refresh();await loadNotifications();msg('Employee account permanently deleted.'+(data.auditRecorded===false?' Warning: audit attribution may not have been recorded.':''));
   }catch(err){msg(err.message||'Could not permanently delete employee.',true)}

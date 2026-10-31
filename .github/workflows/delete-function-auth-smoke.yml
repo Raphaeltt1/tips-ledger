@@ -1,0 +1,31 @@
+name: Tips Ledger - Delete Function Auth Smoke Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify unauthenticated deletion is rejected
+        run: python -m unittest discover -s tests -p 'test_delete_edge_auth.py' -v
+      - name: Check app inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('index.html').read_text()
+          start = source.index('<script>') + len('<script>')
+          end = source.index('</script>', start)
+          Path('/tmp/tl-app-check.js').write_text(source[start:end])
+          PY
+          node --check /tmp/tl-app-check.js
