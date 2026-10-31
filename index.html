@@ -94,15 +94,60 @@ async function sendPushForEvent(eventType,weeklyTipId){try{const r=await db.func
 $('enablePush').onclick=enablePush;$('reregisterPush').onclick=enablePush;$('disablePush').onclick=disablePush;
 $('testPush').onclick=async()=>{if(!profile)return;const b=$('testPush');b.disabled=true;try{const r=await db.functions.invoke('send-push',{body:{event_type:'test'}});if(r.error||r.data?.error)throw Error(r.data?.error||r.error.message);msg(r.data?.sent?'Test push submitted to '+r.data.sent+' registered device(s). Check notifications.':'No push delivered. '+(r.data?.reason||'Check push settings, registered devices, and Supabase logs.'),!r.data?.sent)}catch(e){msg('Test push failed: '+(e.message||'Check server configuration.'),true)}finally{b.disabled=false}};
 
-let activeTab='overview';function setTab(tab){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('[data-pane]').forEach(p=>p.classList.toggle('active',p.dataset.pane===tab))}document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{setTab(b.dataset.tab);if(b.dataset.tab==='audit'&&['admin','superuser'].includes(profile?.role))loadAuditLog()});function setTheme(dark){document.documentElement.dataset.theme=dark?'dark':'light';$('themeLight').classList.toggle('chosen',!dark);$('themeDark').classList.toggle('chosen',dark);$('themeLight').setAttribute('aria-pressed',String(!dark));$('themeDark').setAttribute('aria-pressed',String(dark));try{localStorage.setItem('tips-ledger-theme',dark?'dark':'light')}catch(e){}}$('themeLight').onclick=()=>setTheme(false);$('themeDark').onclick=()=>setTheme(true);try{setTheme(localStorage.getItem('tips-ledger-theme')==='dark')}catch(e){setTheme(false)}
+
+let activeTab='overview';
+function setTab(tab){
+ if(['employees','audit'].includes(tab)&&profile&&!['superuser','admin'].includes(profile.role))tab='overview';
+ activeTab=tab;closeMobileSheets();closeMobileNotices();
+ document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===tab;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ document.querySelectorAll('[data-pane]').forEach(p=>p.classList.toggle('active',p.dataset.pane===tab));
+ window.scrollTo({top:0,behavior:'auto'});
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{setTab(b.dataset.tab);if(b.dataset.tab==='audit'&&['admin','superuser'].includes(profile?.role))loadAuditLog()});
+function setTheme(dark){
+ document.documentElement.dataset.theme=dark?'dark':'light';
+ $('themeLight').classList.toggle('chosen',!dark);$('themeDark').classList.toggle('chosen',dark);
+ $('themeLight').setAttribute('aria-pressed',String(!dark));$('themeDark').setAttribute('aria-pressed',String(dark));
+ $('tlHeaderThemeToggle').textContent=dark?'☀':'☾';
+ $('tlHeaderThemeToggle').setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');
+ const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',dark?'#101c21':'#f5f8f9');
+ try{localStorage.setItem('tips-ledger-theme',dark?'dark':'light')}catch(e){}
+}
+$('themeLight').onclick=()=>setTheme(false);$('themeDark').onclick=()=>setTheme(true);
+$('tlHeaderThemeToggle').onclick=()=>setTheme(document.documentElement.dataset.theme!=='dark');
+try{setTheme(localStorage.getItem('tips-ledger-theme')==='dark')}catch(e){setTheme(false)}
+$('tlProfileShortcut').onclick=()=>setTab('account');
+$('tlSeeAllPayments').onclick=()=>setTab('payments');
+$('tlNewDraftAction').onclick=()=>openMobileSheet('editor');
+$('tlCloseDraft').onclick=closeMobileSheets;$('tlCloseEdit').onclick=closeMobileSheets;
+$('tlModalBackdrop').onclick=closeMobileSheets;
+$('tlCloseNotices').onclick=closeMobileNotices;$('tlNoticeBackdrop').onclick=closeMobileNotices;
+$('tlAddEmployeeAction').onclick=()=>{$('tlCreateDetails').open=true;$('tlCreateDetails').scrollIntoView({behavior:'smooth',block:'start'})};
+$('tlTeamSearch').oninput=()=>{const q=$('tlTeamSearch').value.trim().toLowerCase();$('people').querySelectorAll('.employee-entry').forEach(e=>e.classList.toggle('hidden',!e.textContent.toLowerCase().includes(q)))};
+$('tlQuickActions').onclick=e=>{
+ const b=e.target.closest('button[data-tl-quick]');if(!b)return;
+ const target=b.dataset.tlQuick;
+ if(target==='draft')openMobileSheet('editor');
+ else if(target==='pending'){
+  $('from').value='';$('to').value='';$('historyRunner').value='';$('historyStatus').value='published';
+  setTab('payments');refresh();
+ }else if(target==='notices')openMobileNotices();
+ else if(['payments','account','overview','audit'].includes(target)){
+  setTab(target);
+  if(target==='audit'&&['admin','superuser'].includes(profile?.role))loadAuditLog();
+ }
+};
+$('tlHomeRecent').onclick=e=>{const b=e.target.closest('button[data-tl-quick="payments"]');if(b)setTab('payments')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMobileSheets();closeMobileNotices()}});
+$('tlPaymentFilters').appendChild($('tlHistoryFilterRow'));
 function msg(s,bad=false){$('message').textContent=s;$('message').className=bad?'error':'muted';show('message',!!s)}
 function stat(label,value){return '<div class="stat">'+esc(label)+'<b>'+esc(value)+'</b></div>'}
-async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;show('noticeToggle',false);show('notificationsPanel',false);show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
+async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;show('noticeToggle',false);show('tlProfileShortcut',false);closeMobileNotices();show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
 const r=await db.from('profiles').select('id,full_name,role,active').eq('id',user.id).single();if(r.error||!r.data?.active){msg('Your account has no active profile. Contact the admin.',true);show('login',false);show('app',false);show('logout',true);return}
-profile=r.data;$('pushTroubleshooting').open=false;show('noticeToggle',true);await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',profile.role!=='runner');show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',profile.role==='runner');show('runnerPaymentTable',profile.role==='runner');show('viewToggle',profile.role!=='runner');if(profile.role==='runner'){$('records').classList.remove('table-view');$('viewToggle').textContent='Table view'}show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab(activeTab==='employees'&&!['admin','superuser'].includes(profile.role)?'overview':activeTab);const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=({superuser:'Superuser',admin:'Admin',manager:'Manager',runner:'Runner'}[String(profile.role||'').toLowerCase()]||profile.role);$('welcome').textContent='Welcome, '+displayName;$('role').textContent='Role: '+displayRole;await refresh();await loadOwnRate();await loadNotifications();msg('')}
+profile=r.data;$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',profile.role!=='runner');updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',profile.role!=='runner');show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',profile.role==='runner');show('runnerPaymentTable',profile.role==='runner');show('viewToggle',profile.role!=='runner');if(profile.role==='runner'){$('records').classList.remove('table-view');$('viewToggle').textContent='Table view'}show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab(activeTab==='employees'&&!['admin','superuser'].includes(profile.role)?'overview':activeTab);const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=({superuser:'Superuser',admin:'Admin',manager:'Manager',runner:'Runner'}[String(profile.role||'').toLowerCase()]||profile.role);$('welcome').textContent='Welcome, '+displayName;$('role').textContent='Role: '+displayRole;await refresh();await loadOwnRate();await loadNotifications();msg('')}
 async function loadOwnRate(){show('ownRate',profile?.role==='runner');if(profile?.role!=='runner')return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
 async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div><small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join(''):'No notifications yet.'}
-$('noticeToggle').onclick=async()=>{const panel=$('notificationsPanel');panel.classList.toggle('hidden');if(!panel.classList.contains('hidden')){await loadNotifications();panel.scrollIntoView({behavior:'smooth',block:'start'})}};
+$('noticeToggle').onclick=()=>{$('notificationsPanel').classList.contains('hidden')?openMobileNotices():closeMobileNotices()};
 $('noticeList').onclick=async e=>{const del=e.target.closest('button[data-notice-delete]'),read=e.target.closest('button[data-notice-read]');if(!del&&!read||!profile)return;const b=del||read;b.disabled=true;try{const q=db.from('notifications');const res=del?await q.delete().eq('recipient_id',profile.id).eq('id',del.dataset.noticeDelete).select('id'):await q.update({read_at:new Date().toISOString()}).eq('recipient_id',profile.id).eq('id',read.dataset.noticeRead).select('id');if(res.error)throw res.error;if(!res.data?.length)throw Error('Notification could not be updated. Verify database permissions.');await loadNotifications();msg(del?'Notification deleted.':'Notification marked as read.')}catch(err){msg(err.message||'Could not update notification.',true)}finally{b.disabled=false}};
 $('markNotices').onclick=async()=>{if(!profile)return;const ids=notifications.filter(n=>!n.read_at).map(n=>n.id);if(!ids.length)return;const r=await db.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',profile.id).in('id',ids);if(r.error){msg(r.error.message,true);return}await loadNotifications()};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&profile)loadNotifications()});
