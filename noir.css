@@ -506,3 +506,104 @@ html[data-theme="dark"] #records .payment-card,html[data-theme="dark"] .tl-graph
  .noir-metric{padding:13px 11px}
  .noir-metric-value{font-size:21px}
 }
+
+
+/* ============================================================
+   Noir refinements: compact overview, top notification panel,
+   profile photo/initials treatment, simplified Audit Log.
+   ============================================================ */
+
+/* The notification bell opens a drop-down from the TOP, not a bottom sheet. */
+#notificationsPanel{
+ position:fixed!important;
+ inset:auto!important;
+ top:76px!important;
+ right:clamp(14px,3.2vw,55px)!important;
+ left:auto!important;
+ bottom:auto!important;
+ width:min(435px,calc(100vw - 28px))!important;
+ max-height:min(71dvh,650px)!important;
+ overflow-y:auto!important;
+ border-radius:18px!important;
+ border:1px solid var(--tl-border)!important;
+ padding:17px 17px 20px!important;
+ background:var(--tl-modal)!important;
+ box-shadow:0 22px 65px #0005!important;
+ z-index:88;
+}
+#notificationsPanel h2{font-size:18px;margin:0}
+#notificationsPanel .row{gap:8px;flex-wrap:wrap}
+#notificationsPanel #noticeList{margin-top:12px}
+
+/* More compact layout while retaining the original Noir visual identity. */
+.noir-content{padding-top:95px}
+body.tl-logged-in .noir-content>.tl-greeting{margin:4px 0 18px}
+.noir-content>.tl-greeting #welcome{font-size:clamp(25px,2.8vw,33px);margin:6px 0}
+.noir-metrics{gap:11px;margin:17px 0 14px}
+.noir-metric{padding:15px 15px 14px;border-radius:14px}
+.noir-metric-value{font-size:clamp(21px,2.15vw,27px);margin:12px 0 7px}
+.noir-metric-label{font-size:11px}
+.noir-metric-icon{height:30px;width:30px;font-size:16px}
+.noir-metric-foot{font-size:10px}
+.noir-analytics-grid{gap:13px;margin-bottom:14px}
+.noir-analytics-grid .tl-graph-box{padding:17px 16px}
+.noir-analytics-grid .tl-graph-top h3{font-size:16px;margin:3px 0}
+.noir-receipt{padding:17px 17px 16px;border-radius:16px}
+.noir-receipt-heading{font-size:16px}
+.noir-receipt-donut{width:min(130px,66%);margin:14px auto}
+.noir-receipt-inner strong{font-size:25px}
+.noir-legend{gap:7px}
+.noir-legend-row{font-size:11px}
+.noir-lower-grid{gap:13px}
+.noir-recent-block,.noir-activity-block{padding:17px 16px;border-radius:16px}
+.noir-recent-block .tl-section-head,.noir-activity-block .tl-section-head{margin-bottom:9px}
+.noir-recent-block .tl-recent-card{padding:9px 0}
+.noir-recent-block .tl-recent-amount{font-size:17px}
+.noir-recent-block .tl-recent-bottom{margin-top:6px}
+.noir-activity-row{padding:10px 0}
+.noir-activity-icon{height:30px;width:30px}
+.noir-quick-wrapper{margin-top:16px}
+.noir-quick-wrapper .tl-section-head{margin:12px 0}
+#tlQuickActions.tl-quick-grid{gap:9px}
+#tlQuickActions .tl-quick{min-height:80px;padding:10px 7px;gap:6px}
+#tlQuickActions .tl-quick-icon{height:32px;width:32px}
+
+/* Photos are always optional; letters are visible if an image fails to load. */
+.tl-account-avatar,.tl-avatar-button,.noir-sidebar-avatar,.tl-person-avatar{
+ position:relative;isolation:isolate;overflow:hidden;
+}
+.tl-avatar-letters{position:relative;z-index:0;display:inline-flex;align-items:center;justify-content:center;height:100%;width:100%}
+.tl-avatar-image{position:absolute;inset:0;height:100%;width:100%;object-fit:cover;display:block;z-index:1}
+.tl-photo-card{margin:15px 0;padding:17px;background:var(--tl-card);border:1px solid var(--tl-border);border-radius:16px;box-shadow:var(--tl-soft-shadow)}
+.tl-photo-card .tl-setting-row{padding:0;margin-bottom:13px}
+.tl-photo-actions{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.tl-photo-actions button{min-height:39px;padding:9px 13px;font-size:12px}
+#tlChooseProfilePhoto{background:var(--tl-teal);color:var(--tl-button-ink)}
+#tlRemoveProfilePhoto{background:var(--tl-surface);color:var(--tl-text);border:1px solid var(--tl-border)}
+#tlPhotoStatus{margin:5px 0 0;line-height:1.5}
+.tl-avatar-image[hidden]{display:none}
+
+/* Only one Audit Log display; the detailed table is always visible. */
+.tl-audit-table-card{padding:17px;background:var(--tl-card);border:1px solid var(--tl-border);border-radius:16px;margin:15px 0;box-shadow:var(--tl-soft-shadow)}
+.tl-audit-table-card h2{font-size:16px;letter-spacing:-.4px;margin:0 0 13px}
+.tl-audit-table-card h2:before{display:none}
+.tl-audit-table-card .scroll{overflow-x:auto}
+.tl-audit-table-card table{min-width:610px;width:100%}
+#auditShowMore{min-height:39px}
+
+@media(max-width:680px){
+ #notificationsPanel{top:calc(env(safe-area-inset-top) + 63px)!important;left:12px!important;right:12px!important;width:calc(100vw - 24px)!important;max-height:65dvh!important;padding:15px!important}
+ .noir-content{padding-top:0}
+ body.tl-logged-in .noir-content>.tl-greeting{margin:0 0 15px}
+ .noir-metrics{margin:14px 0 12px;gap:9px}
+ .noir-metric{padding:13px 12px}
+ .noir-metric-value{font-size:21px;margin:11px 0 6px}
+ .noir-metric-icon{height:27px;width:27px;font-size:15px}
+ .noir-analytics-grid,.noir-lower-grid{gap:11px}
+ .noir-analytics-grid .tl-graph-box{padding:15px 12px}
+ .noir-receipt{padding:17px}
+ .noir-receipt-donut{width:127px;height:127px;margin:10px auto 15px}
+ .noir-recent-block,.noir-activity-block{padding:15px}
+ .noir-quick-wrapper{margin-top:14px}
+ .tl-photo-card{padding:15px}
+}
