@@ -1,32 +1,70 @@
-# Tips Ledger — secure backend plan
+# Tips Ledger — production security and recovery overview
 
-The existing index.html is a **local-only prototype**. Its Admin/Manager/Runner buttons are NOT authentication. Do not enter real payroll or tips data.
+_Last reviewed: 2026-10-31_
 
-## Recommended stack
-- Supabase Auth (email invitation + password), Postgres, Row Level Security (RLS)
-- Static frontend hosted separately (e.g. Vercel), with public Supabase URL and anon/publishable key only
-- Never commit Supabase service-role keys or credentials.
+**Current status:** Tips Ledger is a deployed GitHub Pages app using Supabase
+authentication, PostgreSQL, RLS, and server-side role-checked operations. The
+earlier "local-only prototype" warning in this file was outdated.
 
-## Roles
-- **admin**: only role allowed to invite/create accounts, set runner rates, and assign roles.
-- **manager**: can publish weekly records for assigned runners; cannot change rates, invite users, or impersonate runners.
-- **runner**: can read only their own records and confirm receipt of their own published payments.
+- App: https://raphaeltt1.github.io/tips-ledger/
+- Repository: https://github.com/Raphaeltt1/tips-ledger
+- Production Supabase project: `qvwgmybocjyhldwnrqqt`
+- Stable code rollback branch: `stable-approved-20261031`
 
-## Data model
-- profiles (id UUID references auth.users, role, display_name, employee_id)
-- runner_rates (runner_id, hourly_rate, effective_from, changed_by)
-- weekly_tips (id, runner_id, week_start, hours, gross_tips, advance, net_tips, rate_snapshot, status, published_by, published_at)
-- receipt_confirmations (weekly_tips_id unique, runner_id, confirmed_at)
-- audit_log (actor_id, action, record_id, occurred_at)
+## Authorization and financial data
 
-## Security requirements
-- Enable RLS on every exposed table. Use auth.uid() and server-side role checks; never trust a role chosen in the browser.
-- Create users via a trusted server-side admin endpoint with verified admin authorization, not the browser or a public signup flow.
-- Enforce unique (runner_id, week_start); nonnegative amounts; advance <= gross; validate hours and week date.
-- Make published records immutable except through audited correction workflows.
-- Confirmations must be authenticated, bound to the caller's runner ID, and one-time only.
-- Financial calculations and authorization must run in the database or trusted backend, not solely in JavaScript.
-- Test cross-user isolation, unauthorized rate edits, duplicate weeks, and receipt replay before deployment.
+- User identity comes from Supabase Auth; effective roles come from active
+  `public.profiles` entries, not browser controls or editable user metadata.
+- Roles include superuser, admin, manager and employee positions. The superuser
+  can manage admins. Database operations enforce role checks server-side.
+- Weekly tips and receipt confirmations use RLS. Employee payment visibility is
+  restricted to the applicable role and identity.
+- Sensitive changes are audited. Published payment records use protection
+  logic and are not editable by ordinary employees.
+- Privileged `SECURITY DEFINER` functions are intentionally callable by
+  authenticated sessions where needed, with function-level role checks and
+  explicit locked search paths. The security advisor still flags 12 functions
+  for ongoing manual review; do not revoke them indiscriminately.
 
-## Next step
-Create a Supabase project owned by Raphael and connect it to the repository through deployment environment variables. No production credentials or real financial records should be used until RLS and integration tests pass.
+## Authentication and browser dependencies
+
+- Supabase leaked-password blocking is not activated; the feature requires a
+  paid tier. Strengthen password policies when doing so will not disrupt
+  existing logins.
+- CAPTCHA is not enabled because the frontend has not integrated a CAPTCHA
+  challenge and token into login requests.
+- Supabase client keys are publishable keys; no service-role credential belongs
+  in `index.html`.
+- Excel export uses the official SheetJS 0.20.3 pinned standalone browser
+  bundle, which replaces the outdated npm-distributed 0.18.5 release.
+
+## Backup and recovery
+
+- A scheduled workflow exports `public`, `auth` and `storage` schema data,
+  downloads Storage files, encrypts the archive using authenticated AES-256-GCM,
+  and stores it in a **private** Cloudflare R2 bucket with 7-day retention.
+- Workflow: `.github/workflows/daily-offsite-backup.yml`
+- Configured schedule: 23:00 Asia/Beirut; GitHub schedules may start late or
+  occasionally be skipped. Confirm the first scheduled success after it runs.
+- Initial manual encrypted backup was verified on 2026-10-31.
+- An isolated restore rehearsal passed on 2026-10-31, restoring 12 weekly
+  payments, 7 confirmations, and 3 rate records, and verifying 3 Storage
+  objects: https://github.com/Raphaeltt1/tips-ledger/actions/runs/41171669920
+- The rehearsal tests representative table recovery; it does **not** prove a
+  complete replacement Supabase environment can be restored. Separate
+  disaster-recovery testing of Auth, storage upload, Edge Functions and secrets
+  remains appropriate.
+- Private table `tips_ledger_backups.approved_snapshots` has RLS enabled and
+  remains inaccessible to `anon` and `authenticated`. No RLS policy is
+  intentionally present for these client roles.
+
+## Operational safeguards
+
+- Do not commit credentials, employees' data, database dumps or R2 archives
+  into this public repository.
+- Never enable a private backup bucket's public-access setting.
+- Preserve the backup encryption passphrase securely **outside** GitHub and
+  Supabase; losing it renders the offsite archives unrecoverable.
+- Use pull requests and small changes for production updates; verify the
+  relevant GitHub Actions and app function after merging.
+- Do not run a destructive restore against the production database.
