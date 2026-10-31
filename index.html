@@ -21,7 +21,7 @@ html[data-theme="dark"] .graph-shell{background:linear-gradient(180deg,#162943,#
 html[data-theme="dark"] .graph-kpi{color:#ecf4ff}
 html[data-theme="dark"] .graph-legend{color:#b1c6df}
 @media(max-width:430px){.graph-shell{padding:11px}.graph-kpi{font-size:16px}}
-</style><link rel="stylesheet" href="./noir.css"></head><body>
+</style><link rel="stylesheet" href="./noir.css?v=20261101-seven"></head><body>
 <div id="vapidGenerator" class="hidden" style="max-width:760px;margin:24px auto;padding:22px;background:var(--card,#fff);border:1px solid var(--line);border-radius:18px">
 <h1>🔐 Local VAPID Key Generator</h1>
 <p>Generates a Web Push key pair in this browser only. Keys are not sent anywhere by this page.</p>
@@ -53,8 +53,18 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <div class="noir-analytics-grid"><div id="tlTeamTrend"></div><div id="tlNoirReceipt"></div></div>
 <div class="noir-lower-grid"><div class="noir-recent-block"><div class="tl-section-head"><div><h2>Recent payments</h2><p class="tl-caption">Latest recorded payouts</p></div><button type="button" id="tlSeeAllPayments" class="tl-text-action">View all →</button></div><div id="tlHomeRecent" class="tl-recent-list"></div></div><div class="noir-activity-block"><div class="tl-section-head"><div><h2>Recent activity</h2><p class="tl-caption">Your latest alerts</p></div><button type="button" id="noirShowNotifications" class="tl-text-action">View inbox →</button></div><div id="tlNoirActivity"></div></div></div>
 <div class="noir-quick-wrapper"><div class="tl-section-head"><h2>Quick actions</h2><span class="tl-caption">Frequently used</span></div><div id="tlQuickActions" class="tl-quick-grid"></div></div><details id="tlFullOverview" class="tl-collapsible"><summary>Full weekly overview & details</summary><div class="tl-collapsible-body"><h2>Payment history</h2><div id="tlHistoryFilterRow" class="row"><div class="field"><label for="from">From</label><input id="from" type="date"></div><div class="field"><label for="to">To</label><input id="to" type="date"></div><div class="field hidden" id="runnerFilterField"><label for="historyRunner">Runner</label><select id="historyRunner"><option value="">All runners</option></select></div><div class="field"><label for="historyStatus">Status</label><select id="historyStatus"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="received">Received</option></select></div><button id="filter" type="button">Apply filters</button><button id="clearFilters" type="button" style="background:#64748b">Clear</button></div><div id="runnerSummary" class="hidden"><h2 style="margin-top:18px">Summary</h2><div id="totals" class="row"></div><p class="muted" style="font-size:13px">Summary reflects your currently filtered payments.</p></div><hr><h2>Latest week overview</h2><p id="latestWeekLabel" class="muted" style="font-size:13px">Based on the latest week with payment records.</p><div id="latestWeekSummary" class="row"></div><div id="runnerTipsGraph" class="hidden" style="margin-top:24px"><hr><h2>Total Tips Over Time</h2><p class="muted">Published weekly tips before advances · From/To filters apply.</p><div id="runnerTipsGraphContent"></div></div></div></details></section>
-<section id="auditPanel" class="card hidden tab-pane" data-pane="audit"><span class="tl-eyebrow" style="margin-top:19px">CONTROL & ACCOUNTABILITY</span><h1 class="tl-page-title">Activity log</h1><p class="tl-page-intro">Every important change, in one clear timeline.</p><div class="row" style="justify-content:space-between"><div><h2>Audit Log</h2><p class="muted">Admin-only history of payment, receipt, rate, and employee actions.</p></div><button type="button" id="refreshAudit">Refresh log</button></div><form id="auditFilters" class="audit-filters"><div class="row"><div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee deleted permanently</option><option value="employee.update">Employee updated (older)</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.insert">Rate added</option><option value="hourly_rate.update">Rate updated</option><option value="payment.deleted">Payment deleted</option></select></div><div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div><div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div><div class="field"><label for="auditFrom">From</label><input id="auditFrom" type="date"></div><div class="field"><label for="auditTo">To</label><input id="auditTo" type="date"></div></div><div class="row"><button type="submit">Search audit log</button><button id="clearAuditFilters" type="button" class="secondary-action">Clear filters</button></div></form><div id="tlAuditTimeline" aria-live="polite"></div><details class="tl-collapsible"><summary>Detailed audit table</summary><div class="tl-collapsible-body"><div class="scroll"><table><thead><tr><th>When</th><th>Who</th><th>Role</th><th>Action</th><th>Employee</th><th>Details</th></tr></thead><tbody id="auditRows"><tr><td colspan="6">Open Audit Log to load entries.</td></tr></tbody></table></div></div></details><div class="row" style="justify-content:space-between;align-items:center;margin-top:14px"><span id="auditPageCount" class="muted" style="font-size:13px" aria-live="polite"></span><button id="auditShowMore" type="button" class="secondary-action hidden">Show 10 more</button></div></section>
-<div class="card tl-payments-section tab-pane" data-pane="payments"><div id="tlPaymentHeader"><span class="tl-eyebrow">WEEKLY LEDGER</span><h1 class="tl-page-title">Payments</h1><p class="tl-page-intro">Review, publish and track weekly tips.</p><button type="button" id="tlNewDraftAction">＋ New draft</button></div><div id="tlPaymentSummary"></div><div id="tlPaymentFilters"></div><div id="tlPaymentToolbar" class="row" style="justify-content:space-between"><h2 style="margin:0">Payment history</h2><div class="row"><button id="viewToggle" type="button">Table view</button><button id="exportExcel" type="button" class="hidden" style="background:#16845a">Export to Excel</button><button id="refresh">Refresh</button></div></div><div id="records" class="scroll"></div><div id="runnerPaymentTable" class="hidden"><h3 style="margin-top:22px">Payment details — Table View</h3><div id="runnerPaymentTableContents" class="scroll"></div></div></div><section id="accountPanel" class="card tab-pane" data-pane="account"><span class="tl-eyebrow" style="margin-top:19px">YOUR WORKSPACE</span><h1 class="tl-page-title">Account</h1><p class="tl-page-intro">Profile, appearance and security.</p><div id="tlAccountHero" class="tl-account-card"></div><div class="tl-setting-box"><div class="tl-setting-row"><div><div class="tl-setting-name">Appearance</div><div class="tl-setting-help">Choose light or dark mode</div></div><div class="tl-theme-switch" role="group" aria-label="Color appearance"><button id="themeLight" type="button" aria-label="Light mode">☀ Light</button><button id="themeDark" type="button" aria-label="Dark mode">☾ Dark</button></div></div></div><h2 class="tl-section-head" style="margin-top:22px">Account settings</h2><div id="ownRate" class="hidden" aria-live="polite"><h3>My current hourly rate</h3><p id="ownRateValue" class="muted">Loading…</p><p class="muted" style="font-size:13px">Read-only; contact an Admin for changes.</p></div><div class="push-setting"><h3 style="margin:0 0 5px">🔔 Push notifications</h3><p class="muted">Get alerts when your weekly tips are published or a runner confirms receipt. This device must support browser notifications.</p><p id="pushStatus" class="muted" role="status">Checking notification support…</p><button type="button" id="enablePush" class="hidden">Enable notifications</button><details id="pushTroubleshooting" class="push-troubleshooting"><summary>Notification troubleshooting</summary><div class="push-troubleshooting-body"><p class="muted" style="font-size:13px">Only use these options if alerts stop arriving or you need to test this device.</p><button type="button" id="reregisterPush" class="secondary-action hidden">Re-register this device</button><button type="button" id="testPush" class="secondary-action hidden">Send test push</button><button type="button" id="disablePush" class="secondary-action hidden">Disable on this device</button><p class="muted" style="font-size:12px">For iPhone alerts, open Tips Ledger from its Home Screen icon and allow notifications. Device settings may sometimes delay delivery.</p></div></details></div><form id="passwordForm"><div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" autocomplete="current-password" required></div><div class="field"><label for="newPassword">New password (12 characters minimum)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required></div><div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required></div><button type="submit">Change password</button></form><button id="logout" type="button" class="hidden">Sign out</button></section></div></div></section></main>
+<section id="auditPanel" class="card hidden tab-pane" data-pane="audit"><span class="tl-eyebrow" style="margin-top:19px">CONTROL & ACCOUNTABILITY</span><h1 class="tl-page-title">Activity log</h1><p class="tl-page-intro">Every important change, in one clear timeline.</p><div class="row" style="justify-content:space-between"><div><h2>Audit Log</h2><p class="muted">Admin-only history of payment, receipt, rate, and employee actions.</p></div><button type="button" id="refreshAudit">Refresh log</button></div><form id="auditFilters" class="audit-filters"><div class="row"><div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee deleted permanently</option><option value="employee.update">Employee updated (older)</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.insert">Rate added</option><option value="hourly_rate.update">Rate updated</option><option value="payment.deleted">Payment deleted</option></select></div><div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div><div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div><div class="field"><label for="auditFrom">From</label><input id="auditFrom" type="date"></div><div class="field"><label for="auditTo">To</label><input id="auditTo" type="date"></div></div><div class="row"><button type="submit">Search audit log</button><button id="clearAuditFilters" type="button" class="secondary-action">Clear filters</button></div></form><div class="tl-audit-table-card"><h2>Detailed audit table</h2><div class="scroll"><table><thead><tr><th>When</th><th>Who</th><th>Role</th><th>Action</th><th>Employee</th><th>Details</th></tr></thead><tbody id="auditRows"><tr><td colspan="6">Open Audit Log to load entries.</td></tr></tbody></table></div></div><div class="row" style="justify-content:space-between;align-items:center;margin-top:14px"><span id="auditPageCount" class="muted" style="font-size:13px" aria-live="polite"></span><button id="auditShowMore" type="button" class="secondary-action hidden">Show 10 more</button></div></section>
+<div class="card tl-payments-section tab-pane" data-pane="payments"><div id="tlPaymentHeader"><span class="tl-eyebrow">WEEKLY LEDGER</span><h1 class="tl-page-title">Payments</h1><p class="tl-page-intro">Review, publish and track weekly tips.</p><button type="button" id="tlNewDraftAction">＋ New draft</button></div><div id="tlPaymentSummary"></div><div id="tlPaymentFilters"></div><div id="tlPaymentToolbar" class="row" style="justify-content:space-between"><h2 style="margin:0">Payment history</h2><div class="row"><button id="viewToggle" type="button">Table view</button><button id="exportExcel" type="button" class="hidden" style="background:#16845a">Export to Excel</button><button id="refresh">Refresh</button></div></div><div id="records" class="scroll"></div><div id="runnerPaymentTable" class="hidden"><h3 style="margin-top:22px">Payment details — Table View</h3><div id="runnerPaymentTableContents" class="scroll"></div></div></div><section id="accountPanel" class="card tab-pane" data-pane="account"><span class="tl-eyebrow" style="margin-top:19px">YOUR WORKSPACE</span><h1 class="tl-page-title">Account</h1><p class="tl-page-intro">Your photo, profile and account security.</p><div id="tlAccountHero" class="tl-account-card"></div>
+<div class="tl-photo-card">
+<div class="tl-setting-row"><div><div class="tl-setting-name">Your profile picture</div><div class="tl-setting-help">Choose a photo from your phone or keep your initials.</div></div></div>
+<div class="tl-photo-actions">
+<button id="tlChooseProfilePhoto" type="button">Upload from Photos</button>
+<button id="tlRemoveProfilePhoto" type="button" class="tl-secondary-button hidden">Remove photo</button>
+</div>
+<input id="tlProfilePhotoFile" type="file" accept="image/*,.heic,.heif" class="hidden" aria-label="Choose profile photo">
+<p id="tlPhotoStatus" role="status" aria-live="polite" class="tl-caption">Optional. Photos are visible to your team.</p>
+</div>
+<h2 class="tl-section-head" style="margin-top:22px">Account settings</h2><div id="ownRate" class="hidden" aria-live="polite"><h3>My current hourly rate</h3><p id="ownRateValue" class="muted">Loading…</p><p class="muted" style="font-size:13px">Read-only; contact an Admin for changes.</p></div><div class="push-setting"><h3 style="margin:0 0 5px">🔔 Push notifications</h3><p class="muted">Get alerts when your weekly tips are published or a runner confirms receipt. This device must support browser notifications.</p><p id="pushStatus" class="muted" role="status">Checking notification support…</p><button type="button" id="enablePush" class="hidden">Enable notifications</button><details id="pushTroubleshooting" class="push-troubleshooting"><summary>Notification troubleshooting</summary><div class="push-troubleshooting-body"><p class="muted" style="font-size:13px">Only use these options if alerts stop arriving or you need to test this device.</p><button type="button" id="reregisterPush" class="secondary-action hidden">Re-register this device</button><button type="button" id="testPush" class="secondary-action hidden">Send test push</button><button type="button" id="disablePush" class="secondary-action hidden">Disable on this device</button><p class="muted" style="font-size:12px">For iPhone alerts, open Tips Ledger from its Home Screen icon and allow notifications. Device settings may sometimes delay delivery.</p></div></details></div><form id="passwordForm"><div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" autocomplete="current-password" required></div><div class="field"><label for="newPassword">New password (12 characters minimum)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required></div><div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required></div><button type="submit">Change password</button></form><button id="logout" type="button" class="hidden">Sign out</button></section></div></div></section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 (()=>{'use strict';
@@ -113,14 +123,11 @@ function setTab(tab){
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{setTab(b.dataset.tab);if(b.dataset.tab==='audit'&&['admin','superuser'].includes(profile?.role))loadAuditLog()});
 function setTheme(dark){
  document.documentElement.dataset.theme=dark?'dark':'light';
- $('themeLight').classList.toggle('chosen',!dark);$('themeDark').classList.toggle('chosen',dark);
- $('themeLight').setAttribute('aria-pressed',String(!dark));$('themeDark').setAttribute('aria-pressed',String(dark));
  $('tlHeaderThemeToggle').textContent=dark?'☀':'☾';
  $('tlHeaderThemeToggle').setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');
  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',dark?'#0c111c':'#f7f8fd');
  try{localStorage.setItem('tips-ledger-theme',dark?'dark':'light');localStorage.setItem('tips-ledger-noir-theme',dark?'dark':'light')}catch(e){}
 }
-$('themeLight').onclick=()=>setTheme(false);$('themeDark').onclick=()=>setTheme(true);
 $('tlHeaderThemeToggle').onclick=()=>setTheme(document.documentElement.dataset.theme!=='dark');
 try{setTheme(localStorage.getItem('tips-ledger-noir-theme')!=='light')}catch(e){setTheme(true)}
 $('tlProfileShortcut').onclick=()=>setTab('account');$('noirShowNotifications').onclick=openMobileNotices;
@@ -150,7 +157,7 @@ $('tlPaymentFilters').appendChild($('tlHistoryFilterRow'));
 function msg(s,bad=false){$('message').textContent=s;$('message').className=bad?'error':'muted';show('message',!!s)}
 function stat(label,value){return '<div class="stat">'+esc(label)+'<b>'+esc(value)+'</b></div>'}
 async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;document.body.classList.remove('tl-logged-in');$('tlHeaderRole').textContent='SECURE WORKSPACE';show('noticeToggle',false);show('tlProfileShortcut',false);show('tlHeaderSignOut',false);closeMobileNotices();show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
-const r=await db.from('profiles').select('id,full_name,role,active').eq('id',user.id).single();if(r.error||!r.data?.active){document.body.classList.remove('tl-logged-in');msg('Your account has no active profile. Contact the admin.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
+const r=await db.from('profiles').select('id,full_name,role,active,avatar_path').eq('id',user.id).single();if(r.error||!r.data?.active){document.body.classList.remove('tl-logged-in');msg('Your account has no active profile. Contact the admin.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
 profile=r.data;document.body.classList.add('tl-logged-in');show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',profile.role!=='runner');$('tlPaymentHeader').classList.toggle('tl-no-create',profile.role==='runner');updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',profile.role!=='runner');show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',profile.role==='runner');show('runnerPaymentTable',profile.role==='runner');show('viewToggle',profile.role!=='runner');if(profile.role==='runner'){$('records').classList.remove('table-view');$('viewToggle').textContent='Table view'}show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab(activeTab==='employees'&&!['admin','superuser'].includes(profile.role)?'overview':activeTab);const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=({superuser:'Superuser',admin:'Admin',manager:'Manager',runner:'Runner'}[String(profile.role||'').toLowerCase()]||profile.role);$('welcome').textContent=profile.role==='runner'?'Your tips. Clearly in view.':'Every payout. Fully in control.';$('role').textContent='Welcome, '+displayName+' · '+displayRole+' workspace';await refresh();await loadOwnRate();await loadNotifications();msg('')}
 async function loadOwnRate(){show('ownRate',profile?.role==='runner');if(profile?.role!=='runner')return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
 async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div><small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join('') :'No notifications yet.';renderNoirActivity()}
@@ -225,7 +232,7 @@ function auditQuery(filters,start,end){
 function renderAuditRecords(){
  const p=auditPaging,visible=p.records.slice(0,p.shown);
  $('auditRows').innerHTML=visible.length?visible.map(auditRowHtml).join(''):'<tr><td colspan="6">No audit records match these filters.</td></tr>';
- renderMobileAudit(visible);$('auditPageCount').textContent=visible.length?'Showing '+visible.length+' audit record'+(visible.length===1?'':'s'): 'No matching records';
+ $('auditPageCount').textContent=visible.length?'Showing '+visible.length+' audit record'+(visible.length===1?'':'s'): 'No matching records';
  show('auditShowMore',p.shown<p.records.length||!p.exhausted);
 }
 async function showNextAuditPage(){
@@ -292,6 +299,86 @@ function renderRunnerTipsGraph(){
 }
 
 /* Mobile-first interface uses existing rows, role checks and payment history. */
+
+const AVATAR_BUCKET='tips-ledger-avatars';
+function tlAvatarUrl(path){
+ if(typeof path!=='string'||!/^[a-f0-9-]{36}\/[a-f0-9-]{36}\.jpg$/i.test(path)||!db?.storage)return '';
+ try{return db.storage.from(AVATAR_BUCKET).getPublicUrl(path).data?.publicUrl||''}catch(e){return ''}
+}
+function tlAvatarHtml(name,path){
+ const initials='<span class="tl-avatar-letters">'+esc(tlInitials(name))+'</span>',src=tlAvatarUrl(path);
+ return initials+(src?'<img class="tl-avatar-image" loading="lazy" src="'+esc(src)+'" alt="">':'');
+}
+document.addEventListener('error',e=>{if(e.target?.classList?.contains('tl-avatar-image'))e.target.remove()},true);
+function tlAvatarLoading(loading,message){
+ $('tlChooseProfilePhoto').disabled=!!loading;
+ $('tlRemoveProfilePhoto').disabled=!!loading;
+ $('tlChooseProfilePhoto').textContent=loading?'Uploading…':'Upload from Photos';
+ if(message)$('tlPhotoStatus').textContent=message;
+}
+async function tlPrepareAvatar(file){
+ if(file.size>15*1024*1024)throw Error('Choose a photo smaller than 15 MB.');
+ if(!file.type.startsWith('image/')&&!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name||''))throw Error('Please choose an image from your Photos library.');
+ return new Promise((resolve,reject)=>{
+  const url=window.URL.createObjectURL(file),image=new Image();
+  image.onerror=()=>{window.URL.revokeObjectURL(url);reject(Error('Could not open that photo. Try another photo or a JPG/PNG image.'))};
+  image.onload=()=>{
+   try{
+    const w=image.naturalWidth,h=image.naturalHeight;
+    if(!w||!h)throw Error('This image cannot be opened.');
+    const canvas=document.createElement('canvas'),size=560,edge=Math.min(w,h);
+    canvas.width=size;canvas.height=size;
+    const ctx=canvas.getContext('2d');if(!ctx)throw Error('Photo conversion is unavailable.');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
+    ctx.drawImage(image,(w-edge)/2,(h-edge)/2,edge,edge,0,0,size,size);
+    canvas.toBlob(blob=>{window.URL.revokeObjectURL(url);
+     if(blob&&blob.size>0&&blob.size<=2*1024*1024)resolve(blob);
+     else reject(Error('Could not prepare this photo. Please choose another.'));
+    },'image/jpeg',0.82);
+   }catch(err){window.URL.revokeObjectURL(url);reject(err)}
+  };
+  image.src=url;
+ });
+}
+$('tlChooseProfilePhoto').onclick=()=>{if(profile)$('tlProfilePhotoFile').click()};
+$('tlProfilePhotoFile').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file||!profile)return;
+ const id=profile.id,old=profile.avatar_path||null;
+ let key=null,uploaded=false;
+ tlAvatarLoading(true,'Preparing your photo…');
+ try{
+  const jpg=await tlPrepareAvatar(file),token=window.crypto?.randomUUID?.();
+  if(!token)throw Error('Secure HTTPS is required to upload your photo.');
+  if(profile?.id!==id)throw Error('Please sign in again.');
+  key=id+'/'+token+'.jpg';tlAvatarLoading(true,'Uploading your photo…');
+  const store=db.storage.from(AVATAR_BUCKET);
+  const upload=await store.upload(key,jpg,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});
+  if(upload.error)throw upload.error;
+  uploaded=true;
+  const result=await db.rpc('set_my_avatar_path',{p_avatar_path:key});
+  if(result.error)throw result.error;
+  if(profile?.id!==id)throw Error('Session changed. Reopen your account.');
+  profile.avatar_path=key;updateMobileProfile();
+  tlAvatarLoading(false,'Photo saved. Your team can see it.');
+  if(old&&old!==key)store.remove([old]).catch(()=>{});
+ }catch(error){
+  if(uploaded&&key)db.storage.from(AVATAR_BUCKET).remove([key]).catch(()=>{});
+  tlAvatarLoading(false,'Your current picture was not changed.');
+  msg('Photo upload failed: '+(error.message||'Please retry.'),true);
+ }finally{$('tlProfilePhotoFile').value=''}
+};
+$('tlRemoveProfilePhoto').onclick=async()=>{
+ if(!profile?.avatar_path)return;
+ const id=profile.id,old=profile.avatar_path;
+ tlAvatarLoading(true,'Removing photo…');
+ try{
+  const r=await db.rpc('set_my_avatar_path',{p_avatar_path:null});if(r.error)throw r.error;
+  if(profile?.id===id){profile.avatar_path=null;updateMobileProfile()}
+  tlAvatarLoading(false,'Photo removed. Your initials are now shown.');
+  db.storage.from(AVATAR_BUCKET).remove([old]).catch(()=>{});
+ }catch(e){tlAvatarLoading(false,'Photo was not removed.');msg(e.message||'Could not remove photo.',true)}
+};
+
 function tlInitials(name){return String(name||'TL').trim().split(/\s+/).slice(0,2).map(w=>w.charAt(0).toUpperCase()).join('')}
 function tlStatus(p,confirmations){
  const done=confirmations.includes(p.id);return done?'received':p.published?'published':'draft';
@@ -322,7 +409,7 @@ function renderMobileDashboard(source,confirmations){
  const latestWeek=published.length?published[0].week_start:'';
  const current=latestWeek?published.filter(p=>p.week_start===latestWeek):[];
  const totalPublished=published.reduce((sum,p)=>sum+Number(p.tips_amount||0),0);
- const netCurrent=current.reduce((sum,p)=>sum+Number(p.net_payout||0),0);
+ const latestTips=current.reduce((sum,p)=>sum+Number(p.tips_amount||0),0);
  const totalReceived=published.filter(p=>confirmations.includes(p.id)).length;
  const received=current.filter(p=>confirmations.includes(p.id)).length;
  const pending=current.length-received;
@@ -331,12 +418,12 @@ function renderMobileDashboard(source,confirmations){
  const publishedWeeks=new Set(published.map(p=>p.week_start)).size;
  const metrics=runner?[
   ['Total published tips',money(totalPublished),publishedWeeks+' published weeks','◈'],
-  ['Latest week remaining',money(netCurrent),latestWeek?'Week of '+latestWeek:'No published payments','▤'],
+  ['Latest week tips',money(latestTips),latestWeek?'Before advances · Week of '+latestWeek:'No published payments','▤'],
   ['Receipts confirmed',totalReceived+' / '+published.length,'Your payment confirmations','✓'],
   ['Published weeks',publishedWeeks,'Actual published payment history','▥']
  ]:[
   ['Total distributed tips',money(totalPublished),'All published weeks','◈'],
-  ['Latest week payout',money(netCurrent),latestWeek?'Week of '+latestWeek:'No published payments','▤'],
+  ['Latest week tips',money(latestTips),latestWeek?'Before advances · Week of '+latestWeek:'No published payments','▤'],
   ['Receipts confirmed',totalReceived+' / '+published.length,'Across all published payouts','✓'],
   ['Active runners',runners.length,'Eligible for weekly payments','♙']
  ];
@@ -371,22 +458,18 @@ function renderNoirActivity(){
   '<li class="noir-activity-row"><span class="noir-activity-icon" aria-hidden="true">✓</span><div><strong>'+esc(n.title||'Notification')+'</strong><p>'+esc(n.body||'')+'</p><small>'+esc(n.created_at?new Date(n.created_at).toLocaleString():'')+'</small></div></li>'
  ).join('')+'</ul>':'<p class="tl-caption" style="margin:10px 0 0">No recent notifications. Payment and employee activity will appear in your inbox.</p>';
 }
-function renderMobileAudit(visible){
- const element=$('tlAuditTimeline');
- if(!visible.length){element.innerHTML='<p class="muted" style="font-size:12px;margin:0">No matching audit events.</p>';return}
- element.innerHTML=visible.map(x=>{
-  const action=(x.action==='employee.update'&&typeof x.details?.before?.active==='boolean'&&typeof x.details?.after?.active==='boolean'&&x.details.before.active!==x.details.after.active)?(x.details.after.active?'Employee Activated':'Employee Deactivated'):auditLabel(x.action);
-  const icon=x.action.startsWith('employee')?'♙':x.action.startsWith('hourly')?'✎':'▤';
-  const d=new Date(x.occurred_at);
-  return '<div class="tl-audit-item"><span class="tl-audit-icon" aria-hidden="true">'+icon+'</span><div class="tl-audit-text"><div class="tl-audit-title">'+esc(action)+'</div><div class="tl-audit-sub">'+esc(x.actor_name||'System / unavailable')+' · '+esc(x.actor_role?auditLabel(x.actor_role):'—')+'</div><div class="tl-audit-detail"><strong>Employee:</strong> '+esc(x.target_name||'—')+(auditDetail(x.details)?'<div style="margin-top:4px">'+esc(auditDetail(x.details))+'</div>':'')+'</div></div><span class="tl-audit-date">'+esc(d.toLocaleDateString(undefined,{month:'short',day:'numeric'}))+'</span></div>';
- }).join('');
-}
 function updateMobileProfile(){
  if(!profile)return;
  const name=String(profile.full_name||'').trim()||'Account';
- $('tlAccountHero').innerHTML='<div class="tl-account-avatar">'+esc(tlInitials(name))+'</div><div><div class="tl-account-name">'+esc(name)+'</div><span class="tl-account-role">'+esc(profile.role[0].toUpperCase()+profile.role.slice(1))+'</span><p class="tl-caption" style="margin-top:6px">Your signed-in Tips Ledger profile</p></div>';
- $('tlHeaderRole').textContent=(profile.role||'').toUpperCase()+' WORKSPACE';$('noirSidebarAvatar').textContent=tlInitials(name);$('noirSidebarName').textContent=name;$('noirSidebarRole').textContent=profile.role.charAt(0).toUpperCase()+profile.role.slice(1);
- $('tlProfileShortcut').textContent=tlInitials(name);
+ const avatar=tlAvatarHtml(name,profile.avatar_path);
+ $('tlAccountHero').innerHTML='<div class="tl-account-avatar">'+avatar+'</div><div><div class="tl-account-name">'+esc(name)+'</div><span class="tl-account-role">'+esc(profile.role[0].toUpperCase()+profile.role.slice(1))+'</span><p class="tl-caption" style="margin-top:6px">Your signed-in Tips Ledger profile</p></div>';
+ $('tlHeaderRole').textContent=(profile.role||'').toUpperCase()+' WORKSPACE';
+ $('noirSidebarAvatar').innerHTML=avatar;
+ $('noirSidebarName').textContent=name;
+ $('noirSidebarRole').textContent=profile.role.charAt(0).toUpperCase()+profile.role.slice(1);
+ $('tlProfileShortcut').innerHTML=avatar;
+ show('tlRemoveProfilePhoto',!!profile.avatar_path);
+ $('tlPhotoStatus').textContent=profile.avatar_path?'Photo saved. Your team can see it.':'Optional. Your initials appear until you upload a photo.';
 }
 function openMobileSheet(id){
  if(!profile)return;
@@ -455,14 +538,14 @@ function renderManageableEmployees(people){
  return allowed.map(x=>{
   const roleName={admin:'Admin',manager:'Manager',runner:'Runner'}[x.role]||x.role;
   const status=x.active?'Active':'Inactive';
-  return '<p class="employee-entry"><span class="tl-person-main"><span class="tl-person-avatar" aria-hidden="true">'+esc(tlInitials(x.full_name))+'</span><span><strong class="tl-person-name">'+esc(x.full_name)+'</strong><span class="tl-person-meta" style="display:block">'+esc(roleName)+' · '+esc(status)+'</span></span></span><span class="tl-person-actions">'+
+  return '<p class="employee-entry"><span class="tl-person-main"><span class="tl-person-avatar" aria-hidden="true">'+tlAvatarHtml(x.full_name,x.avatar_path)+'</span><span><strong class="tl-person-name">'+esc(x.full_name)+'</strong><span class="tl-person-meta" style="display:block">'+esc(roleName)+' · '+esc(status)+'</span></span></span><span class="tl-person-actions">'+
    '<button type="button" data-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'" data-active="'+(!x.active)+'">'+(x.active?'Deactivate':'Reactivate')+'</button>'+
    '<button type="button" data-delete-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'">Delete permanently</button>'+
    '</span></p>';
  }).join('');
 }
 async function refresh(){if(!profile)return;
-if(profile.role!=='runner'){const p=await db.from('profiles').select('id,full_name,role,active').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>x.role==='runner'&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').innerHTML='<option value="">All runners</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active runners</span><b>'+p.data.filter(x=>x.role==='runner'&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();$('rateRunner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');await loadEmployeeRates(p.data)}}
+if(profile.role!=='runner'){const p=await db.from('profiles').select('id,full_name,role,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>x.role==='runner'&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').innerHTML='<option value="">All runners</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active runners</span><b>'+p.data.filter(x=>x.role==='runner'&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();$('rateRunner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');await loadEmployeeRates(p.data)}}
 let payQuery=db.from('weekly_tips').select('id,runner_id,week_start,hours_worked,tips_amount,advances,net_payout,published').order('week_start',{ascending:false});if(profile.role==='runner')payQuery=payQuery.eq('runner_id',profile.id).eq('published',true);const r=await payQuery;if(r.error){msg(r.error.message,true);return}rows=r.data||[];
 let confirmed=[];let receiptQuery=db.from('receipt_confirmations').select('weekly_tip_id');if(profile.role==='runner')receiptQuery=receiptQuery.eq('runner_id',profile.id);const c=await receiptQuery;if(c.error){msg('Could not load receipt confirmations: '+c.error.message,true);return}confirmed=(c.data||[]).map(x=>x.weekly_tip_id)
 if(profile.role!=='runner'){const pending=rows.filter(x=>x.published&&!confirmed.includes(x.id));const alert=$('pendingAlert');alert.classList.toggle('hidden',false);alert.classList.toggle('clear',pending.length===0);alert.innerHTML=pending.length?'<div><strong>'+pending.length+' unconfirmed payment'+(pending.length===1?'':'s')+'</strong><div>Published payments awaiting runner confirmation</div></div><button type="button" id="viewPending">View pending</button>':'<div><strong>All published payments confirmed</strong><div>No outstanding receipts</div></div>';if(pending.length)$('viewPending').onclick=()=>{$('from').value='';$('to').value='';$('historyRunner').value='';$('historyStatus').value='published';setTab('payments');refresh()}}else{show('pendingAlert',false)}
