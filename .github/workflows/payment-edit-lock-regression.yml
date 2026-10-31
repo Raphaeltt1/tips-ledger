@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - fix-published-edit-lock-20261031
+      - main
+    paths:
+      - 'supabase/migrations/**'
+      - 'tests/payment_edit_lock_regression.sql'
+      - '.github/workflows/payment-edit-lock-regression.yml'
 
 permissions:
   contents: read
