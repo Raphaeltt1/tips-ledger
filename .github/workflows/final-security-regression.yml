@@ -31,7 +31,7 @@ jobs:
           from pathlib import Path
           import re
           src = Path('index.html').read_text(encoding='utf-8')
-          scripts = re.findall(r'<script>([\\s\\S]*?)</script>', src)
+          scripts = [part.split('</script>', 1)[0] for part in src.split('<script>')[1:]]
           if len(scripts) != 2:
               raise SystemExit('Expected two inline app script blocks')
           for i, code in enumerate(scripts):
