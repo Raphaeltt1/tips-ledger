@@ -2,9 +2,6 @@ name: Tips Ledger - Final Security Regression
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - audit-avatar-cleanup-20261031
 
 permissions:
   contents: read
