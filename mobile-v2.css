@@ -279,3 +279,28 @@ html[data-theme="dark"] .push-troubleshooting{border-color:var(--tl-border)}
  #tabs.tabbar button .tab-icon{width:20px;height:20px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Payment and account panes are full-screen-style sections, not nested desktop cards. */
+#app .tl-payments-section{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important}
+#tlPaymentHeader{position:relative;min-height:109px;padding-right:108px}
+#tlPaymentHeader .tl-page-title{font-weight:830}
+#tlNewDraftAction{position:absolute;right:0;top:31px;min-height:38px!important;padding:8px 13px!important;font-size:12px;border-radius:11px;background:var(--tl-teal)!important;color:#fff!important}
+#tlNewDraftAction.hidden{display:none!important}
+#tlPaymentToolbar h2:before{display:none!important}
+#tlPaymentToolbar h2{font-size:17px!important}
+#tlPaymentFilters .row{display:flex;align-items:end;gap:10px}
+#tlPaymentFilters .field{margin:6px 0}
+#tlPaymentFilters .field label{color:var(--tl-muted)}
+#admin .tl-section-head{margin:16px 0 12px}
+#admin .tl-collapsible-body h2{font-size:15px;margin:10px 0}
+#accountPanel #passwordForm .field{min-width:100%}
+#accountPanel #passwordForm button{width:100%}
+#tlNoticeBackdrop.hidden,#tlModalBackdrop.hidden{display:none!important}
+#tlAccountHero .tl-account-role{max-width:100%;overflow-wrap:anywhere}
+#tlPaymentHeader .tl-page-intro{max-width:350px}
+@media(max-width:400px){
+ #tlPaymentHeader{padding-right:95px}
+ #tlNewDraftAction{font-size:11px;right:0;top:32px;padding:8px!important}
+ #tlPaymentToolbar .row button{font-size:10px!important;padding:8px!important}
+}
