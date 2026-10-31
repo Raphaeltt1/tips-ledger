@@ -299,6 +299,86 @@ function renderRunnerTipsGraph(){
 }
 
 /* Mobile-first interface uses existing rows, role checks and payment history. */
+
+const AVATAR_BUCKET='tips-ledger-avatars';
+function tlAvatarUrl(path){
+ if(typeof path!=='string'||!/^[a-f0-9-]{36}\/[a-f0-9-]{36}\.jpg$/i.test(path)||!db?.storage)return '';
+ try{return db.storage.from(AVATAR_BUCKET).getPublicUrl(path).data?.publicUrl||''}catch(e){return ''}
+}
+function tlAvatarHtml(name,path){
+ const initials='<span class="tl-avatar-letters">'+esc(tlInitials(name))+'</span>',src=tlAvatarUrl(path);
+ return initials+(src?'<img class="tl-avatar-image" loading="lazy" src="'+esc(src)+'" alt="">':'');
+}
+document.addEventListener('error',e=>{if(e.target?.classList?.contains('tl-avatar-image'))e.target.remove()},true);
+function tlAvatarLoading(loading,message){
+ $('tlChooseProfilePhoto').disabled=!!loading;
+ $('tlRemoveProfilePhoto').disabled=!!loading;
+ $('tlChooseProfilePhoto').textContent=loading?'Uploading…':'Upload from Photos';
+ if(message)$('tlPhotoStatus').textContent=message;
+}
+async function tlPrepareAvatar(file){
+ if(file.size>15*1024*1024)throw Error('Choose a photo smaller than 15 MB.');
+ if(!file.type.startsWith('image/')&&!/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name||''))throw Error('Please choose an image from your Photos library.');
+ return new Promise((resolve,reject)=>{
+  const url=window.URL.createObjectURL(file),image=new Image();
+  image.onerror=()=>{window.URL.revokeObjectURL(url);reject(Error('Could not open that photo. Try another photo or a JPG/PNG image.'))};
+  image.onload=()=>{
+   try{
+    const w=image.naturalWidth,h=image.naturalHeight;
+    if(!w||!h)throw Error('This image cannot be opened.');
+    const canvas=document.createElement('canvas'),size=560,edge=Math.min(w,h);
+    canvas.width=size;canvas.height=size;
+    const ctx=canvas.getContext('2d');if(!ctx)throw Error('Photo conversion is unavailable.');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
+    ctx.drawImage(image,(w-edge)/2,(h-edge)/2,edge,edge,0,0,size,size);
+    canvas.toBlob(blob=>{window.URL.revokeObjectURL(url);
+     if(blob&&blob.size>0&&blob.size<=2*1024*1024)resolve(blob);
+     else reject(Error('Could not prepare this photo. Please choose another.'));
+    },'image/jpeg',0.82);
+   }catch(err){window.URL.revokeObjectURL(url);reject(err)}
+  };
+  image.src=url;
+ });
+}
+$('tlChooseProfilePhoto').onclick=()=>{if(profile)$('tlProfilePhotoFile').click()};
+$('tlProfilePhotoFile').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file||!profile)return;
+ const id=profile.id,old=profile.avatar_path||null;
+ let key=null,uploaded=false;
+ tlAvatarLoading(true,'Preparing your photo…');
+ try{
+  const jpg=await tlPrepareAvatar(file),token=window.crypto?.randomUUID?.();
+  if(!token)throw Error('Secure HTTPS is required to upload your photo.');
+  if(profile?.id!==id)throw Error('Please sign in again.');
+  key=id+'/'+token+'.jpg';tlAvatarLoading(true,'Uploading your photo…');
+  const store=db.storage.from(AVATAR_BUCKET);
+  const upload=await store.upload(key,jpg,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});
+  if(upload.error)throw upload.error;
+  uploaded=true;
+  const result=await db.rpc('set_my_avatar_path',{p_avatar_path:key});
+  if(result.error)throw result.error;
+  if(profile?.id!==id)throw Error('Session changed. Reopen your account.');
+  profile.avatar_path=key;updateMobileProfile();
+  tlAvatarLoading(false,'Photo saved. Your team can see it.');
+  if(old&&old!==key)store.remove([old]).catch(()=>{});
+ }catch(error){
+  if(uploaded&&key)db.storage.from(AVATAR_BUCKET).remove([key]).catch(()=>{});
+  tlAvatarLoading(false,'Your current picture was not changed.');
+  msg('Photo upload failed: '+(error.message||'Please retry.'),true);
+ }finally{$('tlProfilePhotoFile').value=''}
+};
+$('tlRemoveProfilePhoto').onclick=async()=>{
+ if(!profile?.avatar_path)return;
+ const id=profile.id,old=profile.avatar_path;
+ tlAvatarLoading(true,'Removing photo…');
+ try{
+  const r=await db.rpc('set_my_avatar_path',{p_avatar_path:null});if(r.error)throw r.error;
+  if(profile?.id===id){profile.avatar_path=null;updateMobileProfile()}
+  tlAvatarLoading(false,'Photo removed. Your initials are now shown.');
+  db.storage.from(AVATAR_BUCKET).remove([old]).catch(()=>{});
+ }catch(e){tlAvatarLoading(false,'Photo was not removed.');msg(e.message||'Could not remove photo.',true)}
+};
+
 function tlInitials(name){return String(name||'TL').trim().split(/\s+/).slice(0,2).map(w=>w.charAt(0).toUpperCase()).join('')}
 function tlStatus(p,confirmations){
  const done=confirmations.includes(p.id);return done?'received':p.published?'published':'draft';
