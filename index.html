@@ -123,7 +123,7 @@ function setTheme(dark){
 $('themeLight').onclick=()=>setTheme(false);$('themeDark').onclick=()=>setTheme(true);
 $('tlHeaderThemeToggle').onclick=()=>setTheme(document.documentElement.dataset.theme!=='dark');
 try{setTheme(localStorage.getItem('tips-ledger-theme')==='dark')}catch(e){setTheme(false)}
-$('tlProfileShortcut').onclick=()=>setTab('account');
+$('tlProfileShortcut').onclick=()=>setTab('account');$('noirShowNotifications').onclick=openMobileNotices;
 $('tlSeeAllPayments').onclick=()=>setTab('payments');
 $('tlNewDraftAction').onclick=()=>{updateDraftTotal();openMobileSheet('editor')};
 $('tlCloseDraft').onclick=closeMobileSheets;$('tlCloseEdit').onclick=closeMobileSheets;
@@ -151,9 +151,9 @@ function msg(s,bad=false){$('message').textContent=s;$('message').className=bad?
 function stat(label,value){return '<div class="stat">'+esc(label)+'<b>'+esc(value)+'</b></div>'}
 async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;$('tlHeaderRole').textContent='SECURE WORKSPACE';show('noticeToggle',false);show('tlProfileShortcut',false);show('tlHeaderSignOut',false);closeMobileNotices();show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
 const r=await db.from('profiles').select('id,full_name,role,active').eq('id',user.id).single();if(r.error||!r.data?.active){msg('Your account has no active profile. Contact the admin.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
-profile=r.data;show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',profile.role!=='runner');$('tlPaymentHeader').classList.toggle('tl-no-create',profile.role==='runner');updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',profile.role!=='runner');show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',profile.role==='runner');show('runnerPaymentTable',profile.role==='runner');show('viewToggle',profile.role!=='runner');if(profile.role==='runner'){$('records').classList.remove('table-view');$('viewToggle').textContent='Table view'}show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab(activeTab==='employees'&&!['admin','superuser'].includes(profile.role)?'overview':activeTab);const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=({superuser:'Superuser',admin:'Admin',manager:'Manager',runner:'Runner'}[String(profile.role||'').toLowerCase()]||profile.role);$('welcome').textContent='Welcome, '+displayName;$('role').textContent='Role: '+displayRole;await refresh();await loadOwnRate();await loadNotifications();msg('')}
+profile=r.data;show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',profile.role!=='runner');$('tlPaymentHeader').classList.toggle('tl-no-create',profile.role==='runner');updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',profile.role!=='runner');show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',profile.role==='runner');show('runnerPaymentTable',profile.role==='runner');show('viewToggle',profile.role!=='runner');if(profile.role==='runner'){$('records').classList.remove('table-view');$('viewToggle').textContent='Table view'}show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab(activeTab==='employees'&&!['admin','superuser'].includes(profile.role)?'overview':activeTab);const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=({superuser:'Superuser',admin:'Admin',manager:'Manager',runner:'Runner'}[String(profile.role||'').toLowerCase()]||profile.role);$('welcome').textContent=profile.role==='runner'?'Your tips. Clearly in view.':'Every payout. Fully in control.';$('role').textContent='Welcome, '+displayName+' · '+displayRole+' workspace';await refresh();await loadOwnRate();await loadNotifications();msg('')}
 async function loadOwnRate(){show('ownRate',profile?.role==='runner');if(profile?.role!=='runner')return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
-async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div><small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join(''):'No notifications yet.'}
+async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div><small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join('') :'No notifications yet.';renderNoirActivity()}
 $('noticeToggle').onclick=()=>{$('notificationsPanel').classList.contains('hidden')?openMobileNotices():closeMobileNotices()};
 $('noticeList').onclick=async e=>{const del=e.target.closest('button[data-notice-delete]'),read=e.target.closest('button[data-notice-read]');if(!del&&!read||!profile)return;const b=del||read;b.disabled=true;try{const q=db.from('notifications');const res=del?await q.delete().eq('recipient_id',profile.id).eq('id',del.dataset.noticeDelete).select('id'):await q.update({read_at:new Date().toISOString()}).eq('recipient_id',profile.id).eq('id',read.dataset.noticeRead).select('id');if(res.error)throw res.error;if(!res.data?.length)throw Error('Notification could not be updated. Verify database permissions.');await loadNotifications();msg(del?'Notification deleted.':'Notification marked as read.')}catch(err){msg(err.message||'Could not update notification.',true)}finally{b.disabled=false}};
 $('markNotices').onclick=async()=>{if(!profile)return;const ids=notifications.filter(n=>!n.read_at).map(n=>n.id);if(!ids.length)return;const r=await db.from('notifications').update({read_at:new Date().toISOString()}).eq('recipient_id',profile.id).in('id',ids);if(r.error){msg(r.error.message,true);return}await loadNotifications()};
@@ -319,37 +319,57 @@ function tlDrawTrend(source){
 function renderMobileDashboard(source,confirmations){
  if(!profile)return;
  const published=source.filter(p=>p.published).sort((a,b)=>b.week_start.localeCompare(a.week_start));
- const week=published.length?published[0].week_start:'';
- const current=week?published.filter(p=>p.week_start===week):[];
- const weekNet=current.reduce((sum,p)=>sum+Number(p.net_payout||0),0);
+ const latestWeek=published.length?published[0].week_start:'';
+ const current=latestWeek?published.filter(p=>p.week_start===latestWeek):[];
+ const totalPublished=published.reduce((sum,p)=>sum+Number(p.tips_amount||0),0);
+ const netCurrent=current.reduce((sum,p)=>sum+Number(p.net_payout||0),0);
+ const totalReceived=published.filter(p=>confirmations.includes(p.id)).length;
  const received=current.filter(p=>confirmations.includes(p.id)).length;
- const waiting=current.length-received;
- const percent=current.length?Math.round(received/current.length*100):0;
+ const pending=current.length-received;
+ const rate=current.length?Math.round(100*received/current.length):0;
  const runner=profile.role==='runner';
- $('tlHomeHero').innerHTML='<div class="tl-hero"><div class="tl-hero-head"><span class="tl-hero-label">'+(runner?'YOUR WEEKLY TIPS':'LATEST PUBLISHED WEEK')+'</span><span class="tl-hero-week">'+(week?'Week of '+esc(week):'No published week yet')+'</span></div><div class="tl-hero-amount">'+esc(money(weekNet))+'</div><div class="tl-hero-sub"><span>Remaining tips after advances</span><span class="tl-hero-week">'+(runner?'Your published payouts':received+' / '+current.length+' received')+'</span></div><div class="tl-progress"><div class="tl-progress-fill" style="width:'+percent+'%"></div></div><div class="tl-progress-note">'+(week?percent+'% of published payouts confirmed':'Publish a weekly payment to start tracking.')+'</div></div>';
+ const publishedWeeks=new Set(published.map(p=>p.week_start)).size;
  const metrics=runner?[
-  ['⏱','Hours worked',current.reduce((sum,p)=>sum+Number(p.hours_worked||0),0).toFixed(2),'Latest published week'],
-  ['▤','Published weeks',new Set(published.map(p=>p.week_start)).size,'Payments available to you']
+  ['Total published tips',money(totalPublished),publishedWeeks+' published weeks','◈'],
+  ['Latest week remaining',money(netCurrent),latestWeek?'Week of '+latestWeek:'No published payments','▤'],
+  ['Receipts confirmed',totalReceived+' / '+published.length,'Your payment confirmations','✓'],
+  ['Published weeks',publishedWeeks,'Actual published payment history','▥']
  ]:[
-  ['◷','Awaiting receipt',waiting,'Published and unconfirmed'],
-  ['♙','Active runners',runners.length,'Eligible for weekly payments']
+  ['Total distributed tips',money(totalPublished),'All published weeks','◈'],
+  ['Latest week payout',money(netCurrent),latestWeek?'Week of '+latestWeek:'No published payments','▤'],
+  ['Receipts confirmed',totalReceived+' / '+published.length,'Across all published payouts','✓'],
+  ['Active runners',runners.length,'Eligible for weekly payments','♙']
  ];
- $('tlHomeMetrics').innerHTML='<div class="tl-metric-grid">'+metrics.map(([icon,title,value,foot])=>'<div class="tl-metric-card"><div class="tl-metric-icon" aria-hidden="true">'+icon+'</div><div class="tl-metric-label">'+esc(title)+'</div><div class="tl-metric-value">'+esc(value)+'</div><div class="tl-metric-foot">'+esc(foot)+'</div></div>').join('')+'</div>';
- const quick=runner?[
-  ['▤','My payments','payments'],
-  ['♙','Account','account'],
-  ['♧','Notifications','notices']
- ]:[
-  ['＋','New draft','draft'],
-  ['◷','Pending','pending'],
-  ['▤',profile.role==='manager'?'Payments':'Activity',profile.role==='manager'?'payments':'audit']
- ];
- $('tlQuickActions').innerHTML=quick.map(([ico,name,target])=>'<button type="button" class="tl-quick" data-tl-quick="'+target+'"><span class="tl-quick-icon" aria-hidden="true">'+ico+'</span>'+esc(name)+'</button>').join('');
+ $('tlHomeHero').innerHTML='<div class="noir-metrics">'+metrics.map(([label,value,note,icon])=>
+  '<article class="noir-metric"><div class="noir-metric-head"><span class="noir-metric-label">'+esc(label)+'</span><span class="noir-metric-icon" aria-hidden="true">'+icon+'</span></div><div class="noir-metric-value">'+esc(value)+'</div><div class="noir-metric-foot">'+esc(note)+'</div></article>'
+ ).join('')+'</div>';
+ $('tlHomeMetrics').innerHTML='';
+ const draftWeek=latestWeek||source.slice().sort((a,b)=>b.week_start.localeCompare(a.week_start))[0]?.week_start||'';
+ const draftCount=source.filter(p=>p.week_start===draftWeek&&!p.published).length;
+ $('tlNoirReceipt').innerHTML='<div class="noir-receipt"><span class="tl-eyebrow" style="font-size:10px">PAYMENT TRACKING</span><h3 class="noir-receipt-heading">Receipt status</h3><p class="tl-caption">'+(latestWeek?'Week of '+esc(latestWeek):'No published week yet')+'</p><div class="noir-receipt-donut" style="--noir-progress:'+rate+'%"><div class="noir-receipt-inner"><strong>'+rate+'%</strong><small>Confirmed</small></div></div><div class="noir-legend">'+[
+ ['Received',received],['Awaiting receipt',pending],['Draft',draftCount]
+ ].map(([label,value])=>'<div class="noir-legend-row"><span class="noir-legend-left"><span class="noir-legend-dot"></span>'+esc(label)+'</span><strong>'+value+'</strong></div>').join('')+'</div></div>';
  $('tlTeamTrend').innerHTML=tlDrawTrend(source);
- const recent=source.slice().sort((a,b)=>b.week_start.localeCompare(a.week_start)).slice(0,3);
- $('tlHomeRecent').innerHTML=recent.length?recent.map(p=>'<article class="tl-recent-card"><div class="tl-recent-top"><div><div class="tl-recent-name">'+esc(runner?'My payment':employeeNames.get(p.runner_id)||'Runner')+'</div><div class="tl-recent-week">Week of '+esc(p.week_start)+' · '+esc(p.hours_worked)+' hours</div></div>'+tlStatusHtml(tlStatus(p,confirmations))+'</div><div class="tl-recent-bottom"><div><div class="tl-caption">Remaining tips</div><div class="tl-recent-amount">'+esc(money(p.net_payout))+'</div></div><button type="button" class="tl-text-action" data-tl-quick="payments">View details →</button></div></article>').join(''):'<div class="tl-history-summary">No payments recorded yet. Your latest payments will appear here.</div>';
+ const quick=runner?[
+  ['▤','My payments','payments'],['♙','Account','account'],['♧','Notifications','notices']
+ ]:[
+  ['＋','New draft','draft'],['◷','Pending','pending'],['▤',profile.role==='manager'?'Payments':'Audit log',profile.role==='manager'?'payments':'audit']
+ ];
+ $('tlQuickActions').innerHTML=quick.map(([icon,name,target])=>'<button type="button" class="tl-quick" data-tl-quick="'+target+'"><span class="tl-quick-icon" aria-hidden="true">'+icon+'</span>'+esc(name)+'</button>').join('');
+ const recent=source.slice().sort((a,b)=>b.week_start.localeCompare(a.week_start)).slice(0,4);
+ $('tlHomeRecent').innerHTML=recent.length?recent.map(p=>
+  '<article class="tl-recent-card"><div class="tl-recent-top"><div><div class="tl-recent-name">'+esc(runner?'My payment':employeeNames.get(p.runner_id)||'Runner')+'</div><div class="tl-recent-week">Week of '+esc(p.week_start)+' · '+esc(p.hours_worked)+' hours</div></div>'+tlStatusHtml(tlStatus(p,confirmations))+'</div><div class="tl-recent-bottom"><div><span class="tl-caption">Remaining tips</span><div class="tl-recent-amount">'+esc(money(p.net_payout))+'</div></div><button type="button" class="tl-text-action" data-tl-quick="payments">Details →</button></div></article>'
+ ).join(''):'<div class="tl-history-summary">No payments recorded yet. New records will appear here.</div>';
  const allPending=source.filter(p=>p.published&&!confirmations.includes(p.id)).length;
  $('tlPaymentSummary').innerHTML='<div class="tl-payment-summary"><div><strong>'+source.length+' payment records</strong><small>'+allPending+' awaiting receipt · '+(runner?0:source.filter(p=>!p.published).length)+' drafts</small></div><span style="font-size:23px" aria-hidden="true">▤</span></div>';
+ renderNoirActivity();
+}
+function renderNoirActivity(){
+ const container=$('tlNoirActivity');if(!container)return;
+ const items=notifications.slice(0,5);
+ container.innerHTML=items.length?'<ul class="noir-activity-list">'+items.map(n=>
+  '<li class="noir-activity-row"><span class="noir-activity-icon" aria-hidden="true">✓</span><div><strong>'+esc(n.title||'Notification')+'</strong><p>'+esc(n.body||'')+'</p><small>'+esc(n.created_at?new Date(n.created_at).toLocaleString():'')+'</small></div></li>'
+ ).join('')+'</ul>':'<p class="tl-caption" style="margin:10px 0 0">No recent notifications. Payment and employee activity will appear in your inbox.</p>';
 }
 function renderMobileAudit(visible){
  const element=$('tlAuditTimeline');
@@ -365,7 +385,7 @@ function updateMobileProfile(){
  if(!profile)return;
  const name=String(profile.full_name||'').trim()||'Account';
  $('tlAccountHero').innerHTML='<div class="tl-account-avatar">'+esc(tlInitials(name))+'</div><div><div class="tl-account-name">'+esc(name)+'</div><span class="tl-account-role">'+esc(profile.role[0].toUpperCase()+profile.role.slice(1))+'</span><p class="tl-caption" style="margin-top:6px">Your signed-in Tips Ledger profile</p></div>';
- $('tlHeaderRole').textContent=(profile.role||'').toUpperCase()+' WORKSPACE';
+ $('tlHeaderRole').textContent=(profile.role||'').toUpperCase()+' WORKSPACE';$('noirSidebarAvatar').textContent=tlInitials(name);$('noirSidebarName').textContent=name;$('noirSidebarRole').textContent=profile.role.charAt(0).toUpperCase()+profile.role.slice(1);
  $('tlProfileShortcut').textContent=tlInitials(name);
 }
 function openMobileSheet(id){
