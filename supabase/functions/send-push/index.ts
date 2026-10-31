@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       title = "💰 Your Weekly Tips Are Ready!";
       message = "Your payment for this week has been published. Open Tips Ledger to review it.";
     } else {
-      if (profile.role !== "runner") return json({ error: "Only the runner can confirm receipt" }, 403);
+      if (!["runner", "host_hostess", "counter", "expo", "kitchen_crew"].includes(profile.role)) return json({ error: "Only the paid team member can confirm receipt" }, 403);
       const { data: receipt, error } = await admin.from("receipt_confirmations")
         .select("weekly_tip_id,runner_id").eq("weekly_tip_id", weeklyTipId)
         .eq("runner_id", profile.id).maybeSingle();
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       if (adminsError) return json({ error: "Could not load administrators" }, 500);
       recipientIds = (admins || []).map((x: { id: string }) => x.id);
       title = "✅ Payment Received";
-      message = `Runner ${profile.full_name || "Unknown"} confirmed receiving their weekly payment.`;
+      message = `Team member ${profile.full_name || "Unknown"} confirmed receiving their weekly payment.`;
     }
 
     if (!recipientIds.length) return json({ sent: 0, failed: 0, reason: "No active recipients" });
