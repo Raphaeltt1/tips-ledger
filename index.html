@@ -679,7 +679,7 @@ $('people').onclick=async e=>{
     throw Error(message);
    }
    if(!data?.success)throw Error(data?.error||'Could not permanently delete employee');
-   await refresh();await loadNotifications();msg('Employee account permanently deleted.'+(data.auditRecorded===false?' Warning: audit attribution may not have been recorded.':''));
+   await refresh();await loadNotifications();msg('Employee account permanently deleted.'+(data.auditRecorded===false?' Warning: audit attribution may not have been recorded.':'')+(data.avatarCleanupWarning?' Warning: some profile photos may require manual cleanup.':''));
   }catch(err){msg(err.message||'Could not permanently delete employee.',true)}
   finally{b.disabled=false}
   return;
