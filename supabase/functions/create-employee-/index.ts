@@ -100,11 +100,10 @@ Deno.serve(async (req) => {
     const role =
       typeof body?.role === "string" ? body.role : "";
 
-    const allowedRoles =
-      actor.role === "superuser"
-        ? ["admin", "manager", "runner"]
-        : ["manager", "runner"];
-
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew"];
+    const allowedRoles = actor.role === "superuser"
+      ? ["admin", "manager", ...teamRoles]
+      : ["manager", ...teamRoles];
     if (!fullName || fullName.length > 100) {
       return json(
         { error: "Enter a valid full name (maximum 100 characters)." },
