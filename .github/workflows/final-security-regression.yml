@@ -2,6 +2,9 @@ name: Tips Ledger - Final Security Regression
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -10,6 +13,9 @@ on:
       - 'push-sw.js'
       - 'manifest.webmanifest'
       - 'supabase/functions/delete-employee/index.ts'
+      - 'supabase/functions/create-employee-/index.ts'
+      - 'supabase/migrations/20261031_superuser_mfa_enforcement.sql'
+      - 'tests/test_superuser_security.py'
       - '.github/workflows/final-security-regression.yml'
 
 permissions:
@@ -31,6 +37,8 @@ jobs:
           deno-version: v2.x
       - name: Check Edge Function TypeScript
         run: deno check supabase/functions/delete-employee/index.ts
+      - name: Check employee creation Edge Function TypeScript
+        run: deno check supabase/functions/create-employee-/index.ts
       - name: Check app and service-worker JavaScript
         run: |
           python - <<'PY'
@@ -47,6 +55,8 @@ jobs:
           node --check /tmp/tl-inline-1.js
           node --check push-sw.js
           python -m json.tool manifest.webmanifest > /dev/null
+      - name: Verify Superuser MFA and backup security requirements
+        run: python -m unittest discover -s tests -p 'test_superuser_security.py' -v
       - name: Verify no-auth employee-deletion blocked
         run: python -m unittest discover -s tests -p 'test_delete_edge_auth.py' -v
       - name: Verify deletion path protects and cleans avatar storage
