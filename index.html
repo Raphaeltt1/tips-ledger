@@ -348,10 +348,16 @@ $('tlProfilePhotoFile').onchange=async e=>{
  let key=null,uploaded=false;
  tlAvatarLoading(true,'Preparing your photo…');
  try{
-  const jpg=await tlPrepareAvatar(file),token=window.crypto?.randomUUID?.();
+  const jpg=await tlPrepareAvatar(file);
+  // Use the authenticated session identity, not just the profile object, so
+  // the Storage folder and server-side RPC check the same principal.
+  const identity=await db.auth.getUser();
+  if(identity.error||!identity.data?.user?.id)throw Error('Your session expired. Please sign in again.');
+  const principal=String(identity.data.user.id).toLowerCase();
+  if(principal!==String(id).toLowerCase()||profile?.id!==id)throw Error('Your session changed. Please sign out and sign in again.');
+  const token=window.crypto?.randomUUID?.()?.toLowerCase();
   if(!token)throw Error('Secure HTTPS is required to upload your photo.');
-  if(profile?.id!==id)throw Error('Please sign in again.');
-  key=id+'/'+token+'.jpg';tlAvatarLoading(true,'Uploading your photo…');
+  key=principal+'/'+token+'.jpg';tlAvatarLoading(true,'Uploading your photo…');
   const store=db.storage.from(AVATAR_BUCKET);
   const upload=await store.upload(key,jpg,{contentType:'image/jpeg',cacheControl:'3600',upsert:false});
   if(upload.error)throw upload.error;
