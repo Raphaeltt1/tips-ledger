@@ -19,9 +19,16 @@ Data never goes into repository commits, GitHub Actions artifacts, or logs.
 Archives are stored in a private Cloudflare R2 Standard bucket. The script
 verifies upload by downloading and decrypting the entire archive.
 
-### 30-day retention and cost ceiling
+### Backup time — 23:00 Lebanon local time
 
-A successful backup deletes *older-than-30-day* archives in the dedicated
+After activation, GitHub Actions will attempt to run once daily at **11:00 PM**
+using the `Asia/Beirut` timezone, automatically handling summer/winter time.
+GitHub's scheduled runs are best-effort; some runs can start late or be skipped.
+Check the successful run history regularly.
+
+### 7-day retention and cost ceiling
+
+A successful, verified backup deletes *older-than-7-day* archives in the dedicated
 `tips-ledger/daily/` prefix. The script refuses to upload if stored backup
 objects plus the new backup would exceed 8 GB, avoiding the 10 GB-month free
 storage allowance for these backup objects. **This is not a hard R2
