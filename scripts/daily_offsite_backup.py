@@ -44,40 +44,67 @@ def digest(data):
 
 
 def configure_database_environment():
-    # Libpq's PGDATABASE environment variable is a *database name*, not a
-    # connection URI. Convert the Supabase URI to separate libpq variables,
-    # preserving password secrecy (no credentials in process arguments/logs).
-    try:
-        uri = urllib.parse.urlsplit(required_env("SUPABASE_DB_URL"))
-        port = uri.port or 5432
-    except ValueError as exc:
+    # Parse credentials separately from the URI authority. urllib.urlsplit on a
+    # complete connection URI mistakes an unencoded '[' in a password for an
+    # IPv6 host, and treats a raw '#' or '?' in a password as URL punctuation.
+    # Supabase's copied URI may contain a '[YOUR-PASSWORD]' placeholder.
+    # Keeping credentials out of process arguments and exception strings is
+    # essential because this repo and Actions logs are publicly viewable.
+    raw = required_env("SUPABASE_DB_URL").strip()
+    scheme, delimiter, remainder = raw.partition("://")
+    if delimiter != "://" or scheme not in ("postgresql", "postgres"):
         raise RuntimeError(
-            "Invalid Supabase connection URI; check the Session pooler URL "
-            "in your GitHub SUPABASE_DB_URL secret."
-        ) from None
-    host = uri.hostname or ""
-    user = urllib.parse.unquote(uri.username or "")
-    password = urllib.parse.unquote(uri.password or "")
-    database = urllib.parse.unquote(uri.path.lstrip("/")) or "postgres"
-    if uri.scheme not in ("postgresql", "postgres") or not host or not user or not password:
-        raise RuntimeError(
-            "SUPABASE_DB_URL must contain a complete Postgres URI, "
-            "including a database username and password."
+            "SUPABASE_DB_URL must be the complete PostgreSQL Session pooler "
+            "connection string copied from Supabase Connect."
         )
+    user_info, at, server_info = remainder.rpartition("@")
+    username_raw, colon, password_raw = user_info.partition(":")
+    if not at or not colon or not username_raw or not password_raw:
+        raise RuntimeError(
+            "SUPABASE_DB_URL is missing the username or database password; "
+            "copy the complete Supabase Session pooler URI."
+        )
+
+    username = urllib.parse.unquote(username_raw)
+    password = urllib.parse.unquote(password_raw)
     if password == "[YOUR-PASSWORD]":
-        raise RuntimeError("Replace the Supabase connection string password placeholder.")
+        raise RuntimeError(
+            "GitHub SUPABASE_DB_URL still contains [YOUR-PASSWORD]. "
+            "Edit the GitHub secret and replace that placeholder with your "
+            "actual Supabase database password. Do not send it in chat."
+        )
+
+    try:
+        parsed_server = urllib.parse.urlsplit(f"postgresql://{server_info}")
+        host = parsed_server.hostname or ""
+        port = parsed_server.port or 5432
+        database = urllib.parse.unquote(parsed_server.path.lstrip("/")) or "postgres"
+    except ValueError:
+        raise RuntimeError(
+            "SUPABASE_DB_URL has an invalid database host or port. "
+            "Recopy the Session pooler URI from Supabase Connect."
+        ) from None
+
+    if not host or not username or not password:
+        raise RuntimeError(
+            "SUPABASE_DB_URL must contain a database host, username and password."
+        )
     if not (host.endswith(".pooler.supabase.com") or host == f"db.{PROJECT_REF}.supabase.co"):
-        raise RuntimeError("SUPABASE_DB_URL must point to the configured Supabase database.")
+        raise RuntimeError(
+            "SUPABASE_DB_URL must point to the configured Supabase project."
+        )
     if port != 5432:
-        raise RuntimeError("Use the Supabase Session pooler (port 5432), not transaction mode.")
+        raise RuntimeError(
+            "Use the Supabase Session pooler on port 5432, not transaction mode."
+        )
+
     os.environ.update({
         "PGHOST": host,
         "PGPORT": str(port),
-        "PGUSER": user,
+        "PGUSER": username,
         "PGPASSWORD": password,
         "PGDATABASE": database,
     })
-
 
 def db_client_command(scratch, command):
     # Docker inherits each libpq variable by name, without placing secret
