@@ -152,7 +152,46 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Delete login after successful database cleanup.
+    // Remove every stored profile picture under this employee's own UUID.
+    // Do this through Storage API (not SQL), before removing the Auth user.
+    // Supabase can refuse to delete accounts that own Storage objects.
+    // Only the verified Admin/Superuser may reach this path.
+    let avatarCleanupWarning = false;
+    let avatarsRemoved = 0;
+    try {
+      const avatars = admin.storage.from("tips-ledger-avatars");
+      for (let page = 0; page < 20; page++) {
+        const { data: files, error: listError } =
+          await avatars.list(runnerId, { limit: 100, offset: 0 });
+        if (listError) throw listError;
+        if (!files?.length) break;
+        // Avatar upload policy stores UUID-named JPEGs in a UUID folder.
+        // Refuse to delete unexpected objects or nested directories.
+        const paths = files.map(file => {
+          if (typeof file?.name !== "string" ||
+              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg$/i.test(file.name) ||
+              file.id === null) {
+            throw new Error("Unexpected object in employee avatar folder");
+          }
+          return runnerId + "/" + file.name;
+        });
+        const { error: removeError } = await avatars.remove(paths);
+        if (removeError) throw removeError;
+        avatarsRemoved += paths.length;
+      }
+      const { data: leftover, error: verifyError } =
+        await avatars.list(runnerId, { limit: 1, offset: 0 });
+      if (verifyError || leftover?.length) {
+        throw new Error("Employee photo files remain after cleanup");
+      }
+    } catch (error) {
+      avatarCleanupWarning = true;
+      // A partial Storage failure must not conceal the failed cleanup.
+      console.error("Employee avatar cleanup warning:",
+        error instanceof Error ? error.message : "Unknown Storage error");
+    }
+
+    // Delete login after successful database cleanup and photo cleanup.
     const { error: deleteAuthError } =
       await admin.auth.admin.deleteUser(runnerId);
 
@@ -167,6 +206,7 @@ Deno.serve(async (req) => {
           error:
             "Employee history was removed, but the login account could not be deleted. Contact the system administrator before retrying.",
           historyRemoved: true,
+          avatarCleanupWarning,
         },
         500
       );
@@ -192,6 +232,8 @@ Deno.serve(async (req) => {
       success: true,
       message: "Employee account and related history permanently deleted.",
       auditRecorded: !auditError,
+      avatarCleanupWarning,
+      avatarsRemoved,
     });
   } catch (error) {
     console.error("delete-employee failed:", error);

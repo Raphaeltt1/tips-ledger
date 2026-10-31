@@ -1,0 +1,62 @@
+name: Tips Ledger - Final Security Regression
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check Edge Function TypeScript
+        run: deno check supabase/functions/delete-employee/index.ts
+      - name: Check app and service-worker JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          src = Path('index.html').read_text(encoding='utf-8')
+          scripts = [part.split('</script>', 1)[0] for part in src.split('<script>')[1:]]
+          if len(scripts) != 2:
+              raise SystemExit('Expected two inline app script blocks')
+          for i, code in enumerate(scripts):
+              Path(f'/tmp/tl-inline-{i}.js').write_text(code,encoding='utf-8')
+          PY
+          node --check /tmp/tl-inline-0.js
+          node --check /tmp/tl-inline-1.js
+          node --check push-sw.js
+          python -m json.tool manifest.webmanifest > /dev/null
+      - name: Verify no-auth employee-deletion blocked
+        run: python -m unittest discover -s tests -p 'test_delete_edge_auth.py' -v
+      - name: Verify deletion path protects and cleans avatar storage
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('supabase/functions/delete-employee/index.ts').read_text()
+          checks={
+            'token verification': 'await authClient.auth.getUser(token)',
+            'active admin role validation': '["admin", "superuser"].includes(actor.role)',
+            'self deletion guard': 'runnerId === authData.user.id',
+            'name confirmation': 'runner.full_name.trim() !== confirmation.trim()',
+            'avatar list': 'await avatars.list(runnerId',
+            'avatar removal': 'await avatars.remove(paths)',
+            'login deletion': 'await admin.auth.admin.deleteUser(runnerId)',
+          }
+          for name,needle in checks.items():
+            if needle not in p: raise SystemExit(name+' not present')
+          if not p.index('await avatars.remove(paths)') < p.index('await admin.auth.admin.deleteUser(runnerId)'):
+            raise SystemExit('Photo deletion does not precede login deletion')
+          print('Role authorization, avatar cleanup and login deletion checks passed.')
+          PY
