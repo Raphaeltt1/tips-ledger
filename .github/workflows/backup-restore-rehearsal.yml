@@ -5,9 +5,6 @@ name: Tips Ledger - Isolated Backup Restore Rehearsal
 # network-isolated PostgreSQL container on the Actions runner.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - restore-rehearsal-20261031
 
 permissions:
   contents: read
