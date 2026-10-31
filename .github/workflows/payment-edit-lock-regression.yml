@@ -1,0 +1,39 @@
+name: Tips Ledger - Published Payment Lock Regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+      - 'tests/payment_edit_lock_regression.sql'
+      - '.github/workflows/payment-edit-lock-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  payment-edit-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Run payment edit/receipt lock tests in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          name="tl-test-lock-${GITHUB_RUN_ID}"
+          trap 'docker rm -f "$name" >/dev/null 2>&1 || true' EXIT
+          docker run --rm --detach --network none --name "$name" \
+            -v "$PWD:/work:ro" -e POSTGRES_HOST_AUTH_METHOD=trust \
+            postgres:17.6-bookworm
+          for i in $(seq 1 60); do
+            if docker exec "$name" pg_isready -U postgres >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          docker exec "$name" psql -U postgres -d postgres \
+            --no-psqlrc -v ON_ERROR_STOP=1 \
+            -f /work/tests/payment_edit_lock_regression.sql

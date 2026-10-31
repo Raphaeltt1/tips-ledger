@@ -39,6 +39,27 @@ is public, objects can be opened by anyone who knows their direct URL. Remove
 unneeded old objects using the Storage API or Supabase Storage dashboard,
 not by deleting rows from `storage.objects` with SQL.
 
+## Second issue found and corrected: published-payment editing and deletion guard
+
+The UI and `update_weekly_tips_draft` RPC deliberately permit authorized Admin
+or Superuser corrections before a payout is marked received, but the old
+`protect_published_tips` trigger rejected **all** updates after publication.
+The protected trigger has been corrected to permit only the hour/tip/advance
+fields for an authorized Admin or Superuser while the payout has no receipt
+confirmation. Identifying details, rate snapshots and published status remain
+immutable, and confirmed payouts cannot be edited.
+
+The regression test also revealed a NULL-handling issue in the special
+permanent-delete override: if the setting did not exist, the trigger did not
+independently reject published deletion. The database's direct client DELETE
+grants were already disabled, but the trigger was hardened with `COALESCE`
+so it denies deletion by default. The authorized employee-deletion exception
+is preserved.
+
+An isolated PostgreSQL 17 test validated corrections, confirmed-payment locks,
+role checks, immutable fields, deletion denial and the authorized deletion
+exception: https://github.com/Raphaeltt1/tips-ledger/actions/runs/41173756418
+
 ## Warnings and limitations
 
 - Supabase security advisor still flags privileged role-checked RPC functions,
