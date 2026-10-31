@@ -49,7 +49,7 @@ def db_client_command(scratch, command):
     return [
         "docker", "run", "--rm", "--network", "host",
         "-v", f"{scratch}:/work", "-w", "/work",
-        "-e", "PGDATABASE", DOCKER_IMAGE,
+        "-e", "PGDATABASE", "-e", "PGSSLMODE=require", DOCKER_IMAGE,
         *command,
     ]
 
