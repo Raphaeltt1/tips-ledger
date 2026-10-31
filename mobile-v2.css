@@ -6,7 +6,7 @@
  --tl-teal:#007e78;--tl-teal-2:#005e58;--tl-mint:#e3f6f0;--tl-surface:#f1f6f5;
  --tl-top:#ffffff;--tl-hero-a:#13333c;--tl-hero-b:#185a5e;--tl-positive:#087a64;
  --tl-success:#e5f7f0;--tl-orange:#ae701f;--tl-orange-bg:#fff3e0;--tl-danger:#b14758;--tl-danger-bg:#fbeaf0;
- --tl-soft-shadow:0 9px 34px #173a460a;--tl-graph:#007e78;--tl-grid:#dcebea;--tl-modal:#fff;
+ --tl-button-ink:#fff;--tl-soft-shadow:0 9px 34px #173a460a;--tl-graph:#007e78;--tl-grid:#dcebea;--tl-modal:#fff;
  --blue:var(--tl-teal);--navy:var(--tl-text);--line:var(--tl-border);
 }
 html[data-theme="dark"]{
@@ -14,7 +14,7 @@ html[data-theme="dark"]{
  --tl-teal:#78dfc8;--tl-teal-2:#9af2db;--tl-mint:#27423e;--tl-surface:#24383c;
  --tl-top:#192a30;--tl-hero-a:#173e42;--tl-hero-b:#245f64;--tl-positive:#93e7c9;
  --tl-success:#25463f;--tl-orange:#eac48d;--tl-orange-bg:#47392c;--tl-danger:#ffaaba;--tl-danger-bg:#4a303b;
- --tl-soft-shadow:0 9px 34px #0002;--tl-graph:#89e6ce;--tl-grid:#385052;--tl-modal:#1b2b30;
+ --tl-button-ink:#12343b;--tl-soft-shadow:0 9px 34px #0002;--tl-graph:#89e6ce;--tl-grid:#385052;--tl-modal:#1b2b30;
  --blue:var(--tl-teal);--navy:var(--tl-text);--line:var(--tl-border);
 }
 html,body{background:var(--tl-bg);color:var(--tl-text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -54,7 +54,7 @@ label,html[data-theme="dark"] label{font-weight:730;color:var(--tl-text);font-si
 input,select,textarea{border:1px solid var(--tl-border);border-radius:11px;background:var(--tl-bg);color:var(--tl-text);min-height:44px;padding:10px 12px;max-width:100%}
 html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{border-color:var(--tl-border);background:var(--tl-bg);color:var(--tl-text)}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--tl-teal);outline-offset:1px}
-button{background:var(--tl-teal);color:#fff;border-radius:12px;min-height:42px;padding:10px 14px;box-shadow:none;font-weight:740;font-size:13px}
+button{background:var(--tl-teal);color:var(--tl-button-ink);border-radius:12px;min-height:42px;padding:10px 14px;box-shadow:none;font-weight:740;font-size:13px}
 button:disabled{opacity:.45}
 .tl-neutral-button{background:var(--tl-surface)!important;color:var(--tl-text)!important;border:1px solid var(--tl-border)!important}
 .tl-secondary-button{background:var(--tl-card)!important;color:var(--tl-text)!important;border:1px solid var(--tl-border)!important}
@@ -285,7 +285,7 @@ html[data-theme="dark"] .push-troubleshooting{border-color:var(--tl-border)}
 #app .tl-payments-section{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important}
 #tlPaymentHeader{position:relative;min-height:109px;padding-right:108px}
 #tlPaymentHeader .tl-page-title{font-weight:830}
-#tlNewDraftAction{position:absolute;right:0;top:31px;min-height:38px!important;padding:8px 13px!important;font-size:12px;border-radius:11px;background:var(--tl-teal)!important;color:#fff!important}
+#tlNewDraftAction{position:absolute;right:0;top:31px;min-height:38px!important;padding:8px 13px!important;font-size:12px;border-radius:11px;background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
 #tlNewDraftAction.hidden{display:none!important}
 #tlPaymentToolbar h2:before{display:none!important}
 #tlPaymentToolbar h2{font-size:17px!important}
