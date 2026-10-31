@@ -49,17 +49,20 @@ def db_client_command(scratch, command):
     return [
         "docker", "run", "--rm", "--network", "host",
         "-v", f"{scratch}:/work", "-w", "/work",
-        "-e", "SUPABASE_DB_URL", DOCKER_IMAGE,
+        "-e", "PGDATABASE", DOCKER_IMAGE,
         *command,
     ]
 
 
 def run_database_export(scratch):
     print("Exporting PostgreSQL schemas public, auth, and storage (read-only)...")
+    # The connection URI must not appear in process arguments or tracebacks.
+    # PostgreSQL clients read PGDATABASE from the container environment.
+    os.environ["PGDATABASE"] = os.environ["SUPABASE_DB_URL"]
     subprocess.run(db_client_command(scratch, [
-        "pg_dump", "--dbname", os.environ["SUPABASE_DB_URL"],
+        "pg_dump",
         "--format=custom", "--compress=6",
-        "--no-owner", "--no-privileges",
+        "--no-owner",
         "--schema=public", "--schema=auth", "--schema=storage",
         "--file=/work/database.dump",
     ]), check=True, timeout=900)
@@ -75,7 +78,7 @@ def run_database_export(scratch):
         "WHERE o.name IS NOT NULL;"
     )
     result = subprocess.run(db_client_command(scratch, [
-        "psql", "--dbname", os.environ["SUPABASE_DB_URL"],
+        "psql",
         "--no-psqlrc", "--tuples-only", "--no-align",
         "--set", "ON_ERROR_STOP=1", "--command", query,
     ]), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
