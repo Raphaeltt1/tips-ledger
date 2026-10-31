@@ -107,10 +107,10 @@ Deno.serve(async (req) => {
       .eq("id", runnerId)
       .maybeSingle();
 
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew"];
     const allowedTargets = actor.role === "superuser"
-      ? ["admin", "manager", "runner"]
-      : ["manager", "runner"];
-    if (
+      ? ["admin", "manager", ...teamRoles]
+      : ["manager", ...teamRoles];    if (
       runnerError ||
       !runner ||
       !allowedTargets.includes(runner.role)
