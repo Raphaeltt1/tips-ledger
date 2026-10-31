@@ -25,7 +25,7 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 PROJECT_REF = "qvwgmybocjyhldwnrqqt"
 PREFIX = "tips-ledger/daily/"
-RETENTION_DAYS = 30
+RETENTION_DAYS = 7
 SAFE_MAX_BYTES = 8_000_000_000  # Stop before Cloudflare R2's 10 GB-month free allowance.
 DOCKER_IMAGE = "postgres:17.6-bookworm"
 ARCHIVE_MAGIC = b"TLB1"
