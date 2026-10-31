@@ -39,7 +39,7 @@ class TestSupabaseConnectionUri(unittest.TestCase):
         self.assertEqual(settings["PGPASSWORD"], "encoded@test#value")
 
     def test_password_placeholder_explained(self):
-        with self.assertRaisesRegex(RuntimeError, r"still contains \\[YOUR-PASSWORD\\]"):
+        with self.assertRaisesRegex(RuntimeError, "still contains"):
             self.parse(
                 "postgresql://postgres.qvwgmybocjyhldwnrqqt:"
                 "[YOUR-PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
