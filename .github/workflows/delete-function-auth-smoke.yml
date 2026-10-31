@@ -2,9 +2,6 @@ name: Tips Ledger - Delete Function Auth Smoke Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - fix-employee-delete-401-20261031
 
 permissions:
   contents: read
