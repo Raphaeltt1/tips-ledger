@@ -1,7 +1,7 @@
 name: Tips Ledger - Encrypted Daily Offsite Backup
 
-# The workflow stays on a separate branch until Cloudflare and GitHub Secrets
-# are configured and the first manual run has been verified.
+# First encrypted R2 backup was successfully exported, uploaded, downloaded,
+# decrypted, and verified in the manual run on 2026-10-31.
 on:
   workflow_dispatch:
   schedule:
@@ -17,9 +17,7 @@ concurrency:
 
 jobs:
   backup:
-    # Nightly scheduling is gated until the first manual backup has succeeded.
-    # Manual workflow_dispatch runs are always allowed.
-    if: github.event_name == 'workflow_dispatch' || vars.TIPS_LEDGER_BACKUP_ENABLED == 'true'
+    # Nightly scheduling is active following the verified manual backup.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
