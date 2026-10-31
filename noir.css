@@ -307,6 +307,7 @@ html[data-theme="dark"] .push-troubleshooting{border-color:var(--tl-border)}
 #tlPaymentHeader .tl-page-intro{max-width:350px}
 @media(max-width:400px){
  #tlPaymentHeader{padding-right:95px}
+ #tlEmployeeHeader{padding-right:120px}
  #tlNewDraftAction,#tlAddEmployeeAction{font-size:11px;right:0;top:32px;padding:8px!important}
  #tlPaymentToolbar .row button{font-size:10px!important;padding:8px!important}
 }
