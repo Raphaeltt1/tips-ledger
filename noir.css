@@ -288,8 +288,10 @@ html[data-theme="dark"] .push-troubleshooting{border-color:var(--tl-border)}
 /* Payment and account panes are full-screen-style sections, not nested desktop cards. */
 #app .tl-payments-section{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important}
 #tlPaymentHeader{position:relative;min-height:109px;padding-right:108px}
+#tlEmployeeHeader{position:relative;min-height:109px;padding-right:143px;margin:16px 0}
+#tlEmployeeHeader .tl-page-title{margin-bottom:7px}
 #tlPaymentHeader .tl-page-title{font-weight:830}
-#tlNewDraftAction{position:absolute;right:0;top:31px;min-height:38px!important;padding:8px 13px!important;font-size:12px;border-radius:11px;background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
+#tlNewDraftAction,#tlAddEmployeeAction{position:absolute;right:0;top:31px;min-height:38px!important;padding:8px 13px!important;font-size:12px;border-radius:11px;background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
 #tlNewDraftAction.hidden{display:none!important}
 #tlPaymentToolbar h2:before{display:none!important}
 #tlPaymentToolbar h2{font-size:17px!important}
@@ -305,7 +307,7 @@ html[data-theme="dark"] .push-troubleshooting{border-color:var(--tl-border)}
 #tlPaymentHeader .tl-page-intro{max-width:350px}
 @media(max-width:400px){
  #tlPaymentHeader{padding-right:95px}
- #tlNewDraftAction{font-size:11px;right:0;top:32px;padding:8px!important}
+ #tlNewDraftAction,#tlAddEmployeeAction{font-size:11px;right:0;top:32px;padding:8px!important}
  #tlPaymentToolbar .row button{font-size:10px!important;padding:8px!important}
 }
 
@@ -442,7 +444,7 @@ html[data-theme="dark"] #records .payment-card,html[data-theme="dark"] .tl-graph
 .tl-text-action{color:var(--tl-teal-2)}
 #tlPaymentSummary .tl-payment-summary{background:var(--tl-mint)}
 .tl-payment-summary{color:var(--tl-text)}
-#tlNewDraftAction,#records button[data-publish],#records button[data-confirm],#exportExcel{background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
+#tlNewDraftAction,#tlAddEmployeeAction,#records button[data-publish],#records button[data-confirm],#exportExcel{background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
 #tlPaymentToolbar button,#tlPaymentFilters button{border-radius:10px}
 #tlNoticeBackdrop,#tlModalBackdrop{background:#0b0f19a8}
 .tl-logged-in #message{max-width:1300px;margin:0 0 14px 220px}
