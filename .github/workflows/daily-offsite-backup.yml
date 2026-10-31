@@ -17,6 +17,9 @@ concurrency:
 
 jobs:
   backup:
+    # Nightly scheduling is gated until the first manual backup has succeeded.
+    # Manual workflow_dispatch runs are always allowed.
+    if: github.event_name == 'workflow_dispatch' || vars.TIPS_LEDGER_BACKUP_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
