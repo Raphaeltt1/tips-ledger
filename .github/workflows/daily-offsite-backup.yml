@@ -5,7 +5,8 @@ name: Tips Ledger - Encrypted Daily Offsite Backup
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 3 * * *' # UTC, once daily; GitHub schedules are best-effort.
+    - cron: '0 23 * * *' # Every day at 11 PM Lebanon local time.
+      timezone: 'Asia/Beirut' # Automatically follows Lebanese daylight-saving time.
 
 permissions:
   contents: read
