@@ -9,6 +9,7 @@ All files and the container are destroyed at the end of this job.
 import io
 import json
 import os
+import re
 import subprocess
 import tarfile
 import tempfile
@@ -33,7 +34,14 @@ def checked(cmd, step, timeout=120):
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"{step}: timed out") from None
     if result.returncode != 0:
-        raise RuntimeError(f"{step}: failed (exit {result.returncode}); "
+        # A pre-data error cannot include payroll rows; retain only the
+        # PostgreSQL ERROR summary to diagnose missing schema dependencies.
+        detail = ""
+        if "(pre-data)" in step:
+            match = re.search(r"ERROR: ([^\\r\\n]{1,180})", result.stderr)
+            if match:
+                detail = " — " + match.group(1)
+        raise RuntimeError(f"{step}: failed (exit {result.returncode}){detail}; "
                            "check the isolated restore script") from None
     return result.stdout.strip()
 
