@@ -15,7 +15,7 @@ BEGIN
   IF TG_OP = 'DELETE' THEN
     IF OLD.published = true
        AND NOT (
-         pg_catalog.current_setting('app.allow_permanent_runner_delete', true) = 'on'
+         COALESCE(pg_catalog.current_setting('app.allow_permanent_runner_delete', true), '') = 'on'
          AND public.current_user_role() IN ('admin', 'superuser')
        ) THEN
       RAISE EXCEPTION 'Published payouts cannot be deleted';
