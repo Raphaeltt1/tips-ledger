@@ -35,7 +35,7 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <header class="tl-topbar"><div class="tl-topbar-inner"><div id="noirTopCrumb" class="noir-top-crumb">CONTROL CENTER <span> / WORKSPACE</span></div>
 <div class="tl-brand"><div class="tl-logo" aria-hidden="true">◈<span style="display:none">.</span></div><div><div class="tl-brand-title">Tips Ledger</div><div id="tlHeaderRole" class="tl-brand-role">SECURE WORKSPACE</div></div></div>
 <div class="tl-header-actions">
-<button id="tlHeaderCurrencyToggle" type="button" class="tl-currency-toggle hidden" aria-label="Show USD equivalents" title="1 USD = 89,500 LBP (BDL reference rate; not live)">LBP</button>
+<button id="tlHeaderCurrencyToggle" type="button" class="tl-currency-toggle hidden" aria-label="Show USD equivalents" title="1 USD = 90,000 LBP (BDL reference rate; not live)">LBP</button>
 <button id="tlHeaderThemeToggle" type="button" class="tl-icon-button" aria-label="Switch to dark mode" title="Toggle light and dark mode">☀</button>
 <button id="noticeToggle" type="button" class="notice-button hidden" aria-label="Notifications">🔔 <span id="noticeCount" class="notice-count hidden">0</span></button>
 <button id="tlProfileShortcut" type="button" class="tl-avatar-button hidden" aria-label="Account settings">TL</button><button id="tlHeaderSignOut" type="button" class="tl-icon-button hidden" aria-label="Sign out of inactive account" title="Sign out">⇥</button>
@@ -75,7 +75,7 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <script>
 (()=>{'use strict';
 const URL='https://qvwgmybocjyhldwnrqqt.supabase.co',KEY='sb_publishable_QfqtXc7KTnV3SAy2vQ6qIA_3N9cbSd8';
-const USD_LBP_RATE=89500; // BDL reference rate, not live; stored numbers are always LBP.
+const USD_LBP_RATE=90000; // BDL reference rate, not live; stored numbers are always LBP.
 let currencyView='LBP';
 const moneyLBP=n=>'LBP '+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2});
 const money=n=>currencyView==='USD'?'$'+(Number(n||0)/USD_LBP_RATE).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):moneyLBP(n);
