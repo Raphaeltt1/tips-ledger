@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
     const token = authorization.slice("Bearer ".length);
 
     const authClient = createClient(url, anonKey, {
+      global: { headers: { Authorization: authorization } },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -78,6 +79,14 @@ Deno.serve(async (req) => {
         { error: "Admin or Superuser access required" },
         403
       );
+    }
+
+    // Verify the authenticated caller's role through the MFA-aware database
+    // function. Service-role profile reads must not bypass required AAL2.
+    const { data: sessionRole, error: sessionRoleError } =
+      await authClient.rpc("current_user_role");
+    if (sessionRoleError || sessionRole !== actor.role) {
+      return json({ error: "Additional sign-in verification is required" }, 403);
     }
 
     const body = await req.json();
