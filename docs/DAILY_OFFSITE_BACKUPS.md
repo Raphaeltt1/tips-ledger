@@ -1,7 +1,7 @@
 # Tips Ledger — Daily offsite backups (browser-only setup)
 
-This workflow is intentionally staged on the `automation/daily-offsite-backups-20261031` branch.
-It **does not run daily until the branch is merged into main after a successful manual test**.
+This workflow is staged on the `automation/daily-offsite-backups-20261031` branch.
+Once merged into `main`, it can be run manually. Nightly backups are **disabled by default** until the repository variable `TIPS_LEDGER_BACKUP_ENABLED` is set to `true` after one successful manual test.
 
 ## What is backed up?
 
@@ -80,12 +80,14 @@ recommended by Supabase.
 
 ## Step 3: Activate after review
 
-Contact ChatGPT after you have saved the six configured values in GitHub
-(4 secrets + 2 variables). The workflow can then be promoted to `main`.
+Once the 4 secrets and 2 variables are saved, merge the staged workflow to `main`.
 Use **GitHub > Actions > Tips Ledger - Encrypted Daily Offsite Backup >
-Run workflow** for the initial manual test. Only claim that daily backups
-are operating after this first test reports SUCCESS and the file is visible
-in the private R2 bucket.
+Run workflow**, select branch `main`, and start the first manual test. Wait for
+SUCCESS and check that an encrypted `.tlbak` exists in the private R2 bucket.
+If the test succeeds, create a **Repository variable** named
+`TIPS_LEDGER_BACKUP_ENABLED` with value `true` to activate daily scheduling.
+Do not enable the variable before verifying a manual backup and do not claim
+that nightly backups are operating until the first scheduled run succeeds.
 
 ## Restore overview
 
