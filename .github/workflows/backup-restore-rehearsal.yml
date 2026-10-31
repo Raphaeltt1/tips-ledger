@@ -33,6 +33,10 @@ jobs:
         run: python -m pip install --disable-pip-version-check -r scripts/backup-requirements.txt
       - name: Check existing backup parser tests
         run: python -m unittest discover -s tests -p 'test_backup_*.py' -v
+      - name: Validate upgraded SheetJS Excel export (no secrets)
+        run: |
+          curl -fsSL --retry 2 --max-time 30 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js' -o /tmp/tl-xlsx.full.min.js
+          node -e "const x=require('/tmp/tl-xlsx.full.min.js');const ws=x.utils.aoa_to_sheet([['Week','Tips'],['Test',10]]);const wb=x.utils.book_new();x.utils.book_append_sheet(wb,ws,'Tips');const out=x.write(wb,{bookType:'xlsx',type:'buffer'});if(x.version!=='0.20.3'||!out||out.length<100)process.exit(1);console.log('SheetJS export smoke test passed');"
       - name: Restore archived payment tables to an isolated disposable database
         env:
           BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
