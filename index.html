@@ -511,13 +511,39 @@ function openMobileNotices(){
 }
 
 async function loadEmployeeRates(people){
-  if(!['admin','superuser'].includes(profile?.role))return;
-  const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
-  const r=await db.from('runner_rates').select('runner_id,hourly_rate,effective_from').lte('effective_from',today).order('effective_from',{ascending:false});
-  const body=$('employeeRatesRows');
-  if(r.error){body.innerHTML='<tr><td colspan="5">Could not load rates: '+esc(r.error.message)+'</td></tr>';return}
-  const current=new Map();for(const x of r.data||[])if(!current.has(x.runner_id))current.set(x.runner_id,x.hourly_rate);
-  body.innerHTML=people.map(x=>'<tr><td>'+esc(x.full_name)+'</td><td>'+esc(x.role)+'</td><td>'+esc(x.active?'Active':'Inactive')+'</td><td>'+(isTeamMemberRole(x.role)?(current.has(x.id)?money(current.get(x.id)):'Not configured'):'N/A')+'</td><td>'+(isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'" data-rate-value="'+esc(current.get(x.id)??'')+'">Edit rate</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="5">No employees found.</td></tr>';
+ if(!['admin','superuser'].includes(profile?.role))return;
+ // Include future rates when detecting if an initial rate has EVER been defined.
+ const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+ const r=await db.from('runner_rates').select('runner_id,hourly_rate,effective_from').order('effective_from',{ascending:false});
+ const body=$('employeeRatesRows'),dropdown=$('rateRunner'),submit=$('rateForm').querySelector('button[type="submit"], button');
+ if(r.error){
+  body.innerHTML='<tr><td colspan="5">Could not load rates: '+esc(r.error.message)+'</td></tr>';
+  dropdown.innerHTML='<option value="">Cannot load rates</option>';dropdown.disabled=true;
+  if(submit)submit.disabled=true;
+  $('tlUnratedNotice').textContent='Could not load team member rate history. Please refresh.';
+  return;
+ }
+ const defined=new Set(),current=new Map();
+ for(const rate of r.data||[]){
+  defined.add(rate.runner_id);
+  if(rate.effective_from<=today&&!current.has(rate.runner_id))current.set(rate.runner_id,rate.hourly_rate);
+ }
+ const unrated=people.filter(p=>isTeamMemberRole(p.role)&&p.active&&!defined.has(p.id));
+ const selected=dropdown.value;
+ dropdown.innerHTML=unrated.length?unrated.map(p=>
+  '<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(roleLabel(p.role))+'</option>'
+ ).join(''):'<option value="">No unrated team members</option>';
+ dropdown.disabled=!unrated.length;
+ if(submit)submit.disabled=!unrated.length;
+ if(unrated.some(x=>x.id===selected))dropdown.value=selected;
+ $('tlUnratedNotice').textContent=unrated.length
+  ?unrated.length+' team member'+(unrated.length===1?'':'s')+' without any hourly rate. Once you save a rate, edit future changes in the table above.'
+  :'All active team members have an hourly rate. Use Employee hourly rates & individual edits to make changes.';
+ body.innerHTML=people.map(x=>
+  '<tr><td>'+esc(x.full_name)+'</td><td>'+esc(roleLabel(x.role))+'</td><td>'+esc(x.active?'Active':'Inactive')+'</td><td>'+
+  (isTeamMemberRole(x.role)?(current.has(x.id)?money(current.get(x.id)):defined.has(x.id)?'Scheduled':'Not configured'):'N/A')+
+  '</td><td>'+(isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'" data-rate-value="'+esc(current.get(x.id)??'')+'">Edit rate</button>':'—')+'</td></tr>'
+ ).join('')||'<tr><td colspan="5">No employees found.</td></tr>';
 }
 async function saveCurrentRate(id,rate){
  if(!['admin','superuser'].includes(profile?.role))throw Error('Admin access required');
@@ -556,7 +582,7 @@ function renderManageableEmployees(people){
  }).join('');
 }
 async function refresh(){if(!profile)return;
-if(!isTeamMemberRole(profile.role)){const p=await db.from('profiles').select('id,full_name,role,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>isTeamMemberRole(x.role)&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').innerHTML='<option value="">All team members</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active runners</span><b>'+p.data.filter(x=>isTeamMemberRole(x.role)&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();$('rateRunner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');await loadEmployeeRates(p.data)}}
+if(!isTeamMemberRole(profile.role)){const p=await db.from('profiles').select('id,full_name,role,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>isTeamMemberRole(x.role)&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').innerHTML='<option value="">All team members</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active runners</span><b>'+p.data.filter(x=>isTeamMemberRole(x.role)&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();await loadEmployeeRates(p.data)}}
 let payQuery=db.from('weekly_tips').select('id,runner_id,week_start,hours_worked,tips_amount,advances,net_payout,published').order('week_start',{ascending:false});if(isTeamMemberRole(profile.role))payQuery=payQuery.eq('runner_id',profile.id).eq('published',true);const r=await payQuery;if(r.error){msg(r.error.message,true);return}rows=r.data||[];
 let confirmed=[];let receiptQuery=db.from('receipt_confirmations').select('weekly_tip_id');if(isTeamMemberRole(profile.role))receiptQuery=receiptQuery.eq('runner_id',profile.id);const c=await receiptQuery;if(c.error){msg('Could not load receipt confirmations: '+c.error.message,true);return}confirmed=(c.data||[]).map(x=>x.weekly_tip_id)
 if(!isTeamMemberRole(profile.role)){const pending=rows.filter(x=>x.published&&!confirmed.includes(x.id));const alert=$('pendingAlert');alert.classList.toggle('hidden',false);alert.classList.toggle('clear',pending.length===0);alert.innerHTML=pending.length?'<div><strong>'+pending.length+' unconfirmed payment'+(pending.length===1?'':'s')+'</strong><div>Published payments awaiting runner confirmation</div></div><button type="button" id="viewPending">View pending</button>':'<div><strong>All published payments confirmed</strong><div>No outstanding receipts</div></div>';if(pending.length)$('viewPending').onclick=()=>{$('from').value='';$('to').value='';$('historyRunner').value='';$('historyStatus').value='published';setTab('payments');refresh()}}else{show('pendingAlert',false)}
