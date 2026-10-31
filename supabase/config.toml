@@ -1,0 +1,13 @@
+# Keep these settings aligned with currently deployed Edge Functions.
+# create-employee- and delete-employee authenticate user JWTs explicitly
+# inside their handlers with Auth.getUser(token) and server-side role checks.
+# The platform JWT check previously rejected a valid ES256 signed-in token on
+# delete-employee; do not switch its verify_jwt back on without regression tests.
+[functions.create-employee-]
+verify_jwt = false
+
+[functions.delete-employee]
+verify_jwt = false
+
+[functions.send-push]
+verify_jwt = true
