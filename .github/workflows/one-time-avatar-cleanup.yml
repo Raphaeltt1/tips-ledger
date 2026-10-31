@@ -1,0 +1,29 @@
+name: One-time orphan profile photo cleanup
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - one-time-orphan-avatar-cleanup-20261031
+
+permissions:
+  contents: read
+
+jobs:
+  orphan-avatar-cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Verify cleanup script
+        run: deno check scripts/cleanup_orphan_avatars_once.ts
+      - name: Verify live Storage, account ownership, and hashed allowlist
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DRY_RUN: 'true'
+        run: deno run -A scripts/cleanup_orphan_avatars_once.ts
