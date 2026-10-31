@@ -38,9 +38,8 @@ def checked(cmd, step, timeout=120):
         # PostgreSQL ERROR summary to diagnose missing schema dependencies.
         detail = ""
         if "(pre-data)" in step:
-            match = re.search(r"ERROR: ([^\\r\\n]{1,180})", result.stderr)
-            if match:
-                detail = " — " + match.group(1)
+            # Only DDL pre-data restores are diagnosed; never log data restores.
+            detail = " — " + result.stderr.strip().replace("\\n", " ")[:600]
         raise RuntimeError(f"{step}: failed (exit {result.returncode}){detail}; "
                            "check the isolated restore script") from None
     return result.stdout.strip()
