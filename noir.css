@@ -703,3 +703,19 @@ body.tl-logged-in .noir-content>.tl-greeting{margin:4px 0 18px}
  #tlRunnerGraphSlot{margin-top:14px}
  #runnerPaymentTable .tl-section-head{gap:7px;flex-wrap:wrap}
 }
+
+
+/* A discreet crown identifies the signed-in Superuser only. */
+.tl-superuser-crown{
+ display:inline-block;
+ vertical-align:middle;
+ margin-left:7px;
+ color:#f1bd4a;
+ font-size:.94em;
+ line-height:1;
+ filter:drop-shadow(0 1px 3px #cb942a55);
+}
+.noir-sidebar-person .tl-superuser-crown{
+ margin-left:5px;
+ font-size:14px;
+}
