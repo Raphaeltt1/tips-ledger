@@ -604,6 +604,22 @@ function renderManageableEmployees(people){
    '</span></p>';
  }).join('');
 }
+
+function renderPaymentRows(){
+ if(!profile)return;
+ const filtered=currentFilteredRows,confirmed=currentPaymentConfirmations,names=currentRunnerNames;
+ const visible=filtered.slice(0,paymentRowsShown);
+ const actions=x=>isTeamMemberRole(profile.role)?(confirmed.includes(x.id)?'<span class="status-pill status-received">Received</span>':'<button data-confirm="'+esc(x.id)+'">Confirm receipt</button>'):(x.published?(confirmed.includes(x.id)?'<span class="status-pill status-received">Received</span>':(['admin','superuser'].includes(profile.role)?'<button data-edit="'+esc(x.id)+'" style="background:#64748b;margin-right:6px">Edit</button>':'')+'<span class="status-pill status-published">Published</span>'):(['admin','superuser'].includes(profile.role)?'<button data-edit="'+esc(x.id)+'" style="background:#64748b;margin-right:6px">Edit</button>':'')+'<button data-publish="'+esc(x.id)+'">Publish</button>');
+ if(isTeamMemberRole(profile.role)){
+  $('runnerPaymentTableContents').innerHTML='<table><thead><tr><th>Week</th><th>Hours worked</th><th>Tips</th><th>Advances</th><th>Remaining</th><th>Status / Action</th></tr></thead><tbody>'+(visible.length?visible.map(x=>'<tr><td>'+esc(x.week_start)+'</td><td>'+esc(x.hours_worked)+'</td><td>'+money(x.tips_amount)+'</td><td>'+money(x.advances)+'</td><td>'+money(x.net_payout)+'</td><td>'+actions(x)+'</td></tr>').join(''):'<tr><td colspan="6">No payments match your filters.</td></tr>')+'</tbody></table>';
+ }else{
+  $('records').innerHTML='<table><thead><tr><th>Week</th><th>Team Member</th><th>Hours</th><th>Tips</th><th>Advance</th><th>Remaining</th><th>Status</th></tr></thead><tbody>'+(visible.length?visible.map(x=>'<tr><td>'+esc(x.week_start)+'</td><td>'+esc(names.get(x.runner_id)||'Team Member')+'</td><td>'+esc(x.hours_worked)+'</td><td>'+money(x.tips_amount)+'</td><td>'+money(x.advances)+'</td><td>'+money(x.net_payout)+'</td><td>'+actions(x)+'</td></tr>').join(''):'<tr><td colspan="7">No payments match your filters.</td></tr>')+'</tbody></table>';
+ }
+ $('tlPaymentPageCount').textContent=filtered.length?'Showing '+visible.length+' of '+filtered.length+' payment record'+(filtered.length===1?'':'s'):'No matching payment records';
+ show('tlPaymentShowMore',visible.length<filtered.length);
+}
+$('tlPaymentShowMore').onclick=()=>{paymentRowsShown+=PAYMENT_PAGE_SIZE;renderPaymentRows()};
+
 async function refresh(){if(!profile)return;
 if(!isTeamMemberRole(profile.role)){const p=await db.from('profiles').select('id,full_name,role,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>isTeamMemberRole(x.role)&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.role))+'</option>').join('');$('historyRunner').innerHTML='<option value="">All team members</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.role))+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active team members</span><b>'+p.data.filter(x=>isTeamMemberRole(x.role)&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();await loadEmployeeRates(p.data)}}
 let payQuery=db.from('weekly_tips').select('id,runner_id,week_start,hours_worked,tips_amount,advances,net_payout,published').order('week_start',{ascending:false}).order('created_at',{ascending:false});if(isTeamMemberRole(profile.role))payQuery=payQuery.eq('runner_id',profile.id).eq('published',true);const r=await payQuery;if(r.error){msg(r.error.message,true);return}rows=r.data||[];
@@ -618,12 +634,8 @@ const latestPublished=latestRows.filter(x=>x.published).length;
 const latestPending=latestRows.filter(x=>x.published&&!confirmed.includes(x.id)).length;
 $('latestWeekLabel').textContent=latestWeek?(isTeamMemberRole(profile.role)?'Based on your latest published payment.':'Latest recorded week: '+latestWeek):'No weekly payments have been recorded yet.';
 $('latestWeekSummary').innerHTML=latestWeek?stat(isTeamMemberRole(profile.role)?'Week starting':'Payments',isTeamMemberRole(profile.role)?latestWeek:latestRows.length)+stat('Tips recorded',money(latestRows.reduce((a,x)=>a+Number(x.tips_amount),0)))+stat('Advances',money(latestRows.reduce((a,x)=>a+Number(x.advances),0)))+stat('Remaining',money(latestRows.reduce((a,x)=>a+Number(x.net_payout),0)))+stat('Published',latestPublished)+stat('Awaiting receipt',latestPending)+stat('Received',latestReceived)+(isTeamMemberRole(profile.role)?'':stat('Active team members',runners.length)):'<div class="empty-state">Create a weekly draft to start your overview.</div>';
-renderMobileDashboard(rows,confirmed);const names=employeeNames;currentFilteredRows=filtered.slice();currentRunnerNames=names;
-const actions=x=>isTeamMemberRole(profile.role)?(confirmed.includes(x.id)?'<span class="status-pill status-received">Received</span>':'<button data-confirm="'+esc(x.id)+'">Confirm receipt</button>'):(x.published?(confirmed.includes(x.id)?'<span class="status-pill status-received">Received</span>':(['admin','superuser'].includes(profile.role)?'<button data-edit="'+esc(x.id)+'" style="background:#64748b;margin-right:6px">Edit</button>':'')+'<span class="status-pill status-published">Published</span>'):(['admin','superuser'].includes(profile.role)?'<button data-edit="'+esc(x.id)+'" style="background:#64748b;margin-right:6px">Edit</button>':'')+'<button data-publish="'+esc(x.id)+'">Publish</button>');
-$('records').innerHTML=isTeamMemberRole(profile.role)?'':'<table><thead><tr><th>Week</th><th>Team Member</th><th>Hours</th><th>Tips</th><th>Advance</th><th>Remaining</th><th>Status</th></tr></thead><tbody>'+filtered.map(x=>'<tr><td>'+esc(x.week_start)+'</td><td>'+esc(names.get(x.runner_id)||'Team Member')+'</td><td>'+esc(x.hours_worked)+'</td><td>'+money(x.tips_amount)+'</td><td>'+money(x.advances)+'</td><td>'+money(x.net_payout)+'</td><td>'+actions(x)+'</td></tr>').join('')+'</tbody></table>';
-if(isTeamMemberRole(profile.role)){
- $('runnerPaymentTableContents').innerHTML='<table><thead><tr><th>Week</th><th>Hours worked</th><th>Tips</th><th>Advances</th><th>Remaining</th><th>Status / Action</th></tr></thead><tbody>'+filtered.map(x=>'<tr><td>'+esc(x.week_start)+'</td><td>'+esc(x.hours_worked)+'</td><td>'+money(x.tips_amount)+'</td><td>'+money(x.advances)+'</td><td>'+money(x.net_payout)+'</td><td>'+actions(x)+'</td></tr>').join('')+'</tbody></table>'+(filtered.length?'':'<p class="muted">No payments match your filters.</p>');
-}
+renderMobileDashboard(rows,confirmed);currentFilteredRows=filtered.slice();currentRunnerNames=employeeNames;currentPaymentConfirmations=confirmed.slice();paymentRowsShown=PAYMENT_PAGE_SIZE;
+renderPaymentRows();
 }
 
 
