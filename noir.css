@@ -719,3 +719,27 @@ body.tl-logged-in .noir-content>.tl-greeting{margin:4px 0 18px}
  margin-left:5px;
  font-size:14px;
 }
+
+
+/* Compact payment-history pagination and shared per-user currency display. */
+.tl-currency-toggle{
+ min-width:58px;height:40px;min-height:40px!important;padding:0 10px!important;
+ border:1px solid var(--tl-border)!important;border-radius:12px!important;
+ background:var(--tl-card)!important;color:var(--tl-text)!important;
+ font-size:12px!important;font-weight:850!important;letter-spacing:.35px;
+ box-shadow:none!important;white-space:nowrap;
+}
+.tl-currency-toggle[aria-pressed="true"]{
+ background:var(--tl-mint)!important;color:var(--tl-teal-2)!important;
+ border-color:var(--tl-border)!important;
+}
+.tl-currency-toggle.hidden{display:none!important}
+.tl-payment-pager{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 4px}
+#tlPaymentPageCount{font-size:12px;color:var(--tl-muted)}
+#tlPaymentShowMore{min-height:38px!important;border-radius:10px!important;font-size:12px!important}
+#tlPaymentShowMore.hidden{display:none!important}
+@media(max-width:410px){
+ body.tl-logged-in header .noir-top-crumb{display:none!important}
+ body.tl-logged-in header .tl-topbar-inner{justify-content:flex-end!important}
+ body.tl-logged-in header .tl-header-actions{gap:7px}
+}
