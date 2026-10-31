@@ -43,22 +43,58 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def configure_database_environment():
+    # Libpq's PGDATABASE environment variable is a *database name*, not a
+    # connection URI. Convert the Supabase URI to separate libpq variables,
+    # preserving password secrecy (no credentials in process arguments/logs).
+    try:
+        uri = urllib.parse.urlsplit(required_env("SUPABASE_DB_URL"))
+        port = uri.port or 5432
+    except ValueError as exc:
+        raise RuntimeError(
+            "Invalid Supabase connection URI; check the Session pooler URL "
+            "in your GitHub SUPABASE_DB_URL secret."
+        ) from None
+    host = uri.hostname or ""
+    user = urllib.parse.unquote(uri.username or "")
+    password = urllib.parse.unquote(uri.password or "")
+    database = urllib.parse.unquote(uri.path.lstrip("/")) or "postgres"
+    if uri.scheme not in ("postgresql", "postgres") or not host or not user or not password:
+        raise RuntimeError(
+            "SUPABASE_DB_URL must contain a complete Postgres URI, "
+            "including a database username and password."
+        )
+    if password == "[YOUR-PASSWORD]":
+        raise RuntimeError("Replace the Supabase connection string password placeholder.")
+    if not (host.endswith(".pooler.supabase.com") or host == f"db.{PROJECT_REF}.supabase.co"):
+        raise RuntimeError("SUPABASE_DB_URL must point to the configured Supabase database.")
+    if port != 5432:
+        raise RuntimeError("Use the Supabase Session pooler (port 5432), not transaction mode.")
+    os.environ.update({
+        "PGHOST": host,
+        "PGPORT": str(port),
+        "PGUSER": user,
+        "PGPASSWORD": password,
+        "PGDATABASE": database,
+    })
+
+
 def db_client_command(scratch, command):
-    # Pass the connection string as a Docker environment variable rather than
-    # shell-interpolating it; do not log the database URL or process environment.
+    # Docker inherits each libpq variable by name, without placing secret
+    # values on the command line where an exception might print them.
     return [
         "docker", "run", "--rm", "--network", "host",
         "-v", f"{scratch}:/work", "-w", "/work",
-        "-e", "PGDATABASE", "-e", "PGSSLMODE=require", DOCKER_IMAGE,
+        "-e", "PGHOST", "-e", "PGPORT", "-e", "PGUSER",
+        "-e", "PGPASSWORD", "-e", "PGDATABASE",
+        "-e", "PGSSLMODE=require", DOCKER_IMAGE,
         *command,
     ]
 
 
 def run_database_export(scratch):
     print("Exporting PostgreSQL schemas public, auth, and storage (read-only)...")
-    # The connection URI must not appear in process arguments or tracebacks.
-    # PostgreSQL clients read PGDATABASE from the container environment.
-    os.environ["PGDATABASE"] = os.environ["SUPABASE_DB_URL"]
+    configure_database_environment()
     subprocess.run(db_client_command(scratch, [
         "pg_dump",
         "--format=custom", "--compress=6",
