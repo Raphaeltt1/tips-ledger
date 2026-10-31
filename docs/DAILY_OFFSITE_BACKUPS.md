@@ -1,7 +1,10 @@
 # Tips Ledger — Daily offsite backups (browser-only setup)
 
-This workflow is staged on the `automation/daily-offsite-backups-20261031` branch.
-Once merged into `main`, it can be run manually. Nightly backups are **disabled by default** until the repository variable `TIPS_LEDGER_BACKUP_ENABLED` is set to `true` after one successful manual test.
+This workflow is active on `main` following a successful manual test on
+2026-10-31. The verified run exported PostgreSQL, downloaded 3 Storage files,
+uploaded a private encrypted R2 archive, downloaded and authenticated it,
+and completed successfully. **Daily scheduled backups are enabled**, subject
+to GitHub's best-effort scheduler.
 
 ## What is backed up?
 
@@ -78,16 +81,18 @@ in its password; use the URL-encoded connection URI from Supabase and ensure
 any manual replacement of the password is URL-encoded. Keep SSL enabled as
 recommended by Supabase.
 
-## Step 3: Activate after review
+## Step 3: Verify and monitor the active backups
 
-Once the 4 secrets and 2 variables are saved, merge the staged workflow to `main`.
-Use **GitHub > Actions > Tips Ledger - Encrypted Daily Offsite Backup >
-Run workflow**, select branch `main`, and start the first manual test. Wait for
-SUCCESS and check that an encrypted `.tlbak` exists in the private R2 bucket.
-If the test succeeds, create a **Repository variable** named
-`TIPS_LEDGER_BACKUP_ENABLED` with value `true` to activate daily scheduling.
-Do not enable the variable before verifying a manual backup and do not claim
-that nightly backups are operating until the first scheduled run succeeds.
+The initial manual backup passed on 2026-10-31:
+https://github.com/Raphaeltt1/tips-ledger/actions/runs/41168792669 (attempt 3).
+The archive was confirmed by the script's R2 read-back and decryption verification.
+The scheduled workflow is enabled at 23:00 Asia/Beirut. The **first future
+scheduled run is not yet verified**, and scheduled GitHub Actions jobs can
+be delayed or occasionally skipped. Check Actions history and the private R2
+bucket periodically. You can also manually use **GitHub > Actions >
+Tips Ledger - Encrypted Daily Offsite Backup > Run workflow**, branch `main`.
+Do not add a repository variable named `TIPS_LEDGER_BACKUP_ENABLED`;
+the initial activation guard has been removed following the verified test.
 
 ## Restore overview
 
