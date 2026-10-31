@@ -94,6 +94,23 @@ Tips Ledger - Encrypted Daily Offsite Backup > Run workflow**, branch `main`.
 Do not add a repository variable named `TIPS_LEDGER_BACKUP_ENABLED`;
 the initial activation guard has been removed following the verified test.
 
+## Verified isolated restore rehearsal (2026-10-31)
+
+A successful **read-only** recovery smoke test restored 12 weekly payment rows,
+7 payment confirmations, and 3 employee rate records into a disposable,
+network-isolated PostgreSQL 17 Docker container. It also verified the database
+dump checksum and all 3 Storage file checksums after decrypting the R2 object.
+The test completed without connecting to the live database:
+https://github.com/Raphaeltt1/tips-ledger/actions/runs/41171669920
+
+The reusable, manually triggerable workflow is:
+`.github/workflows/backup-restore-rehearsal.yml`. It reads only R2, and uses
+no Supabase database credentials.
+
+**Limit:** this is a representative **table-level** restore test. It is NOT
+a full restore of Supabase Auth, Storage metadata, Edge Functions, VAPID secrets,
+or the production environment.
+
 ## Restore overview
 
 1. Find the latest `.tlbak` file in your private R2 bucket and download it
