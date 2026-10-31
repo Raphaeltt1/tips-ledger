@@ -23,8 +23,10 @@ earlier "local-only prototype" warning in this file was outdated.
   logic and are not editable by ordinary employees.
 - Privileged `SECURITY DEFINER` functions are intentionally callable by
   authenticated sessions where needed, with function-level role checks and
-  explicit locked search paths. The security advisor still flags 12 functions
-  for ongoing manual review; do not revoke them indiscriminately.
+  explicit locked search paths. On 2026-10-31, execute access was revoked
+  for 3 obsolete privileged functions, reducing the advisor count from 12 to 9.
+  The remaining functions are needed by the deployed app or its role checks;
+  do not revoke them indiscriminately.
 
 ## Authentication and browser dependencies
 
@@ -67,4 +69,6 @@ earlier "local-only prototype" warning in this file was outdated.
   Supabase; losing it renders the offsite archives unrecoverable.
 - Use pull requests and small changes for production updates; verify the
   relevant GitHub Actions and app function after merging.
+- The read-only restore rehearsal workflow is **manual-only** so repository
+  pushes cannot trigger a job that reads private R2 objects.
 - Do not run a destructive restore against the production database.
