@@ -131,7 +131,8 @@ def smoke_restore(scratch):
                     "docker", "exec", container, "pg_restore", "--exit-on-error",
                     "--no-owner", "--no-privileges", f"--section={section}",
                     "--schema=public", f"--table={table}",
-                    "--dbname=postgres", "/work/database.dump",
+                    "--username=postgres", "--dbname=postgres",
+                    "/work/database.dump",
                 ], f"Isolated restore of {table} ({section})", timeout=120)
 
         counts = {}
