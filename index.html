@@ -422,14 +422,25 @@ function tlDrawTrend(source){
  });
  const data=[...weekly].sort((a,b)=>a[0].localeCompare(b[0]));
  if(!data.length)return '<div class="tl-graph-box"><h3 style="margin:0">Tips performance</h3><p class="muted" style="font-size:12px;margin:12px 0">No published payments in the selected dates yet. Your trend will appear here after the first published week.</p></div>';
- const view=data.slice(-12),minx=44,maxx=319,bottom=143,top=25,maxVal=Math.max(1,...view.map(x=>x[1]))*1.16;
+ const view=data.slice(-12),minx=56,maxx=319,bottom=143,top=25,maxVal=Math.max(1,...view.map(x=>x[1]))*1.16;
  const coords=view.map(([date,tips],i)=>({date,tips,x:view.length===1?(minx+maxx)/2:minx+i*(maxx-minx)/(view.length-1),y:bottom-(tips/maxVal)*(bottom-top)}));
  const line=coords.length===1?'M '+(coords[0].x-17)+' '+coords[0].y+' H '+(coords[0].x+17):'M '+coords.map(p=>p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' L ');
  const fill=coords.length>1?'<path d="'+line+' L '+coords.at(-1).x+' '+bottom+' L '+coords[0].x+' '+bottom+' Z" fill="url(#tlTrendGradient)" opacity=".9"/>':'';
- const lines=[.0,.5,1].map(z=>{const y=bottom-z*(bottom-top);return '<path class="tl-chart-grid" d="M '+minx+' '+y+' H '+maxx+'"/><text class="tl-chart-label" x="38" y="'+(y+3)+'" text-anchor="end">'+esc(Math.round(maxVal*z/1000*10)/10>=1?(maxVal*z/1000).toFixed(1)+'k':String(Math.round(maxVal*z)))+'</text>'}).join('');
+ const axisTick=lbp=>{
+  if(currencyView==='USD'){
+   const usd=lbp/USD_LBP_RATE;
+   if(!usd)return '$0';
+   if(usd>=1000)return '$'+(usd/1000).toFixed(usd>=10000?0:1)+'k';
+   const step=maxVal/(2*USD_LBP_RATE);
+   const decimals=step>0?Math.min(6,Math.max(2,Math.ceil(-Math.log10(step))+1)):2;
+   return '$'+usd.toLocaleString('en-US',{minimumFractionDigits:usd>=1?0:2,maximumFractionDigits:decimals});
+  }
+  return Math.round(lbp/1000*10)/10>=1?(lbp/1000).toFixed(1)+'k':String(Math.round(lbp));
+ };
+ const lines=[.0,.5,1].map(z=>{const y=bottom-z*(bottom-top);return '<path class="tl-chart-grid" d="M '+minx+' '+y+' H '+maxx+'"/><text class="tl-chart-label" x="51" y="'+(y+3)+'" text-anchor="end">'+esc(axisTick(maxVal*z))+'</text>'}).join('');
  const lab=coords.map((p,i)=>view.length>6&&i%Math.ceil(view.length/6)!==0&&i!==view.length-1?'':'<text class="tl-chart-label" x="'+p.x+'" y="161" text-anchor="middle">'+esc(p.date.slice(5))+'</text>').join('');
  const dots=coords.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="var(--tl-graph)" stroke="var(--tl-card)" stroke-width="2"><title>'+esc(p.date+' — '+money(p.tips))+'</title></circle>').join('');
- return '<div class="tl-graph-box"><div class="tl-graph-top"><div><span class="tl-eyebrow">PERFORMANCE</span><h3>Tips over time</h3><p class="tl-caption">Tips before advances</p></div>'+'<span class="tl-pill received">Published</span>'+'</div><svg class="tl-trend-svg" viewBox="0 0 350 177" role="img" aria-label="Published weekly tips trend"><defs><linearGradient id="tlTrendGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--tl-graph)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--tl-graph)" stop-opacity="0"/></linearGradient></defs>'+lines+fill+'<path class="tl-chart-line" d="'+line+'"/>'+dots+lab+'</svg><p class="tl-caption" style="text-align:center;margin:0">'+(coords.length===1?'One published week so far · More weeks will connect the line':'Actual published weekly totals · '+(data.length>12?'Latest 12 of '+data.length+' weeks':data.length+' weeks'))+'</p></div>';
+ return '<div class="tl-graph-box"><div class="tl-graph-top"><div><span class="tl-eyebrow">PERFORMANCE</span><h3>Tips over time</h3><p class="tl-caption">Tips before advances · '+currencyView+'</p></div>'+'<span class="tl-pill received">Published</span>'+'</div><svg class="tl-trend-svg" viewBox="0 0 350 177" role="img" aria-label="Published weekly tips trend in '+currencyView+'"><defs><linearGradient id="tlTrendGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--tl-graph)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--tl-graph)" stop-opacity="0"/></linearGradient></defs>'+lines+fill+'<path class="tl-chart-line" d="'+line+'"/>'+dots+lab+'</svg><p class="tl-caption" style="text-align:center;margin:0">'+(coords.length===1?'One published week so far · More weeks will connect the line':'Actual published weekly totals · '+(data.length>12?'Latest 12 of '+data.length+' weeks':data.length+' weeks'))+'</p></div>';
 }
 function renderMobileDashboard(source,confirmations){
  if(!profile)return;
