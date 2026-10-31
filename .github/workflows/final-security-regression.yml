@@ -2,6 +2,15 @@ name: Tips Ledger - Final Security Regression
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'push-sw.js'
+      - 'manifest.webmanifest'
+      - 'supabase/functions/delete-employee/index.ts'
+      - '.github/workflows/final-security-regression.yml'
 
 permissions:
   contents: read
