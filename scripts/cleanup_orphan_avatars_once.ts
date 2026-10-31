@@ -19,13 +19,13 @@ const client = createClient("https://" + PROJECT + ".supabase.co", SECRET, {
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const jpeg = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jpg$/i;
-const digest = async (path) =>
+const digest = async (path: string) =>
   [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(path)))]
     .map((n) => n.toString(16).padStart(2, "0")).join("");
 
-function assert(ok, msg) { if (!ok) throw new Error(msg); }
+function assert(ok: unknown, msg: string): asserts ok { if (!ok) throw new Error(msg); }
 
-async function listing(folder) {
+async function listing(folder: string) {
   const {data, error} = await client.storage.from(BUCKET).list(folder, {
     limit: 1000, offset: 0, sortBy: { column: "name", order: "asc" },
   });
@@ -78,7 +78,8 @@ if (DRY_RUN) {
 // Validate the user account list again as close to the write as possible.
 const { data: freshProfiles, error: freshError } =
   await client.from("profiles").select("id,role,active,avatar_path").limit(1000);
-assert(!freshError && freshProfiles?.some((p) =>
+assert(!freshError && Array.isArray(freshProfiles), "Could not recheck active profiles");
+assert(freshProfiles.some((p) =>
   p.active && p.role === "superuser" && p.id === activeSuperusers[0].id &&
   p.avatar_path === activeSuperusers[0].avatar_path), "Superuser protection changed");
 assert(!targets.some((t) => freshProfiles.some((p) => p.id === t.folder)),
