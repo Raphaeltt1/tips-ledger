@@ -252,6 +252,7 @@
         when: makeLocalDate(x.occurred_at),
         actor: clean(x.actor_name || 'System / unavailable'),
         role: clean(x.display_role || x.actor_role || '—'),
+        rawRole: clean(x.actor_role),
         action: clean(x.display_action || x.action),
         employee: clean(x.target_name || '—'),
         details: clean(x.display_details),
@@ -362,7 +363,7 @@
     raw.getRow(4).height = 31;
     data.forEach((x,i) => {
       const row = raw.getRow(i+5);row.height = 26;
-      [x.id,x.timestamp,x.actorId,x.actor,x.role,x.actionCode,x.entityType,
+      [x.id,x.timestamp,x.actorId,x.actor,x.rawRole,x.actionCode,x.entityType,
         x.entityId,x.employeeId,x.employee,x.json].forEach((value,j) => {
         const cell = row.getCell(j+1);
         cell.value = value;cell.font = font(C.ink,9);
