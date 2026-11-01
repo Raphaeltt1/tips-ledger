@@ -205,9 +205,9 @@ html[data-theme="dark"] .graph-kpi{color:var(--tl-text)}
 #tlPaymentHeader .tl-page-title{margin-bottom:7px}
 #tlPaymentToolbar{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin:12px 0}
 #tlPaymentToolbar .row{gap:7px}
-#tlPaymentToolbar button{padding:9px 10px;font-size:11px;min-height:36px}
+#tlPaymentToolbar button,#exportAuditExcel{padding:9px 10px;font-size:11px;min-height:36px}
 #viewToggle{color:var(--tl-teal-2)!important;background:var(--tl-mint)!important;border:1px solid var(--tl-border)!important}
-#exportExcel{background:var(--tl-teal)!important}
+#exportExcel,#exportAuditExcel{background:var(--tl-teal)!important}
 .tl-payment-summary{background:var(--tl-mint);padding:14px;border-radius:15px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;color:var(--tl-text)}
 .tl-payment-summary strong{font-size:12px;display:block}
 .tl-payment-summary small{font-size:10px;display:block;color:var(--tl-muted);margin-top:4px}
@@ -445,8 +445,8 @@ html[data-theme="dark"] #records .payment-card,html[data-theme="dark"] .tl-graph
 .tl-text-action{color:var(--tl-teal-2)}
 #tlPaymentSummary .tl-payment-summary{background:var(--tl-mint)}
 .tl-payment-summary{color:var(--tl-text)}
-#tlNewDraftAction,#tlAddEmployeeAction,#records button[data-publish],#records button[data-confirm],#exportExcel{background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
-#tlPaymentToolbar button,#tlPaymentFilters button{border-radius:10px}
+#tlNewDraftAction,#tlAddEmployeeAction,#records button[data-publish],#records button[data-confirm],#exportExcel,#exportAuditExcel{background:var(--tl-teal)!important;color:var(--tl-button-ink)!important}
+#tlPaymentToolbar button,#tlPaymentFilters button,#exportAuditExcel{border-radius:10px}
 #tlNoticeBackdrop,#tlModalBackdrop{background:#0b0f19a8}
 .tl-logged-in #message{max-width:1300px;margin:0 0 14px 220px}
 #app:not(.hidden) .noir-sidebar{visibility:visible}
