@@ -10,6 +10,8 @@ on:
       - main
     paths:
       - 'index.html'
+      - 'receipt-pdf.js'
+      - 'tests/receipt_pdf.test.cjs'
       - 'push-sw.js'
       - 'manifest.webmanifest'
       - 'supabase/functions/delete-employee/index.ts'
@@ -55,9 +57,12 @@ jobs:
           node --check /tmp/tl-inline-0.js
           node --check /tmp/tl-inline-1.js
           node --check push-sw.js
+          node --check receipt-pdf.js
           python -m json.tool manifest.webmanifest > /dev/null
       - name: Verify Beirut Audit Log dates and Excel payment status accuracy
         run: node --test tests/final_accuracy.test.cjs
+      - name: Verify PDF receipt generation, permissions and iPhone sharing
+        run: node --test tests/receipt_pdf.test.cjs
       - name: Verify Superuser MFA and backup security requirements
         run: python -m unittest discover -s tests -p 'test_superuser_security.py' -v
       - name: Verify no-auth employee-deletion blocked
