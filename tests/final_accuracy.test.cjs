@@ -75,6 +75,7 @@ const exportContext = {
   $: name => controls[name],
   profile: {role: 'superuser'},
   window: {XLSX: fakeXlsx},
+  XLSX: fakeXlsx,
   currentFilteredRows: [
     {id:'draft',week_start:'2026-10-05',runner_id:'a',hours_worked:3,tips_amount:1200,advances:100,net_payout:1100,published:false},
     {id:'published',week_start:'2026-10-12',runner_id:'b',hours_worked:4,tips_amount:2000,advances:200,net_payout:1800,published:true},
