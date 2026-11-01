@@ -374,6 +374,23 @@ function auditRowHtml(x){
  :auditLabel(x.action);
  return '<tr><td>'+esc(new Date(x.occurred_at).toLocaleString())+'</td><td>'+esc(x.actor_name||'System / unavailable')+'</td><td>'+esc(x.actor_role?roleLabel(x.actor_role):'—')+'</td><td>'+esc(action)+'</td><td>'+esc(x.target_name||'—')+'</td><td>'+esc(auditDetail(x.details))+'</td></tr>';
 }
+// Date filters are calendar days in Beirut, not UTC days or the viewer's timezone.
+// Find the first UTC instant of each local day; this also handles DST transitions
+// (including days when midnight is skipped or repeated).
+const auditBeirutCalendar=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'});
+function auditBeirutDayStartUtc(day){
+ const midnight=Date.parse(day+'T00:00:00.000Z');
+ if(!Number.isFinite(midnight))throw Error('Invalid audit date.');
+ let low=midnight-86400000,high=midnight+86400000;
+ while(low<high){
+  const middle=Math.floor((low+high)/2);
+  const parts=auditBeirutCalendar.formatToParts(new Date(middle));
+  const localDay=parts.find(p=>p.type==='year').value+'-'+parts.find(p=>p.type==='month').value+'-'+parts.find(p=>p.type==='day').value;
+  if(localDay<day)low=middle+1;
+  else high=middle;
+ }
+ return new Date(low).toISOString();
+}
 function auditQuery(filters,start,end){
  let q=db.from('audit_log')
   .select('id,occurred_at,actor_name,actor_role,action,entity_type,entity_id,target_name,details')
@@ -382,8 +399,12 @@ function auditQuery(filters,start,end){
  else if(filters.action)q=q.eq('action',filters.action);
  if(filters.actor)q=q.eq('actor_id',filters.actor);
  if(filters.employee)q=q.eq('target_user_id',filters.employee);
- if(filters.from)q=q.gte('occurred_at',filters.from+'T00:00:00.000Z');
- if(filters.to)q=q.lte('occurred_at',filters.to+'T23:59:59.999Z');
+ if(filters.from)q=q.gte('occurred_at',auditBeirutDayStartUtc(filters.from));
+ if(filters.to){
+  const next=new Date(filters.to+'T00:00:00.000Z');
+  next.setUTCDate(next.getUTCDate()+1);
+  q=q.lt('occurred_at',auditBeirutDayStartUtc(next.toISOString().slice(0,10)));
+ }
  return q;
 }
 function renderAuditRecords(){
@@ -813,7 +834,7 @@ let recoveryMode=window.location.hash.includes('type=recovery')||new URLSearchPa
 $('loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;msg('Signing in…');try{const r=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(r.error)throw r.error;$('password').value='';await load()}catch(err){msg(err.message,true)}finally{b.disabled=false}};
 $('cancelEdit').onclick=closeMobileSheets;
 $('editForm').onsubmit=async e=>{e.preventDefault();if(!['admin','superuser'].includes(profile?.role))return;const id=$('editId').value,record=rows.find(x=>x.id===id);if(!record){msg('Record not found.',true);return}const receipt=await db.from('receipt_confirmations').select('weekly_tip_id').eq('weekly_tip_id',id).limit(1);if(receipt.error){msg(receipt.error.message,true);return}if(receipt.data?.length){msg('Received payments are permanently locked.',true);return}const tips=Number($('editTips').value),adv=Number($('editAdvance').value);if(adv>tips){msg('Advance cannot exceed tips.',true);return}const b=e.target.querySelector('button[type=submit]');b.disabled=true;try{const r=await db.rpc('update_weekly_tips_draft',{p_record_id:id,p_hours:Number($('editHours').value),p_tips:tips,p_advances:adv});if(r.error)throw r.error;closeMobileSheets();await refresh();msg('Draft updated successfully.')}catch(err){msg(err.message,true)}finally{b.disabled=false}};
-$('exportExcel').onclick=()=>{if(!['manager','admin','superuser'].includes(profile?.role))return;if(!window.XLSX){msg('Excel library did not load. Check your connection and refresh.',true);return}try{const sheetRows=[['Tips Ledger — Payment Export (all amounts in LBP)'],['Week','Employee','Hours Worked','Tips (LBP)','Advances (LBP)','Remaining Tips (LBP)','Status']];let confirmedExport=[];const records=currentFilteredRows;for(const x of records){sheetRows.push([x.week_start,currentRunnerNames.get(x.runner_id)||x.runner_id,Number(x.hours_worked),Number(x.tips_amount),Number(x.advances),Number(x.net_payout),x.published?'Published':'Draft'])}sheetRows.push(['TOTAL','',records.reduce((a,x)=>a+Number(x.hours_worked),0),records.reduce((a,x)=>a+Number(x.tips_amount),0),records.reduce((a,x)=>a+Number(x.advances),0),records.reduce((a,x)=>a+Number(x.net_payout),0),'']);const ws=XLSX.utils.aoa_to_sheet(sheetRows);ws['!cols']=[{wch:16},{wch:27},{wch:17},{wch:17},{wch:17},{wch:21},{wch:14}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Payments');XLSX.writeFile(wb,'tips-ledger-payments-'+new Date().toISOString().slice(0,10)+'.xlsx');msg('Excel export prepared from the currently filtered payments.')}catch(e){msg('Excel export failed: '+(e.message||'Please try again.'),true)}};
+$('exportExcel').onclick=()=>{if(!['manager','admin','superuser'].includes(profile?.role))return;if(!window.XLSX){msg('Excel library did not load. Check your connection and refresh.',true);return}try{const sheetRows=[['Tips Ledger — Payment Export (all amounts in LBP)'],['Week','Employee','Hours Worked','Tips (LBP)','Advances (LBP)','Remaining Tips (LBP)','Status']];const confirmedExport=new Set(currentPaymentConfirmations);const records=currentFilteredRows;for(const x of records){sheetRows.push([x.week_start,currentRunnerNames.get(x.runner_id)||x.runner_id,Number(x.hours_worked),Number(x.tips_amount),Number(x.advances),Number(x.net_payout),confirmedExport.has(x.id)?'Received':x.published?'Published':'Draft'])}sheetRows.push(['TOTAL','',records.reduce((a,x)=>a+Number(x.hours_worked),0),records.reduce((a,x)=>a+Number(x.tips_amount),0),records.reduce((a,x)=>a+Number(x.advances),0),records.reduce((a,x)=>a+Number(x.net_payout),0),'']);const ws=XLSX.utils.aoa_to_sheet(sheetRows);ws['!cols']=[{wch:16},{wch:27},{wch:17},{wch:17},{wch:17},{wch:21},{wch:14}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Payments');XLSX.writeFile(wb,'tips-ledger-payments-'+new Date().toISOString().slice(0,10)+'.xlsx');msg('Excel export prepared from the currently filtered payments.')}catch(e){msg('Excel export failed: '+(e.message||'Please try again.'),true)}};
 $('passwordForm').onsubmit=async e=>{e.preventDefault();if(!profile)return;const current=$('currentPassword').value,next=$('newPassword').value;if(next!==$('confirmPassword').value){msg('New passwords do not match.',true);return}if(next.length<12){msg('New password must have at least 12 characters.',true);return}const b=e.target.querySelector('button');b.disabled=true;try{const u=await db.auth.getUser();if(u.error||!u.data?.user?.email)throw Error('Unable to verify account.');const check=await db.auth.signInWithPassword({email:u.data.user.email,password:current});if(check.error)throw Error('Current password is incorrect.');const r=await db.auth.updateUser({password:next});if(r.error)throw r.error;e.target.reset();msg('Password updated successfully.')}catch(err){msg(err.message||'Could not update password.',true)}finally{b.disabled=false}};
 $('logout').onclick=async()=>{await db.auth.signOut();await load()};$('tlHeaderSignOut').onclick=$('logout').onclick;$('refresh').onclick=refresh;$('filter').onclick=refresh;$('clearFilters').onclick=()=>{['from','to','historyRunner','historyStatus'].forEach(id=>$(id).value='');refresh()};
 $('draftForm').onsubmit=async e=>{e.preventDefault();const tips=Number($('tips').value),adv=Number($('advance').value);if(adv>tips){msg('Advance cannot exceed tips.',true);return}const b=e.target.querySelector('button');b.disabled=true;try{const r=await db.rpc('create_weekly_tips_draft',{p_runner_id:$('runner').value,p_week_start:$('week').value,p_hours:Number($('hours').value),p_tips:tips,p_advances:adv});if(r.error){if(r.error.code==='23505'||/unique_runner_week|duplicate key|already exists/i.test(r.error.message||''))throw Error('This team member already has a payment for this week. Open Payments to review the existing record.');throw r.error}msg('Draft saved. Review before publishing.');e.target.reset();closeMobileSheets();await refresh()}catch(err){msg(err.message,true)}finally{b.disabled=false}};
