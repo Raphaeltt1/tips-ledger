@@ -10,6 +10,8 @@ on:
       - main
     paths:
       - 'index.html'
+      - 'excel-export.js'
+      - 'tests/excel_export.test.cjs'
       - 'receipt-pdf.js'
       - 'tests/receipt_pdf.test.cjs'
       - 'push-sw.js'
@@ -58,9 +60,14 @@ jobs:
           node --check /tmp/tl-inline-1.js
           node --check push-sw.js
           node --check receipt-pdf.js
+          node --check excel-export.js
           python -m json.tool manifest.webmanifest > /dev/null
       - name: Verify Beirut Audit Log dates and Excel payment status accuracy
         run: node --test tests/final_accuracy.test.cjs
+      - name: Verify professionally styled Excel export and financial accuracy
+        run: |
+          curl -fsSL --retry 2 --max-time 45 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js' -o /tmp/tl-exceljs.min.js
+          node --test tests/excel_export.test.cjs
       - name: Verify PDF receipt generation, permissions and iPhone sharing
         run: node --test tests/receipt_pdf.test.cjs
       - name: Verify Superuser MFA and backup security requirements
