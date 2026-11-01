@@ -49,7 +49,7 @@
     await pdfReady();
     const page = document.createElement('div');
     page.setAttribute('aria-hidden', 'true');
-    page.style.cssText = 'position:fixed;left:-20000px;top:0;width:794px;height:1088px;box-sizing:border-box;background:#fff;color:#1d2b42;font:16px/1.55 Arial,Helvetica,sans-serif;padding:66px 67px;';
+    page.style.cssText = 'width:794px;height:1088px;box-sizing:border-box;background:#fff;color:#1d2b42;font:16px/1.55 Arial,Helvetica,sans-serif;padding:66px 67px;';
     page.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #204f92;padding-bottom:24px">' +
         '<div><div style="font-size:15px;font-weight:800;letter-spacing:3px;color:#204f92">◆ TIPS LEDGER</div>' +
@@ -75,7 +75,6 @@
         '<div style="font-size:15px;font-weight:bold;margin-top:4px">' + confirmed + '</div></div>' +
       '<div style="position:absolute;bottom:55px;left:67px;right:67px;border-top:1px solid #dfe7f1;padding-top:14px;color:#7c8ca2;font-size:11px">' +
         'Generated from the locked, employee-confirmed Tips Ledger record. This is an internal acknowledgment, not a bank transfer confirmation.</div>';
-    document.body.appendChild(page);
     const filename = 'tips-ledger-receipt-' + receipt.week_start + '-' + reference.slice(-12) + '.pdf';
     try {
       await window.html2pdf().set({
@@ -84,7 +83,7 @@
         html2canvas: { scale:2, backgroundColor:'#ffffff', useCORS:false },
         jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
       }).from(page).save();
-    } finally { page.remove(); }
+    } finally { /* html2pdf clones the detached receipt; no temporary UI remains. */ }
   }
   window.TipsLedgerReceipt = Object.freeze({ download });
 })();
