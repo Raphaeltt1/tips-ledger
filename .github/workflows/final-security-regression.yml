@@ -12,6 +12,7 @@ on:
       - 'index.html'
       - 'excel-export.js'
       - 'tests/excel_export.test.cjs'
+      - 'tests/audit_excel_export.test.cjs'
       - 'receipt-pdf.js'
       - 'tests/receipt_pdf.test.cjs'
       - 'push-sw.js'
@@ -68,6 +69,7 @@ jobs:
         run: |
           curl -fsSL --retry 2 --max-time 45 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js' -o /tmp/tl-exceljs.min.js
           node --test tests/excel_export.test.cjs
+          node --test tests/audit_excel_export.test.cjs
       - name: Verify PDF receipt generation, permissions and iPhone sharing
         run: node --test tests/receipt_pdf.test.cjs
       - name: Verify Superuser MFA and backup security requirements
