@@ -54,7 +54,7 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <div id="noirOverviewAnalytics" class="noir-analytics-grid"><div id="tlOverviewGraphSlot"><div id="tlTeamTrend"></div></div><div id="tlNoirReceipt"></div></div>
 <div class="noir-lower-grid"><div class="noir-recent-block"><div class="tl-section-head"><div><h2>Recent payments</h2><p class="tl-caption">Latest recorded payouts</p></div><button type="button" id="tlSeeAllPayments" class="tl-text-action">View all →</button></div><div id="tlHomeRecent" class="tl-recent-list"></div></div><div class="noir-activity-block"><div class="tl-section-head"><div><h2>Recent activity</h2><p class="tl-caption">Your latest alerts</p></div><button type="button" id="noirShowNotifications" class="tl-text-action">View inbox →</button></div><div id="tlNoirActivity"></div></div></div>
 <div class="noir-quick-wrapper"><div class="tl-section-head"><h2>Quick actions</h2><span class="tl-caption">Frequently used</span></div><div id="tlQuickActions" class="tl-quick-grid"></div></div><details id="tlFullOverview" class="tl-collapsible"><summary>Full weekly overview & details</summary><div class="tl-collapsible-body"><h2>Payment history</h2><div id="tlHistoryFilterRow" class="row"><div class="field"><label for="from">From</label><input id="from" type="date"></div><div class="field"><label for="to">To</label><input id="to" type="date"></div><div class="field hidden" id="runnerFilterField"><label for="historyRunner">Team Member</label><select id="historyRunner"><option value="">All team members</option></select></div><div class="field"><label for="historyStatus">Status</label><select id="historyStatus"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="received">Received</option></select></div><button id="filter" type="button">Apply filters</button><button id="clearFilters" type="button" style="background:#64748b">Clear</button></div><div id="runnerSummary" class="hidden"><h2 style="margin-top:18px">Summary</h2><div id="totals" class="row"></div><p class="muted" style="font-size:13px">Summary reflects your currently filtered payments.</p></div><hr><h2>Latest week overview</h2><p id="latestWeekLabel" class="muted" style="font-size:13px">Based on the latest week with payment records.</p><div id="latestWeekSummary" class="row"></div><div id="runnerTipsGraph" class="hidden" style="margin-top:24px"><hr><h2>Total Tips Over Time</h2><p class="muted">Published weekly tips before advances · From/To filters apply.</p><div id="runnerTipsGraphContent"></div></div></div></details></section>
-<section id="auditPanel" class="card hidden tab-pane" data-pane="audit"><span class="tl-eyebrow" style="margin-top:19px">CONTROL & ACCOUNTABILITY</span><h1 class="tl-page-title">Activity log</h1><p class="tl-page-intro">Every important change, in one clear timeline.</p><div class="row" style="justify-content:space-between"><div><h2>Audit Log</h2><p class="muted">Admin-only history of payment, receipt, rate, and employee actions.</p></div><button type="button" id="refreshAudit">Refresh log</button></div><form id="auditFilters" class="audit-filters"><div class="row"><div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee deleted permanently</option><option value="employee.update">Employee updated (older)</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.insert">Rate added</option><option value="hourly_rate.update">Rate updated</option><option value="payment.deleted">Payment deleted</option></select></div><div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div><div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div><div class="field"><label for="auditFrom">From</label><input id="auditFrom" type="date"></div><div class="field"><label for="auditTo">To</label><input id="auditTo" type="date"></div></div><div class="row"><button type="submit">Search audit log</button><button id="clearAuditFilters" type="button" class="secondary-action">Clear filters</button></div></form><div class="tl-audit-table-card"><h2>Detailed audit table</h2><div class="scroll"><table><thead><tr><th>When</th><th>Who</th><th>Role</th><th>Action</th><th>Employee</th><th>Details</th></tr></thead><tbody id="auditRows"><tr><td colspan="6">Open Audit Log to load entries.</td></tr></tbody></table></div></div><div class="row" style="justify-content:space-between;align-items:center;margin-top:14px"><span id="auditPageCount" class="muted" style="font-size:13px" aria-live="polite"></span><button id="auditShowMore" type="button" class="secondary-action hidden">Show 10 more</button></div></section>
+<section id="auditPanel" class="card hidden tab-pane" data-pane="audit"><span class="tl-eyebrow" style="margin-top:19px">CONTROL & ACCOUNTABILITY</span><h1 class="tl-page-title">Activity log</h1><p class="tl-page-intro">Every important change, in one clear timeline.</p><div class="row" style="justify-content:space-between"><div><h2>Audit Log</h2><p class="muted">Admin-only history of payment, receipt, rate, and employee actions.</p></div><div class="row"><button type="button" id="exportAuditExcel" class="tl-secondary-button" style="background:#285A99;color:white">↓ Export to Excel</button><button type="button" id="refreshAudit">Refresh log</button></div></div><form id="auditFilters" class="audit-filters"><div class="row"><div class="field"><label for="auditAction">Action</label><select id="auditAction"><option value="">All actions</option><option value="employee.created">Employee created</option><option value="employee.activated">Employee activated</option><option value="employee.deactivated">Employee deactivated</option><option value="employee.permanently_deleted">Employee deleted permanently</option><option value="employee.update">Employee updated (older)</option><option value="payment.draft_created">Payment draft created</option><option value="payment.edited">Payment edited</option><option value="payment.published">Payment published</option><option value="payment.receipt_confirmed">Payment receipt confirmed</option><option value="hourly_rate.insert">Rate added</option><option value="hourly_rate.update">Rate updated</option><option value="payment.deleted">Payment deleted</option></select></div><div class="field"><label for="auditActor">Performed by</label><select id="auditActor"><option value="">All Managers, Admins &amp; Superuser</option></select></div><div class="field"><label for="auditEmployee">Employee</label><select id="auditEmployee"><option value="">All employees (except Superuser)</option></select></div><div class="field"><label for="auditFrom">From</label><input id="auditFrom" type="date"></div><div class="field"><label for="auditTo">To</label><input id="auditTo" type="date"></div></div><div class="row"><button type="submit">Search audit log</button><button id="clearAuditFilters" type="button" class="secondary-action">Clear filters</button></div></form><div class="tl-audit-table-card"><h2>Detailed audit table</h2><div class="scroll"><table><thead><tr><th>When</th><th>Who</th><th>Role</th><th>Action</th><th>Employee</th><th>Details</th></tr></thead><tbody id="auditRows"><tr><td colspan="6">Open Audit Log to load entries.</td></tr></tbody></table></div></div><div class="row" style="justify-content:space-between;align-items:center;margin-top:14px"><span id="auditPageCount" class="muted" style="font-size:13px" aria-live="polite"></span><button id="auditShowMore" type="button" class="secondary-action hidden">Show 10 more</button></div></section>
 <div class="card tl-payments-section tab-pane" data-pane="payments"><div id="tlPaymentHeader"><span class="tl-eyebrow">WEEKLY LEDGER</span><h1 class="tl-page-title">Payments</h1><p class="tl-page-intro">Review, publish and track weekly tips.</p><button type="button" id="tlNewDraftAction">＋ New draft</button></div><div id="tlPaymentSummary"></div><div id="tlPaymentFilters"></div><div id="tlPaymentToolbar" class="row" style="justify-content:space-between"><h2 style="margin:0">Payment history</h2><div class="row"><button id="exportExcel" type="button" class="hidden" style="background:#16845a">Export to Excel</button><button id="refresh">Refresh</button></div></div><div id="tlReceiptPanel" class="hidden" role="status" style="margin:16px 0;padding:18px;border:1px solid #a78bfa;border-radius:14px;background:var(--tl-card,#17243a)">
   <strong style="display:block;margin-bottom:5px">PDF receipt ready</strong>
   <p id="tlReceiptFileName" class="muted" style="font-size:12px;overflow-wrap:anywhere;margin:0 0 12px"></p>
@@ -323,7 +323,7 @@ async function load(){if(recoveryMode){showRecovery();return}const {data:{user},
 try{if(await requireMfa())return}catch(e){show('app',false);show('login',false);show('mfaGate',true);$('mfaGateError').textContent=e.message||'Could not verify session';return}
 show('mfaGate',false);
 const r=await db.from('profiles').select('id,full_name,role,active,avatar_path').eq('id',user.id).single();if(r.error||!r.data?.active){document.body.classList.remove('tl-logged-in');show('tlHeaderCurrencyToggle',false);msg('Your account has no active profile. Contact the admin.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
-profile=r.data;document.body.classList.add('tl-logged-in');show('tlHeaderCurrencyToggle',true);show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',!isTeamMemberRole(profile.role));$('tlPaymentHeader').classList.toggle('tl-no-create',isTeamMemberRole(profile.role));updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',!isTeamMemberRole(profile.role));show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('runnerSummary',isTeamMemberRole(profile.role));show('runnerPaymentTable',isTeamMemberRole(profile.role));show('tlPaymentToolbar',!isTeamMemberRole(profile.role));show('records',!isTeamMemberRole(profile.role));configureRunnerLayout();show('mfaSettings',profile.role==='superuser');show('backupPanel',profile.role==='superuser');show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab('overview');const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=roleLabel(profile.role);$('welcome').textContent=isTeamMemberRole(profile.role)?'Your tips. Clearly in view.':'Every payout. Fully in control.';$('role').textContent='Welcome, '+displayName+' · '+displayRole+' workspace';await refresh();await loadOwnRate();await loadNotifications();msg('')}
+profile=r.data;document.body.classList.add('tl-logged-in');show('tlHeaderCurrencyToggle',true);show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',!isTeamMemberRole(profile.role));$('tlPaymentHeader').classList.toggle('tl-no-create',isTeamMemberRole(profile.role));updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',!isTeamMemberRole(profile.role));show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('exportAuditExcel',['admin','superuser'].includes(profile.role));show('runnerSummary',isTeamMemberRole(profile.role));show('runnerPaymentTable',isTeamMemberRole(profile.role));show('tlPaymentToolbar',!isTeamMemberRole(profile.role));show('records',!isTeamMemberRole(profile.role));configureRunnerLayout();show('mfaSettings',profile.role==='superuser');show('backupPanel',profile.role==='superuser');show('exportExcel',['manager','admin','superuser'].includes(profile.role));setTab('overview');const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=roleLabel(profile.role);$('welcome').textContent=isTeamMemberRole(profile.role)?'Your tips. Clearly in view.':'Every payout. Fully in control.';$('role').textContent='Welcome, '+displayName+' · '+displayRole+' workspace';await refresh();await loadOwnRate();await loadNotifications();msg('')}
 async function loadOwnRate(){show('ownRate',isTeamMemberRole(profile?.role));if(!isTeamMemberRole(profile?.role))return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
 async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div><small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join('') :'No notifications yet.';renderNoirActivity()}
 $('noticeToggle').onclick=()=>{$('notificationsPanel').classList.contains('hidden')?openMobileNotices():closeMobileNotices()};
@@ -373,13 +373,16 @@ function auditMatchesLegacy(x,selected){
   &&x.details.before.active!==x.details.after.active
   &&(selected==='employee.activated')===x.details.after.active;
 }
+function auditDisplayAction(x){
+ return (x.action==='employee.update'
+  &&typeof x.details?.before?.active==='boolean'
+  &&typeof x.details?.after?.active==='boolean'
+  &&x.details.before.active!==x.details.after.active)
+  ? (x.details.after.active?'Employee Activated':'Employee Deactivated')
+  :auditLabel(x.action);
+}
 function auditRowHtml(x){
- const action=(x.action==='employee.update'
- &&typeof x.details?.before?.active==='boolean'
- &&typeof x.details?.after?.active==='boolean'
- &&x.details.before.active!==x.details.after.active)
- ? (x.details.after.active?'Employee Activated':'Employee Deactivated')
- :auditLabel(x.action);
+ const action=auditDisplayAction(x);
  return '<tr><td>'+esc(new Date(x.occurred_at).toLocaleString())+'</td><td>'+esc(x.actor_name||'System / unavailable')+'</td><td>'+esc(x.actor_role?roleLabel(x.actor_role):'—')+'</td><td>'+esc(action)+'</td><td>'+esc(x.target_name||'—')+'</td><td>'+esc(auditDetail(x.details))+'</td></tr>';
 }
 // Date filters are calendar days in Beirut, not UTC days or the viewer's timezone.
@@ -401,7 +404,7 @@ function auditBeirutDayStartUtc(day){
 }
 function auditQuery(filters,start,end){
  let q=db.from('audit_log')
-  .select('id,occurred_at,actor_name,actor_role,action,entity_type,entity_id,target_name,details')
+  .select('id,occurred_at,actor_id,actor_name,actor_role,action,entity_type,entity_id,target_user_id,target_name,details')
   .order('occurred_at',{ascending:false}).order('id',{ascending:false}).range(start,end);
  if(filters.action==='employee.activated'||filters.action==='employee.deactivated')q=q.in('action',[filters.action,'employee.update']);
  else if(filters.action)q=q.eq('action',filters.action);
@@ -414,6 +417,36 @@ function auditQuery(filters,start,end){
   q=q.lt('occurred_at',auditBeirutDayStartUtc(next.toISOString().slice(0,10)));
  }
  return q;
+}
+function auditFilterValues(){
+ return {action:$('auditAction').value,actor:$('auditActor').value,employee:$('auditEmployee').value,
+  from:$('auditFrom').value,to:$('auditTo').value};
+}
+function auditFilterSummary(filters){
+ const parts=[];
+ for(const [key,id,label] of [['action','auditAction','Action'],['actor','auditActor','Performed by'],['employee','auditEmployee','Employee']]){
+  if(filters[key]){
+   const el=$(id);
+   parts.push(label+': '+(el.selectedOptions?.[0]?.textContent?.trim()||filters[key]));
+  }
+ }
+ if(filters.from)parts.push('From: '+filters.from);
+ if(filters.to)parts.push('To: '+filters.to);
+ return parts.length?parts.join('  |  '):'All activity (no filters applied)';
+}
+async function allAuditExportRows(filters,onProgress){
+ // Export every database page, independently of the UI's 10-row pagination.
+ const pageSize=500,results=[];
+ for(let offset=0;;offset+=pageSize){
+  const response=await auditQuery(filters,offset,offset+pageSize-1);
+  if(response.error)throw response.error;
+  if(!Array.isArray(response.data))throw Error('Audit query returned an invalid response.');
+  const batch=response.data;
+  results.push(...batch.filter(x=>auditMatchesLegacy(x,filters.action)));
+  if(onProgress)onProgress(results.length);
+  if(batch.length<pageSize)break;
+ }
+ return results;
 }
 function renderAuditRecords(){
  const p=auditPaging,visible=p.records.slice(0,p.shown);
@@ -445,15 +478,30 @@ async function loadAuditLog(){
  if(!['admin','superuser'].includes(profile?.role)){msg('Admin access required.',true);return}
  auditPaging={
   records:[],offset:0,shown:0,exhausted:false,loading:false,
-  filters:{
-   action:$('auditAction').value,actor:$('auditActor').value,employee:$('auditEmployee').value,
-   from:$('auditFrom').value,to:$('auditTo').value
-  }
+  filters:auditFilterValues()
  };
  $('auditRows').innerHTML='<tr><td colspan="6">Loading audit history…</td></tr>';
  $('auditPageCount').textContent='';show('auditShowMore',false);
  await showNextAuditPage();
 }
+$('exportAuditExcel').onclick=async()=>{
+ if(!['admin','superuser'].includes(profile?.role)){msg('Admin access required.',true);return}
+ const button=$('exportAuditExcel');
+ if(button.disabled)return;
+ const filters=auditFilterValues(),summary=auditFilterSummary(filters);
+ button.disabled=true;button.textContent='Preparing audit export…';
+ try{
+  if(!window.TipsLedgerExcel?.exportAuditLog)throw Error('Excel exporter is not available. Refresh and try again.');
+  const log=await allAuditExportRows(filters,n=>{button.textContent='Exporting '+n+' records…'});
+  const report=await window.TipsLedgerExcel.exportAuditLog({
+   records:log.map(x=>({...x,display_role:x.actor_role?roleLabel(x.actor_role):'—',
+    display_action:auditDisplayAction(x),display_details:auditDetail(x.details)})),
+   filterSummary:summary
+  });
+  msg('Audit Log Excel export prepared: '+report.count+' matching records.');
+ }catch(err){msg('Audit Log export failed: '+(err.message||'Please try again.'),true)}
+ finally{button.disabled=false;button.textContent='↓ Export to Excel'}
+};
 $('auditShowMore').onclick=showNextAuditPage;
 $('refreshAudit').onclick=loadAuditLog;
 $('auditFilters').onsubmit=e=>{e.preventDefault();loadAuditLog()};
