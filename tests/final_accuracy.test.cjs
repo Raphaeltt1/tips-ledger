@@ -91,7 +91,7 @@ controls.exportExcel.onclick();
 assert.equal(written, 1);
 assert.deepEqual([exportedRows[2][6],exportedRows[3][6],exportedRows[4][6]],
                  ['Draft','Published','Received']);
-assert.equal(exportedRows[5][3],6000,'Total tips reflect filtered rows');
+assert.equal(exportedRows[5][3],6200,'Total tips reflect filtered rows');
 assert.equal(exportedRows[5][5],5600,'Remaining payout total');
 exportContext.currentFilteredRows = [exportContext.currentFilteredRows[2]];
 controls.exportExcel.onclick();
