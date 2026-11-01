@@ -225,5 +225,161 @@
     downloadBlob(bytes, filename);
     return { filename, count: entries.length, totals };
   }
-  window.TipsLedgerExcel = Object.freeze({ exportPayments });
+
+  // Audit workbook: polished readable history + an unabridged raw-records sheet.
+  // The caller has already fetched all pages using the server's protected RLS query.
+  async function exportAuditLog(input) {
+    if (!input || !Array.isArray(input.records)) throw new Error('Invalid Audit Log export records.');
+    const records = input.records;
+    const summary = String(input.filterSummary || 'All activity (no filters applied)');
+    const localTime = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Beirut', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    });
+    const makeLocalDate = date => {
+      const instant = new Date(date);
+      if (!Number.isFinite(instant.getTime())) throw new Error('Invalid Audit Log timestamp.');
+      const parts = localTime.formatToParts(instant);
+      const get = type => Number(parts.find(p => p.type === type).value);
+      return new Date(Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute')));
+    };
+    const clean = value => value == null ? '' : String(value);
+    const data = records.map(x => {
+      if (x.id == null || !x.occurred_at) throw new Error('Incomplete Audit Log record.');
+      const details = JSON.stringify(x.details ?? {});
+      if (details.length > 32767) throw new Error('An Audit Log entry exceeds the Excel cell length limit.');
+      return {
+        when: makeLocalDate(x.occurred_at),
+        actor: clean(x.actor_name || 'System / unavailable'),
+        role: clean(x.display_role || x.actor_role || '—'),
+        action: clean(x.display_action || x.action),
+        employee: clean(x.target_name || '—'),
+        details: clean(x.display_details),
+        id: clean(x.id),
+        timestamp: clean(x.occurred_at),
+        actorId: clean(x.actor_id),
+        actionCode: clean(x.action),
+        entityType: clean(x.entity_type),
+        entityId: clean(x.entity_id),
+        employeeId: clean(x.target_user_id),
+        json: details
+      };
+    });
+    await loadExcel();
+    const workbook = new window.ExcelJS.Workbook();
+    workbook.creator = 'Tips Ledger';
+    workbook.lastModifiedBy = 'Tips Ledger';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+    const pageOptions = {
+      paperSize: 9, orientation: 'landscape', fitToPage: true,
+      fitToWidth: 1, fitToHeight: 0,
+      margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }
+    };
+    const ws = workbook.addWorksheet('Audit Log', {
+      views: [{ state: 'frozen', ySplit: 10, activeCell: 'B11' }],
+      pageSetup: pageOptions, properties: { defaultRowHeight: 24 }
+    });
+    ws.columns = [
+      { key: 'when', width: 23 }, { key: 'actor', width: 30 },
+      { key: 'role', width: 17 }, { key: 'action', width: 30 },
+      { key: 'employee', width: 31 }, { key: 'details', width: 65 }
+    ];
+    for (const [index, height] of [[1,28],[2,29],[3,28],[4,34],[5,27],[6,11],[7,25],[8,35],[9,28],[10,32]]) {
+      ws.getRow(index).height = height;
+    }
+    mergeText(ws, 'A1:F2', 'TIPS.LEDGER  /  AUDIT RECORDS', C.navy, C.white, 18, true);
+    mergeText(ws, 'A3:F3', 'ACTIVITY & ACCOUNTABILITY  |  INTERNAL ACCESS ONLY', C.navy, 'C3D5EF', 10, true);
+    const now = new Date();
+    const dateLabel = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Beirut', dateStyle: 'medium', timeStyle: 'short'
+    }).format(now);
+    mergeText(ws, 'A4:F4', 'Exported ' + dateLabel + ' (Beirut time)  |  ' +
+      data.length + ' matching event' + (data.length === 1 ? '' : 's'), C.pale, C.muted, 10);
+    mergeText(ws, 'A5:F5', 'FILTERS: ' + summary.slice(0, 255), C.pale, C.ink, 10);
+    mergeText(ws, 'A7:C7', 'EXPORTED EVENTS', C.paleBlue, C.muted, 9, true);
+    mergeText(ws, 'D7:F7', 'AUDIT PERIOD  /  BEIRUT TIME', C.paleBlue, C.muted, 9, true);
+    mergeText(ws, 'A8:C8', data.length, C.paleBlue, C.navy, 18, true);
+    const first = data.at(-1)?.when, last = data[0]?.when;
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric'
+    });
+    const span = data.length ? fmt.format(first) + '  —  ' + fmt.format(last) : 'No matching events';
+    mergeText(ws, 'D8:F8', span, C.paleBlue, C.navy, 12, true);
+    mergeText(ws, 'A9:F9', 'AUDIT EVENT HISTORY', C.navyLight, C.white, 11, true);
+    const columns = ['When (Beirut)', 'Performed by', 'Role', 'Action', 'Employee', 'Details'];
+    columns.forEach((label, i) => {
+      const cell = ws.getRow(10).getCell(i + 1);
+      cell.value = label;
+      cell.fill = fill(C.navyLight);
+      cell.font = font(C.white, 10, true);
+      cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    });
+    data.forEach((entry, i) => {
+      const row = ws.getRow(11 + i);
+      row.height = 30;
+      [entry.when, entry.actor, entry.role, entry.action, entry.employee, entry.details].forEach((value, j) => {
+        const cell = row.getCell(j + 1);
+        cell.value = value;
+        cell.fill = fill(i % 2 ? C.pale : C.white);
+        cell.font = font(j === 3 ? C.blue : C.ink, 10, j === 3);
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1, wrapText: j === 5 };
+        cell.border = borderBottom;
+        if (j === 0) cell.numFmt = 'dd mmm yyyy hh:mm';
+      });
+    });
+    const endRow = 10 + data.length;
+    const footer = endRow + 2;
+    ws.getRow(footer).height = 28;
+    mergeText(ws, 'A' + footer + ':F' + footer,
+      'INTERNAL AUDIT EXPORT   •   All matching records, including those beyond the on-screen pages. Raw event data is available on the second sheet.',
+      C.pale, C.muted, 9);
+    if (data.length) ws.autoFilter = { from: 'A10', to: 'F' + endRow };
+    ws.printTitlesRow = '9:10';
+    ws.headerFooter.oddFooter = '&L TIPS.LEDGER  |  CONFIDENTIAL AUDIT&RPage &P of &N';
+
+    const raw = workbook.addWorksheet('Raw Records', {
+      views: [{ state: 'frozen', ySplit: 4, activeCell: 'A5' }],
+      pageSetup: pageOptions
+    });
+    raw.columns = [
+      {width:20},{width:27},{width:40},{width:30},{width:16},{width:30},
+      {width:22},{width:40},{width:40},{width:30},{width:72}
+    ];
+    raw.getRow(1).height = 35;
+    mergeText(raw, 'A1:K1', 'TIPS.LEDGER  /  ORIGINAL AUDIT DATA', C.navy, C.white, 16, true);
+    mergeText(raw, 'A2:K2', 'UNALTERED EVENT FIELDS   |   UTC TIMESTAMPS   |   INTERNAL USE ONLY',
+      C.navyLight, C.white, 10, true);
+    mergeText(raw, 'A3:K3', 'Includes record identifiers, original action codes and complete JSON details.',
+      C.pale, C.muted, 10);
+    const rawHeaders = ['Event ID','Timestamp (UTC)','Actor ID','Actor name','Actor role',
+      'Action code','Entity type','Entity ID','Employee ID','Employee name','Details JSON'];
+    rawHeaders.forEach((label,i) => {
+      const cell = raw.getRow(4).getCell(i+1);
+      cell.value = label; cell.font = font(C.white,10,true);cell.fill = fill(C.navyLight);
+      cell.alignment = { vertical: 'middle', indent: 1 };
+    });
+    raw.getRow(4).height = 31;
+    data.forEach((x,i) => {
+      const row = raw.getRow(i+5);row.height = 26;
+      [x.id,x.timestamp,x.actorId,x.actor,x.role,x.actionCode,x.entityType,
+        x.entityId,x.employeeId,x.employee,x.json].forEach((value,j) => {
+        const cell = row.getCell(j+1);
+        cell.value = value;cell.font = font(C.ink,9);
+        cell.fill = fill(i%2 ? C.pale : C.white);
+        cell.border = borderBottom;
+        cell.alignment = { vertical: 'middle', indent: 1 };
+      });
+    });
+    if(data.length)raw.autoFilter={from:'A4',to:'K'+(data.length+4)};
+    raw.printTitlesRow='4:4';
+    raw.headerFooter.oddFooter = '&L TIPS.LEDGER  |  CONFIDENTIAL RAW AUDIT&RPage &P of &N';
+
+    const bytes = await workbook.xlsx.writeBuffer();
+    const filename = 'tips-ledger-audit-' + now.toISOString().slice(0,10) + '.xlsx';
+    downloadBlob(bytes, filename);
+    return { filename, count: data.length };
+  }
+
+  window.TipsLedgerExcel = Object.freeze({ exportPayments, exportAuditLog });
 })();
