@@ -117,7 +117,7 @@ test('empty filtered result still exports valid report with zero totals', async 
   assert.equal(result.totals.net, 0);
   assert.equal(ws.getCell('D12').value, 0);
   assert.equal(ws.getCell('F12').value, 0);
-  assert.equal(ws.getCell('A7').value.result, 0);
+  assert.equal(ws.getCell('A7').value, 0);
 });
 
 test('invalid finance and date data fails before writing or downloading a file', async () => {
