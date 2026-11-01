@@ -54,51 +54,15 @@ assert.ok(operations.some(x => x[0] === 'eq' && x[1] === 'actor_id' && x[2] === 
 assert.ok(operations.some(x => x[0] === 'eq' && x[1] === 'target_user_id' && x[2] === 'target'));
 assert.ok(!operations.some(x => ['gte','lt'].includes(x[0])), 'No date filter means no date bound');
 
-// Execute the actual button handler with a stub XLSX writer and known records.
-// Statuses must correspond to receipt confirmations, not merely publication.
-const exportCode = excerpt(" $('exportExcel').onclick=()=>{".trim(), "\n$('passwordForm').onsubmit");
-const controls = { exportExcel: {} };
-let written = 0;
-let exportedRows;
-const fakeXlsx = {
-  utils: {
-    aoa_to_sheet: rows => { exportedRows = rows; return {}; },
-    book_new: () => ({}),
-    book_append_sheet: () => {},
-  },
-  writeFile: (_workbook, name) => {
-    assert.match(name, /^tips-ledger-payments-\d{4}-\d{2}-\d{2}\.xlsx$/);
-    written++;
-  }
-};
-const exportContext = {
-  $: name => controls[name],
-  profile: {role: 'superuser'},
-  window: {XLSX: fakeXlsx},
-  XLSX: fakeXlsx,
-  currentFilteredRows: [
-    {id:'draft',week_start:'2026-10-05',runner_id:'a',hours_worked:3,tips_amount:1200,advances:100,net_payout:1100,published:false},
-    {id:'published',week_start:'2026-10-12',runner_id:'b',hours_worked:4,tips_amount:2000,advances:200,net_payout:1800,published:true},
-    {id:'received',week_start:'2026-10-19',runner_id:'c',hours_worked:5,tips_amount:3000,advances:300,net_payout:2700,published:true},
-  ],
-  currentRunnerNames: new Map([['a','Alpha'],['b','Beta'],['c','Gamma']]),
-  currentPaymentConfirmations: ['received'],
-  msg: (_message,bad) => {if(bad)throw Error('Export error message');},
-  Date, Set, Number, Error
-};
-vm.runInNewContext(exportCode, exportContext);
-controls.exportExcel.onclick();
-assert.equal(written, 1);
-assert.deepEqual([exportedRows[2][6],exportedRows[3][6],exportedRows[4][6]],
-                 ['Draft','Published','Received']);
-assert.equal(exportedRows[5][3],6200,'Total tips reflect filtered rows');
-assert.equal(exportedRows[5][5],5600,'Remaining payout total');
-exportContext.currentFilteredRows = [exportContext.currentFilteredRows[2]];
-controls.exportExcel.onclick();
-assert.equal(exportedRows[2][6], 'Received', 'Filtered received record stays Received');
-assert.equal(exportedRows[3][3], 3000, 'Filtered export total must be correct');
-exportContext.profile = {role: 'runner'};
-controls.exportExcel.onclick();
-assert.equal(written, 2, 'Employee role must not export financial ledger');
+// Verify that the export button still forwards the currently filtered rows to
+// the styled workbook generator. Real XLSX totals and statuses are tested in
+// tests/excel_export.test.cjs using the actual ExcelJS browser bundle.
+const exportCode = excerpt(" $('exportExcel').onclick=async()=>{".trim(), "\n$('passwordForm').onsubmit");
+assert.match(exportCode, /\['manager','admin','superuser'\]/);
+assert.match(exportCode, /currentFilteredRows\.slice\(\)/);
+assert.match(exportCode, /currentRunnerNames/);
+assert.match(exportCode, /currentPaymentConfirmations\.slice\(\)/);
+assert.match(exportCode, /TipsLedgerExcel\.exportPayments/);
+assert.match(exportCode, /finally\{b\.disabled=false\}/);
 
-console.log('PASS: Excel statuses, role guard, filtered totals, Beirut dates and DST-sensitive queries.');
+console.log('PASS: Beirut Audit Log dates, DST boundaries and styled Excel export integration.');
