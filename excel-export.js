@@ -68,7 +68,7 @@
   function summaryBox(ws, labelRange, valueRange, label, value, result) {
     mergeText(ws, labelRange, label, C.paleBlue, C.muted, 9, true);
     const cell = mergeText(ws, valueRange,
-      { formula: value, result },
+      value === null ? result : { formula: value, result },
       C.paleBlue, C.navy, 17, true);
     cell.numFmt = '#,##0.00';
   }
@@ -150,11 +150,11 @@
     const firstDataRow = 12;
     const totalRow = firstDataRow + entries.length;
     summaryBox(ws, 'A6:B6', 'A7:B8', 'TOTAL TIPS / LBP',
-      'D' + totalRow, totals.tips);
+      entries.length ? 'D' + totalRow : null, totals.tips);
     summaryBox(ws, 'C6:D6', 'C7:D8', 'ADVANCES / LBP',
-      'E' + totalRow, totals.advances);
+      entries.length ? 'E' + totalRow : null, totals.advances);
     summaryBox(ws, 'E6:G6', 'E7:G8', 'NET PAYOUT / LBP',
-      'F' + totalRow, totals.net);
+      entries.length ? 'F' + totalRow : null, totals.net);
     mergeText(ws, 'A10:G10', 'PAYMENT DETAILS', C.navyLight, C.white, 11, true);
 
     const headers = ['Week', 'Team member', 'Hours worked', 'Tips (LBP)', 'Advances (LBP)', 'Remaining tips (LBP)', 'Status'];
