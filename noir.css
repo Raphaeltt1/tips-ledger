@@ -746,3 +746,30 @@ body.tl-logged-in .noir-content>.tl-greeting{margin:4px 0 18px}
  body.tl-logged-in header .tl-topbar-inner{justify-content:flex-end!important}
  body.tl-logged-in header .tl-header-actions{gap:7px}
 }
+
+/* Audit Log toolbar alignment: identical button dimensions, existing purple theme. */
+#auditPanel #exportAuditExcel,
+#auditPanel #refreshAudit{
+  box-sizing:border-box;
+  flex:0 1 146px;
+  width:146px;
+  min-width:0;
+  height:42px;
+  min-height:42px;
+  padding:9px 12px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:740;
+  line-height:20px;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  white-space:nowrap;
+}
+/* Match the existing Payments -> Clear button, without changing any handler. */
+#auditPanel #clearAuditFilters,
+html[data-theme="dark"] #auditPanel #clearAuditFilters{
+  background:#64748b!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
