@@ -65,8 +65,8 @@ Deno.serve(async (req) => {
       title = "🔔 Tips Ledger Test";
       message = "Background push is working on this device.";
     } else if (eventType === "schedule_published") {
-      if (!["admin", "superuser", "manager"].includes(profile.role)) {
-        return json({ error: "Only management may send schedule publication notifications" }, 403);
+      if (!["admin", "superuser"].includes(profile.role)) {
+        return json({ error: "Admin or Superuser required for schedule publication notifications" }, 403);
       }
       // The DB is authoritative: a schedule must already be successfully published.
       // current_user_role also respects superuser MFA.
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
       try {
         await webpush.sendNotification(row.subscription, JSON.stringify({
           title, body: message, tag: `tips-ledger-${eventType}-${schedulePublicationId || weeklyTipId || profile.id}`,
-          url: "https://raphaeltt1.github.io/tips-ledger/"
+          url: eventType === "schedule_published" ? "https://raphaeltt1.github.io/tips-ledger/?tab=schedule" : "https://raphaeltt1.github.io/tips-ledger/"
         }));
         sent++;
         if (eventType === "schedule_published") scheduleDelivered.add(row.user_id);
