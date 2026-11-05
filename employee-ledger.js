@@ -231,7 +231,7 @@
     await wb.xlsx.load(await file.arrayBuffer());
     const sheets=wb.worksheets.filter(ws=>ws.state!=='veryHidden'&&ws.state!=='hidden');
     const named=sheets.find(ws=>new RegExp('\\b'+dept+'\\b','i').test(ws.name));
-    if(!named && sheets.some(ws=>/\\b(?:FOH|BOH)\\b/i.test(ws.name)))
+    if(!named && sheets.some(ws=>/\b(?:FOH|BOH)\b/i.test(ws.name)))
       throw Error('No '+dept+' worksheet found. Choose the matching department workbook.');
     const selected=named||sheets[0];
     if(!selected)throw Error('No visible worksheet in this Excel workbook.');
