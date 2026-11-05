@@ -1,0 +1,39 @@
+name: Health Card and Schedule Notification Checks
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/notification-tests.yml'
+      - 'supabase/functions/health-card-reminders/**'
+      - 'supabase/functions/send-push/**'
+      - 'supabase/migrations/20261105_health_card_schedule_notifications.sql'
+      - 'tests/health_card_notifications.test.mjs'
+      - 'tests/employee_ledger.test.cjs'
+      - 'employee-ledger.js'
+      - 'employee-ledger.css'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'push-sw.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-notification-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check employee-ledger.js
+          node --check excel-export.js
+          node --check receipt-pdf.js
+          node --check push-sw.js
+      - name: Install real browser ExcelJS test fixture
+        run: curl -fsSL --retry 3 https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js -o /tmp/tl-exceljs.min.js
+      - name: Verify schedule and reminder logic and security boundaries
+        run: node --test tests/health_card_notifications.test.mjs tests/employee_ledger.test.cjs

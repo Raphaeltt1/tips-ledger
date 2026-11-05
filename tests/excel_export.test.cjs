@@ -1,5 +1,5 @@
 'use strict';
-/* Real XLSX round-trip and styling regressions for Tips Ledger.
+/* Real XLSX round-trip and styling regressions for Employee Ledger.
  * Uses the same ExcelJS browser bundle loaded by the app.
  * No live payment records or databases are touched.
  */
@@ -54,7 +54,7 @@ async function inspect(input={}) {
   assert.equal(state.urls.length, 1, 'File URL should be created once');
   assert.equal(state.removed.length, 1, 'Temporary download anchor must be removed');
   assert.equal(state.clicked[0].href, 'blob:tips-ledger-test');
-  assert.match(state.clicked[0].download, /^tips-ledger-payments-\d{4}-\d{2}-\d{2}\.xlsx$/);
+  assert.match(state.clicked[0].download, /^employee-ledger-payments-\d{4}-\d{2}-\d{2}\.xlsx$/);
   assert.equal(state.urls[0].type,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(Buffer.from(await state.urls[0].arrayBuffer()));
@@ -64,8 +64,8 @@ async function inspect(input={}) {
 test('real export opens as valid .xlsx with navy/blue professional styling', async () => {
   const { ws, result, wb } = await inspect();
   assert.ok(ws);
-  assert.equal(wb.creator, 'Tips Ledger');
-  assert.equal(ws.getCell('A1').value, 'TIPS.LEDGER  /  PAYMENT RECORD');
+  assert.equal(wb.creator, 'Employee Ledger');
+  assert.equal(ws.getCell('A1').value, 'EMPLOYEE.LEDGER  /  PAYMENT RECORD');
   assert.equal(ws.getCell('A1').fill.fgColor.argb, 'FF13223C');
   assert.equal(ws.getCell('A1').font.bold, true);
   assert.equal(ws.getCell('A1').font.color.argb, 'FFFFFFFF');

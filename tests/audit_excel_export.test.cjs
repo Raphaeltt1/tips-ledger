@@ -54,7 +54,7 @@ async function workbookFor(records,filterSummary='All activity (no filters appli
   const result=await api.exportAuditLog({records,filterSummary});
   assert.equal(result.count,records.length);
   assert.equal(state.links.length,1);
-  assert.match(state.links[0].download,/^tips-ledger-audit-\d{4}-\d\d-\d\d\.xlsx$/);
+  assert.match(state.links[0].download,/^employee-ledger-audit-\d{4}-\d\d-\d\d\.xlsx$/);
   assert.equal(state.removed.length,1);
   assert.equal(state.blobs[0].type,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   const book=new ExcelJS.Workbook();
@@ -65,9 +65,9 @@ async function workbookFor(records,filterSummary='All activity (no filters appli
 test('real audit XLSX has polished navy style, summary, dates and complete raw records',async()=>{
   const original=[auditExample(0),auditExample(1,'employee.created')];
   const {book,log,raw,result}=await workbookFor(original);
-  assert.equal(book.creator,'Tips Ledger');
+  assert.equal(book.creator,'Employee Ledger');
   assert.equal(result.count,2);
-  assert.equal(log.getCell('A1').value,'TIPS.LEDGER  /  AUDIT RECORDS');
+  assert.equal(log.getCell('A1').value,'EMPLOYEE.LEDGER  /  AUDIT RECORDS');
   assert.equal(log.getCell('A1').fill.fgColor.argb,'FF13223C');
   assert.equal(log.getCell('A1').font.color.argb,'FFFFFFFF');
   assert.equal(log.getCell('A9').fill.fgColor.argb,'FF23446D');

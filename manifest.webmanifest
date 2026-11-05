@@ -1,7 +1,7 @@
 {
-  "name": "Tips Ledger",
-  "short_name": "Tips Ledger",
-  "description": "Weekly tips and payment confirmations",
+  "name": "Employee Ledger",
+  "short_name": "Employee Ledger",
+  "description": "Employee schedules, health cards, weekly tips and payment confirmations",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

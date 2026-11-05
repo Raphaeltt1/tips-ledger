@@ -1,4 +1,4 @@
-/* Tips Ledger: lightweight vector PDF receipts, with native iPhone file sharing.
+/* Employee Ledger: lightweight vector PDF receipts, with native iPhone file sharing.
    Only call prepare() with the row returned by get_confirmed_payment_receipt RPC. */
 (() => {
   'use strict';
@@ -62,7 +62,7 @@
 
     // Draw PDF directly: no full-page HTML canvas, overlay or navigation changes.
     const pdf = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-    pdf.setProperties({ title: 'Tips Ledger - Confirmed Payment Receipt', subject: 'Internal confirmed weekly payout' });
+    pdf.setProperties({ title: 'Employee Ledger - Confirmed Payment Receipt', subject: 'Internal confirmed weekly payout' });
     const color = (r, g, b) => pdf.setTextColor(r, g, b);
     const text = (value, x, y, size = 11, bold = false, options) => {
       pdf.setFont('helvetica', bold ? 'bold' : 'normal');
@@ -75,7 +75,7 @@
     pdf.setFillColor(19, 34, 60);
     pdf.rect(0, 0, 210, 54, 'F');
     color(255, 255, 255);
-    text('TIPS.LEDGER', 20, 25, 19, true);
+    text('EMPLOYEE.LEDGER', 20, 25, 19, true);
     color(170, 194, 226);
     text('PAYMENT RECORD  /  COMMAND SUITE', 20, 33, 8, true);
     pdf.setFillColor(213, 244, 230);
@@ -137,7 +137,7 @@
     color(112, 129, 150);
     text('Internal acknowledgment only - not proof of bank transfer.', 20, 293, 7.7);
 
-    const filename = 'tips-ledger-receipt-' + receipt.week_start + '-' + reference.slice(-12) + '.pdf';
+    const filename = 'employee-ledger-receipt-' + receipt.week_start + '-' + reference.slice(-12) + '.pdf';
     const blob = pdf.output('blob');
     const file = new File([blob], filename, { type: 'application/pdf' });
     return { filename, blob, file };
@@ -151,7 +151,7 @@
   // Call directly from the user's SECOND click, to preserve iOS user activation.
   function share(prepared) {
     if (!canShareFile(prepared)) throw new Error('File sharing is not available on this device.');
-    return navigator.share({ files: [prepared.file], title: 'Tips Ledger - Payment Receipt' });
+    return navigator.share({ files: [prepared.file], title: 'Employee Ledger - Payment Receipt' });
   }
 
   function download(prepared) {

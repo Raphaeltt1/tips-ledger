@@ -1,0 +1,100 @@
+/* Employee Ledger: new health cards & weekly Schedule. Scoped selectors preserve payment UI. */
+.el-schedule-panel{max-width:100%;overflow:hidden}
+.el-schedule-panel .el-section-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.el-schedule-panel .tl-page-title{margin-bottom:6px}
+.el-segments{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0 12px}
+.el-segments button{background:#e4ebf7;color:#1e365a;border:1px solid #c9d7ef;box-shadow:none}
+.el-segments button.selected{background:#2563eb;color:white;border-color:#2563eb}
+.el-schedule-weekbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:10px 0 16px}
+.el-schedule-weekbar .field{flex:0 1 210px;min-width:170px}
+.el-schedule-weekbar .el-week-name{font-weight:770;font-size:14px;min-width:180px;align-self:center}
+.el-schedule-weekbar button{min-width:40px;min-height:41px;background:#e3edfa;color:#1c3d68}
+.el-schedule-scroll{overflow-x:auto;border:1px solid #dce6f3;border-radius:14px;background:#fff;max-width:100%;-webkit-overflow-scrolling:touch}
+.el-schedule-table{width:100%;min-width:710px;border-collapse:separate;border-spacing:0;font-size:13px}
+.el-schedule-table thead th{background:#17375f;color:#fff;padding:12px 10px;white-space:nowrap;position:sticky;top:0;z-index:1;text-align:center}
+.el-schedule-table thead th:first-child{text-align:left;position:sticky;left:0;z-index:2}
+.el-schedule-table tbody td{padding:12px 10px;text-align:center;border-bottom:1px solid #dce6f3;max-width:240px;min-width:85px;white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:middle;color:#162844}
+.el-schedule-table tbody td:first-child{position:sticky;left:0;z-index:1;text-align:left;font-weight:750;min-width:155px;background:#edf3fb}
+.el-schedule-table tbody tr:nth-child(even) td{background:#f5f8fc}
+.el-schedule-table tbody tr:nth-child(even) td:first-child{background:#e8f0fa}
+.el-schedule-table tbody td.el-day-off{color:#64748b;font-weight:700;background:#ebedf1}
+.el-schedule-caption{padding:11px 3px;font-size:15px;font-weight:800;color:#24466e}
+.el-empty{padding:40px 15px;text-align:center;background:#f3f7ff;border:1px dashed #adc2df;border-radius:14px;color:#5a7290}
+.el-import-card{padding:18px;border:1px solid #ccdcf0;background:#f7faff;border-radius:14px;margin-top:22px}
+.el-import-card h3{margin:0 0 5px;font-size:17px}
+.el-import-card .field{min-width:210px}
+.el-import-card input[type=file]{padding:9px}
+.el-import-card .el-management-note{font-size:12px;color:#64748b;margin:8px 0 0}
+.el-draft-preview{border:1px dashed #f59e0b;border-radius:14px;padding:16px;margin-top:14px}
+.el-draft-preview h3{margin:0 0 5px}
+.el-health-editor{margin:12px 0 20px;border:1px solid #d5e2f4;border-radius:15px;padding:16px;background:var(--tl-card,#fff)}
+.el-health-editor .el-section-intro strong{font-size:16px;color:var(--tl-text,#172b49)}
+.el-health-editor .el-section-intro p{margin:4px 0 12px;font-size:12px}
+.el-health-tag{display:inline-flex;padding:5px 9px;font-size:11px;border-radius:999px;align-self:center;font-weight:700}
+.el-health-missing{background:#e7edf6;color:#5a6c80}
+.el-health-valid{background:#dff6e9;color:#11643b}
+.el-health-near{background:#ffefd1;color:#875413}
+.el-health-expired{background:#ffe0e3;color:#ae1b30}
+.el-health-edit{font-size:12px!important;min-height:34px!important;padding:5px 9px!important}
+.el-filter-banner{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:13px;background:#fff3d9;border-radius:12px;padding:11px 14px;font-weight:700}
+.noir-metric.el-health-metric{display:flex;flex-direction:column;width:100%;min-height:132px;text-align:left;padding:18px;cursor:pointer;border:1px solid var(--tl-border,#dce6f3);background:var(--tl-card,#fff);color:var(--tl-text,#142846);border-radius:16px;box-shadow:none}
+.noir-metric.el-health-metric .noir-metric-value{margin:6px 0;font-size:clamp(25px,2.5vw,34px)}
+.noir-metric.el-health-metric .noir-metric-foot{font-size:12px;font-weight:600;color:var(--tl-muted,#6480a3)}
+.noir-metric.el-health-metric.el-zero .noir-metric-value{color:#16845a}
+.noir-metric.el-health-metric.el-near{border-color:#e3b65f}
+.noir-metric.el-health-metric.el-near .noir-metric-value{color:#d99616}
+.noir-metric.el-health-metric.el-expired{border:2px solid #e32337;background:#ffeced}
+.noir-metric.el-health-metric.el-expired .noir-metric-value,.noir-metric.el-health-metric.el-expired .noir-metric-label{color:#c40025}
+.noir-metric.el-health-metric:hover{transform:translateY(-2px)}
+html[data-theme=dark] .el-schedule-panel .el-segments button:not(.selected){background:#233953;color:#cbe1fc;border-color:#395571}
+html[data-theme=dark] .el-schedule-weekbar button{background:#253e60;color:#cce0fa}
+html[data-theme=dark] .el-import-card{background:#1a2c45;border-color:#344e70}
+html[data-theme=dark] .el-schedule-scroll{background:#17243a;border-color:#344965}
+html[data-theme=dark] .el-schedule-table tbody td{background:#172940;color:#e9f2ff;border-color:#324b67}
+html[data-theme=dark] .el-schedule-table tbody tr:nth-child(even) td{background:#203653}
+html[data-theme=dark] .el-schedule-table tbody td:first-child,html[data-theme=dark] .el-schedule-table tbody tr:nth-child(even) td:first-child{background:#26415c}
+html[data-theme=dark] .el-schedule-table tbody td.el-day-off{background:#243247;color:#bed0e5}
+html[data-theme=dark] .el-schedule-caption{color:#b9d5f6}
+html[data-theme=dark] .el-empty{background:#192b44;border-color:#425875;color:#a9c0db}
+html[data-theme=dark] .el-health-editor{background:#1a2c45;border-color:#344e70}
+html[data-theme=dark] .el-health-editor .el-section-intro strong{color:#f0f5ff}
+html[data-theme=dark] .el-health-missing{background:#304058;color:#c1d2e6}
+html[data-theme=dark] .el-health-valid{background:#173e31;color:#8be0b3}
+html[data-theme=dark] .el-health-near{background:#4a361f;color:#ffd08a}
+html[data-theme=dark] .el-health-expired{background:#51232d;color:#ffadb8}
+html[data-theme=dark] .el-filter-banner{background:#533c22;color:#fff1c8}
+html[data-theme=dark] .noir-metric.el-health-metric{background:#1d3049;color:#f2f7ff;border-color:#365273}
+html[data-theme=dark] .noir-metric.el-health-metric.el-expired{background:#4f1827;border-color:#ff354d}
+html[data-theme=dark] .noir-metric.el-health-metric.el-expired .noir-metric-label,html[data-theme=dark] .noir-metric.el-health-metric.el-expired .noir-metric-value{color:#ff9ba8}
+html[data-theme=dark] .el-import-card .el-management-note{color:#bbd0e9}
+@media(max-width:600px){.el-schedule-weekbar .el-week-name{width:100%}.el-import-card{padding:12px}.el-schedule-table{font-size:12px}.el-schedule-table tbody td{min-width:80px}.el-schedule-table tbody td:first-child{min-width:125px}.el-schedule-panel .tl-page-title{font-size:26px}}
+
+/* Health-card zero and warning states mirror the existing payment confirmation alert. */
+.noir-metric.el-health-metric.el-zero{
+  background:#e7f7ef;
+  border-color:#bce7d0;
+  color:#12643f;
+}
+.noir-metric.el-health-metric.el-zero .noir-metric-label,
+.noir-metric.el-health-metric.el-zero .noir-metric-value,
+.noir-metric.el-health-metric.el-zero .noir-metric-foot{color:#12643f}
+.noir-metric.el-health-metric.el-near{
+  background:#fff5df;
+  border-color:#f2d69b;
+  color:#7b4a09;
+}
+.noir-metric.el-health-metric.el-near .noir-metric-label,
+.noir-metric.el-health-metric.el-near .noir-metric-value,
+.noir-metric.el-health-metric.el-near .noir-metric-foot{color:#7b4a09}
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero{background:#173b32;border-color:#286b53;color:#b6f3d2}
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-label,
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-value,
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-foot{color:#b6f3d2}
+html[data-theme=dark] .noir-metric.el-health-metric.el-near{background:#44351e;border-color:#79592b;color:#ffe4ae}
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-label,
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-value,
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-foot{color:#ffe4ae}
+
+/* The longer Employee Ledger name fits within the existing 220px navigation rail. */
+.noir-brand{padding-left:2px;padding-right:2px}
+.noir-brand-name{font-size:14px;letter-spacing:-.6px}

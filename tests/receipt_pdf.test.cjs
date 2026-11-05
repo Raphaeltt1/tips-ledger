@@ -117,7 +117,7 @@ test('receipt module exposes only preparation and controlled save/share APIs', (
 test('valid receipt produces vector A4 PDF with correct LBP amounts and reference', async () => {
   const { api, state } = harness();
   const file = await api.prepare(example);
-  assert.equal(file.filename, 'tips-ledger-receipt-2026-10-26-456789ABCDEF.pdf');
+  assert.equal(file.filename, 'employee-ledger-receipt-2026-10-26-456789ABCDEF.pdf');
   assert.equal(file.file.name, file.filename);
   assert.equal(file.file.type, 'application/pdf');
   assert.deepEqual(state.pdfOptions.map(o => [o.format, o.orientation, o.unit]), [['a4', 'portrait', 'mm']]);
