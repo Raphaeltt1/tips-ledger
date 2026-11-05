@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     if (eventType === "test") {
       // A signed-in user may only test notifications to their own devices.
       recipientIds = [profile.id];
-      title = "🔔 Tips Ledger Test";
+      title = "🔔 Employee Ledger Test";
       message = "Background push is working on this device.";
     } else if (eventType === "schedule_published") {
       if (!["admin", "superuser"].includes(profile.role)) {
