@@ -4,8 +4,7 @@
 ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS event_key text;
 ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS push_sent_at timestamptz;
 CREATE UNIQUE INDEX IF NOT EXISTS notifications_unique_recipient_event
-  ON public.notifications (recipient_id, event_key)
-  WHERE event_key IS NOT NULL;
+  ON public.notifications (recipient_id, event_key);
 
 CREATE TABLE IF NOT EXISTS public.employee_health_cards (
   employee_id uuid PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
