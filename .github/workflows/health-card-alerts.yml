@@ -1,0 +1,59 @@
+name: Tips Ledger - Daily Health Card Alerts
+
+# Production workflow activates only after this feature branch is approved/merged.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *'
+      timezone: 'Asia/Beirut'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tips-ledger-daily-health-card-alerts
+  cancel-in-progress: false
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Queue eligible 10-day and 3-day reminders; send push where registered
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_URL: https://qvwgmybocjyhldwnrqqt.supabase.co
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+          url = os.environ.get("SUPABASE_URL")
+          if not key or not url:
+              raise SystemExit("Missing configured secret or Supabase URL")
+          req = urllib.request.Request(
+              url + "/functions/v1/health-card-reminders",
+              method="POST",
+              data=b"{}",
+              headers={
+                  "Authorization": "Bearer " + key,
+                  "apikey": key,
+                  "Content-Type": "application/json",
+              },
+          )
+          with urllib.request.urlopen(req, timeout=120) as response:
+              data = json.load(response)
+          if not data.get("ok"):
+              raise SystemExit("Health-card reminder worker failed")
+          print(
+              "Health-card scan succeeded for", data.get("date"),
+              "| eligible:", data.get("eligible"),
+              "| newly queued:", data.get("newlyQueued"),
+              "| push devices:", data.get("pushed"),
+              "| push failures:", data.get("failed"),
+          )
+          if data.get("failed", 0):
+              raise SystemExit("Some push delivery attempts failed; retry after troubleshooting")
+          PY
