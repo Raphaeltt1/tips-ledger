@@ -48,11 +48,17 @@ GRANT EXECUTE ON FUNCTION public.set_employee_health_card_expiry(uuid,date) TO a
 -- All old warnings (read and unread) disappear as soon as a card is renewed.
 CREATE OR REPLACE FUNCTION public.employee_health_date_changed()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
-DECLARE v_id uuid;
+DECLARE v_id uuid; v_changed boolean := false;
 BEGIN
-  v_id := CASE WHEN TG_OP='DELETE' THEN OLD.employee_id ELSE NEW.employee_id END;
-  IF TG_OP='DELETE' OR TG_OP='INSERT'
-    OR OLD.expires_on IS DISTINCT FROM NEW.expires_on THEN
+  IF TG_OP='DELETE' THEN
+    v_id:=OLD.employee_id; v_changed:=true;
+  ELSIF TG_OP='INSERT' THEN
+    v_id:=NEW.employee_id; v_changed:=true;
+  ELSE
+    v_id:=NEW.employee_id;
+    v_changed:=OLD.expires_on IS DISTINCT FROM NEW.expires_on;
+  END IF;
+  IF v_changed THEN
     DELETE FROM public.notifications
     WHERE event_key LIKE ('health:' || v_id::text || ':%');
   END IF;
