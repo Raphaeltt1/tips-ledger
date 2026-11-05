@@ -33,6 +33,14 @@ const mkfile=async(sheetNames)=>{
   return {name:'Schedule.xlsx',size:bytes.byteLength,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};
 };
 
+test('main inline browser script parses after wiring new navigation hooks',()=>{
+  const start=app.indexOf("<script>\n(()=>{'use strict';");
+  assert.ok(start>0,'main script start must exist');
+  const bodyStart=start+'<script>'.length;
+  const end=app.indexOf('</script>',bodyStart);
+  assert.ok(end>bodyStart);
+  assert.doesNotThrow(()=>new vm.Script(app.slice(bodyStart,end),{filename:'index-browser.js'}));
+});
 test('visible Employee Ledger brand and both schedule selectors',()=>{
   assert.match(app,/<title>Employee Ledger<\/title>/);
   assert.match(app,/<div class="tl-brand-title">Employee Ledger<\/div>/);
