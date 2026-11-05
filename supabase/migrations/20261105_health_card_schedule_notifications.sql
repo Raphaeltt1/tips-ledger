@@ -29,8 +29,8 @@ BEGIN
     RAISE EXCEPTION 'Admin or Superuser access required';
   END IF;
   SELECT * INTO v_employee FROM public.profiles WHERE id=p_employee_id
-    AND active AND role IN ('runner','host_hostess','counter','expo','kitchen_crew');
-  IF NOT FOUND THEN RAISE EXCEPTION 'Active team member not found'; END IF;
+    AND active AND role <> 'superuser';
+  IF NOT FOUND THEN RAISE EXCEPTION 'Active employee not found'; END IF;
   IF p_expiry_date IS NULL THEN
     DELETE FROM public.employee_health_cards WHERE employee_id=p_employee_id;
   ELSE
