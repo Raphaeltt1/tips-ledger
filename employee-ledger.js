@@ -7,7 +7,7 @@
   const teamRoles = ['runner','host_hostess','counter','expo','kitchen_crew'];
   const admin = () => ['admin','superuser'].includes(state.profile?.role);
   const state = {db:null, profile:null, api:null, wired:false, health:[], people:[], filter:'all',
-    dept:'FOH', week:null, published:[], draft:null, scheduleLoading:false};
+    dept:'FOH', week:null, manualWeek:false, published:[], draft:null, scheduleLoading:false};
   const toast = (message,bad=false) => state.api?.toast?.(message,bad);
   function todayBeirut() {
     const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -263,7 +263,7 @@
     $('elScheduleFoh').classList.toggle('selected',state.dept==='FOH');
     $('elScheduleBoh').classList.toggle('selected',state.dept==='BOH');
     const weeks=scheduleWeeks();
-    if(!state.week||(!weeks.includes(state.week) && weeks.length && !state.draft)){
+    if(!state.week||(!weeks.includes(state.week) && weeks.length && !state.draft && !state.manualWeek)){
       state.week=weeks[0];
     }
     const week=$('elScheduleWeek');
@@ -333,7 +333,7 @@
     finally{b.disabled=false;b.textContent='Publish schedule'}
   }
   function showDept(dept){
-    state.dept=dept;state.week=null;
+    state.dept=dept;state.week=null;state.manualWeek=false;
     const first=state.published.find(x=>x.department===dept);
     state.week=first?.week_start||mondayISO(todayBeirut());
     renderSchedule();
@@ -354,7 +354,7 @@
     $('elScheduleBoh').onclick=()=>showDept('BOH');
     $('elScheduleRefresh').onclick=loadScheduleIndex;
     $('elScheduleWeek').onchange=()=>{
-      state.week=mondayISO($('elScheduleWeek').value);renderSchedule();
+      state.week=mondayISO($('elScheduleWeek').value);state.manualWeek=true;renderSchedule();
     };
     $('elSchedulePrev').onclick=()=>{const x=scheduleWeeks().filter(w=>w<state.week);if(x.length){state.week=x[0];renderSchedule()}};
     $('elScheduleNext').onclick=()=>{const x=scheduleWeeks().filter(w=>w>state.week);if(x.length){state.week=x.at(-1);renderSchedule()}};
@@ -366,7 +366,7 @@
   }
   function init({db,profile,setTab,toast,loadNotifications}){
     state.db=db;state.profile=profile;state.api={setTab,toast,loadNotifications};
-    state.filter='all';state.dept='FOH';state.week=null;state.published=[];state.draft=null;
+    state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;
     wire();
     $('elScheduleManagement').classList.toggle('hidden',!admin());
     if($('elHealthForm'))$('elHealthForm').closest('.el-health-editor').classList.toggle('hidden',!admin());
