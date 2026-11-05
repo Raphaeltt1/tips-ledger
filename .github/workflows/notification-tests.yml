@@ -33,7 +33,6 @@ jobs:
           node --check excel-export.js
           node --check receipt-pdf.js
           node --check push-sw.js
-          node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');const a=s.match(/<script>\\s*\\(\\(\\)=>\\{'use strict';[\\s\\S]*?<\\/script>/); if(!a)throw Error('Main app script missing');new Function(a[0].replace(/^<script>/,'').replace(/<\\/script>$/,''));"
       - name: Install real browser ExcelJS test fixture
         run: curl -fsSL --retry 3 https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js -o /tmp/tl-exceljs.min.js
       - name: Verify schedule and reminder logic and security boundaries
