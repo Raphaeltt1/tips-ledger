@@ -68,3 +68,29 @@ html[data-theme=dark] .noir-metric.el-health-metric.el-expired{background:#4f182
 html[data-theme=dark] .noir-metric.el-health-metric.el-expired .noir-metric-label,html[data-theme=dark] .noir-metric.el-health-metric.el-expired .noir-metric-value{color:#ff9ba8}
 html[data-theme=dark] .el-import-card .el-management-note{color:#bbd0e9}
 @media(max-width:600px){.el-schedule-weekbar .el-week-name{width:100%}.el-import-card{padding:12px}.el-schedule-table{font-size:12px}.el-schedule-table tbody td{min-width:80px}.el-schedule-table tbody td:first-child{min-width:125px}.el-schedule-panel .tl-page-title{font-size:26px}}
+
+/* Health-card zero and warning states mirror the existing payment confirmation alert. */
+.noir-metric.el-health-metric.el-zero{
+  background:#e7f7ef;
+  border-color:#bce7d0;
+  color:#12643f;
+}
+.noir-metric.el-health-metric.el-zero .noir-metric-label,
+.noir-metric.el-health-metric.el-zero .noir-metric-value,
+.noir-metric.el-health-metric.el-zero .noir-metric-foot{color:#12643f}
+.noir-metric.el-health-metric.el-near{
+  background:#fff5df;
+  border-color:#f2d69b;
+  color:#7b4a09;
+}
+.noir-metric.el-health-metric.el-near .noir-metric-label,
+.noir-metric.el-health-metric.el-near .noir-metric-value,
+.noir-metric.el-health-metric.el-near .noir-metric-foot{color:#7b4a09}
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero{background:#173b32;border-color:#286b53;color:#b6f3d2}
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-label,
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-value,
+html[data-theme=dark] .noir-metric.el-health-metric.el-zero .noir-metric-foot{color:#b6f3d2}
+html[data-theme=dark] .noir-metric.el-health-metric.el-near{background:#44351e;border-color:#79592b;color:#ffe4ae}
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-label,
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-value,
+html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-foot{color:#ffe4ae}
