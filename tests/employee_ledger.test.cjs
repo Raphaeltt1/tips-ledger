@@ -106,3 +106,43 @@ test('draft imports do not notify; only successful publish changes status and br
   assert.match(source,/event_type:'schedule_published'/);
   assert.doesNotMatch(source,/function importSchedule[\s\S]*?function publishSchedule[\s\S]*?DELETE FROM/);
 });
+
+
+test('restaurant FOH Excel with three columns per day becomes Design B without losing IDs or shifts',async()=>{
+  const book=new ExcelJS.Workbook();
+  const ws=book.addWorksheet('FOH SCHEDULE');
+  const dayNames=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
+  const dates=['21-Sep-26','22-Sep-26','23-Sep-26','24-Sep-26','25-Sep-26','26-Sep-26','27-Sep-26'];
+  ws.addRow(['','FOH SCHEDULE',...dayNames.flatMap(d=>[d,d,d]),'']);
+  ws.addRow(['ID','NAME',...dates.flatMap(d=>[d,d,d]),'TOTAL HOURS']);
+  ws.addRow(['','Waiters',...dayNames.flatMap(()=>['3/4','3/4','3/4']),'']);
+  ws.addRow([4059,'Mario Ibrahim',...['OFF','1-6','6-12','OFF','6-12','1-6','12-6'].flatMap(x=>['',x,'']),28]);
+  const bytes=Buffer.from(await book.xlsx.writeBuffer());
+  const file={name:'FOH.xlsx',size:bytes.byteLength,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};
+  const result=await m.parseExcel(file,'FOH');
+  assert.equal(result.rows.length,4);
+  assert.equal(result.rows[1].length,11,'Employee, Position, 7 days, hours, staff ID');
+  assert.equal(result.rows[1][0],'Employee');
+  assert.match(result.rows[1][2],/Mon/);
+  assert.equal(result.rows[2][0],'Waiters');
+  assert.equal(result.rows[3][0],'Mario Ibrahim');
+  assert.equal(result.rows[3][1],'Waiters');
+  assert.deepEqual(Array.from(result.rows[3].slice(2,9)),['OFF','1-6','6-12','OFF','6-12','1-6','12-6']);
+  assert.equal(result.rows[3][9],'28');
+  assert.equal(result.rows[3][10],'4059');
+  const html=m.tableMarkup(result.rows);
+  assert.match(html,/el-shift-pill/);
+  assert.match(html,/el-off/);
+  assert.match(html,/el-section-row/);
+});
+test('the importer does not silently display a FOH worksheet under the BOH tab',async()=>{
+  const file=await mkfile(['FOH']);
+  await assert.rejects(m.parseExcel(file,'BOH'),/No BOH worksheet/);
+});
+test('admin drafts survive reloads independently, and only publication clears the active draft',()=>{
+  assert.match(source,/\.eq\('status','draft'\)\.order\('created_at'/);
+  assert.match(source,/state\.draft=state\.drafts\[state\.dept\]\|\|null/);
+  assert.match(source,/state\.drafts\[state\.dept\]=state\.draft/);
+  assert.match(source,/delete state\.drafts\[draft\.department\]/);
+  assert.match(source,/const dayColumns=new Set/);
+});

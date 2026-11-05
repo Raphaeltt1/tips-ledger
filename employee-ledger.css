@@ -98,3 +98,90 @@ html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-foot{co
 /* The longer Employee Ledger name fits within the existing 220px navigation rail. */
 .noir-brand{padding-left:2px;padding-right:2px}
 .noir-brand-name{font-size:14px;letter-spacing:-.6px}
+
+
+/* Approved Design B: purple FOH/BOH selectors and readable color-coded shifts.
+   The cells remain strictly read-only; colors never edit workbook data. */
+.el-schedule-panel .el-segments button{
+  border-radius:9px;
+  border:1px solid #d9d5ed;
+  background:#f2effb;
+  color:#272241;
+  padding:11px 20px;
+  font-weight:750;
+  box-shadow:none;
+}
+.el-schedule-panel .el-segments button.selected{
+  background:linear-gradient(125deg,#9364e5,#6840ca);
+  border-color:#8050dc;
+  color:white;
+}
+.el-schedule-scroll{border-color:#e4e2f0;box-shadow:0 2px 14px #30235d09}
+.el-schedule-table{border-spacing:0;min-width:900px}
+.el-schedule-table thead th{
+  white-space:pre-line;
+  background:#eeedf8;
+  color:#27243e;
+  border-bottom:1px solid #dedbed;
+  padding:12px 10px;
+  font-size:12px;
+  line-height:1.5;
+}
+.el-schedule-table thead th:first-child{
+  background:#eeedf8;
+  color:#27243e;
+  min-width:170px;
+}
+.el-schedule-table tbody td{
+  padding:8px 7px;
+  min-width:90px;
+  border-bottom:1px solid #e8e8f0;
+}
+.el-schedule-table tbody td:first-child{min-width:170px;font-weight:760}
+.el-schedule-table tbody td:nth-child(2){min-width:120px}
+.el-schedule-table tbody td.el-day-cell.el-day-off{
+  color:inherit;
+  background:inherit;
+}
+.el-schedule-table .el-shift-pill{
+  display:block;
+  border-radius:8px;
+  padding:8px 6px;
+  font-size:12px;
+  font-weight:720;
+  line-height:1.35;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  text-align:center;
+}
+.el-schedule-table .el-shift-pill.el-on{background:#dff4e5;color:#155633}
+.el-schedule-table .el-shift-pill.el-off{background:#fbe0e2;color:#8f1f2e}
+.el-schedule-table tbody tr.el-section-row td,
+.el-schedule-table tbody tr.el-section-row:nth-child(even) td{
+  background:#eeebf8;
+  color:#604a9d;
+  font-weight:720;
+  font-size:11px;
+}
+.el-schedule-table tbody tr.el-section-row td:first-child,
+.el-schedule-table tbody tr.el-section-row:nth-child(even) td:first-child{
+  background:#e3ddf7;
+  color:#4f3a89;
+}
+html[data-theme=dark] .el-schedule-panel .el-segments button:not(.selected){
+  background:#302a4b;color:#e1d7ff;border-color:#504477
+}
+html[data-theme=dark] .el-schedule-table thead th,
+html[data-theme=dark] .el-schedule-table thead th:first-child{
+  background:#322e50;color:#f1ebff;border-color:#4f4870
+}
+html[data-theme=dark] .el-schedule-table .el-shift-pill.el-on{background:#214e36;color:#b5ffd1}
+html[data-theme=dark] .el-schedule-table .el-shift-pill.el-off{background:#65313d;color:#ffd4dc}
+html[data-theme=dark] .el-schedule-table tbody tr.el-section-row td,
+html[data-theme=dark] .el-schedule-table tbody tr.el-section-row:nth-child(even) td{
+  background:#332b4b;color:#e6d9ff
+}
+html[data-theme=dark] .el-schedule-table tbody tr.el-section-row td:first-child,
+html[data-theme=dark] .el-schedule-table tbody tr.el-section-row:nth-child(even) td:first-child{
+  background:#3c3157;color:#e9dafa
+}

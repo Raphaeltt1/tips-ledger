@@ -7,7 +7,7 @@
   const teamRoles = ['runner','host_hostess','counter','expo','kitchen_crew'];
   const admin = () => ['admin','superuser'].includes(state.profile?.role);
   const state = {db:null, profile:null, api:null, wired:false, health:[], people:[], filter:'all',
-    dept:'FOH', week:null, manualWeek:false, published:[], draft:null, scheduleLoading:false};
+    dept:'FOH', week:null, manualWeek:false, published:[], draft:null, drafts:{}, scheduleLoading:false};
   const toast = (message,bad=false) => state.api?.toast?.(message,bad);
   function todayBeirut() {
     const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -188,13 +188,52 @@
     if(value instanceof Date)return value.toLocaleDateString('en-GB',{timeZone:'UTC'});
     return String(value??'').trim().slice(0,150);
   }
+
+  // The restaurant Excel format uses three subcolumns for each day. Collapse
+  // those display-only cells into one day per column for the selected Design B.
+  // Every nonempty shift remains visible; the workbook is never edited.
+  function normalizeScheduleRows(rows) {
+    const top=rows[0]||[];
+    const days=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'];
+    const starts=days.map(day=>top.findIndex(v=>String(v||'').toUpperCase()===day));
+    if(starts.some(i=>i<2)||starts.some((pos,i)=>
+      top.slice(pos,pos+3).some(value=>String(value||'').toUpperCase()!==days[i])
+    ))return rows;
+    const dates=rows[1]||[];
+    const hoursCol=dates.findIndex(v=>/^total\s*hours$/i.test(String(v||'')));
+    const dateSuffix=value=>{
+      const x=String(value||'').trim();
+      if(/^\d{1,2}-[A-Za-z]{3}-\d{2,4}$/.test(x))return x.split('-').slice(0,2).join(' ');
+      if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(x))return x.slice(0,5);
+      return '';
+    };
+    const headings=['Employee','Position',...days.map((day,i)=>
+      day.slice(0,1)+day.slice(1,3).toLowerCase()+(dateSuffix(dates[starts[i]])?'\n'+dateSuffix(dates[starts[i]]):'')
+    ),'Total Hours','Staff ID'];
+    const normalized=[[String(top[1]||'Weekly Schedule')],headings];
+    let section='';
+    for(const row of rows.slice(2)){
+      const id=String(row[0]||'').trim(),name=String(row[1]||'').trim();
+      if(!name)continue;
+      const shifts=starts.map(i=>[...new Set(row.slice(i,i+3).map(x=>String(x||'').trim()).filter(Boolean))].join(' / '));
+      const total=hoursCol>=0?String(row[hoursCol]||'').trim():'';
+      const groupName=/^(manager on duty|floor supervisors?|waiters?|runners?|host(?:ess)?es?|counter|cashiers?|expo|kitchen(?: crew)?|baristas?|hosts?|support|delivery)$/i.test(name);
+      const isSection=groupName && (!id || shifts.every(x=>!x||/^\d+(?:\s*\/\s*\d+)?$/.test(x)));
+      if(isSection){section=name;normalized.push([name,'',...shifts,total,id]);continue;}
+      normalized.push([name,section,...shifts,total,id]);
+    }
+    return normalized.length>2?normalized:rows;
+  }
   async function parseExcel(file,dept) {
     if(!/\.xlsx$/i.test(file?.name||''))throw Error('Please select an Excel .xlsx workbook.');
     if(file.size>6*1024*1024)throw Error('The Excel workbook must be under 6 MB.');
     const Excel=await ensureExcel(),wb=new Excel.Workbook();
     await wb.xlsx.load(await file.arrayBuffer());
     const sheets=wb.worksheets.filter(ws=>ws.state!=='veryHidden'&&ws.state!=='hidden');
-    const selected=sheets.find(ws=>new RegExp('\\b'+dept+'\\b','i').test(ws.name))||sheets[0];
+    const named=sheets.find(ws=>new RegExp('\\b'+dept+'\\b','i').test(ws.name));
+    if(!named && sheets.some(ws=>/\b(?:FOH|BOH)\b/i.test(ws.name)))
+      throw Error('No '+dept+' worksheet found. Choose the matching department workbook.');
+    const selected=named||sheets[0];
     if(!selected)throw Error('No visible worksheet in this Excel workbook.');
     if(selected.rowCount>500)throw Error('The schedule worksheet has too many rows; keep it to 180 lines.');
     const raw=[];
@@ -210,7 +249,7 @@
     if(raw.length<2||!raw.some(r=>r.filter(Boolean).length>=2))throw Error('No readable weekly schedule grid was found in this workbook.');
     if(raw.length>180)throw Error('A schedule must have no more than 180 rows.');
     if(raw.reduce((n,row)=>n+row.join('').length,0)>150000)throw Error('The schedule is too large to save.');
-    return {rows:raw, sheet:selected.name};
+    return {rows:normalizeScheduleRows(raw), sheet:selected.name};
   }
   function dateLabel(date) {
     if(!date)return 'No week selected';
@@ -225,11 +264,17 @@
     const head=Math.max(0,rows.findIndex(r=>Array.isArray(r)&&r.filter(x=>dayNames.test(String(x||''))).length>=2));
     const cols=Math.max(1,...rows.map(r=>r.length));
     const banner=rows.slice(0,head).flat().filter(Boolean).slice(0,3).join(' · ');
+    const dayColumns=new Set(Array.from({length:cols},(_,i)=>dayNames.test(String(rows[head][i]||''))?i:-1).filter(i=>i>=0));
     const heads=Array.from({length:cols},(_,i)=>'<th>'+esc(rows[head][i]||'')+'</th>').join('');
-    const tbody=rows.slice(head+1).map(row=>'<tr>'+Array.from({length:cols},(_,i)=>{
-      const str=String(row[i]||''),off=/^off$/i.test(str);
-      return '<td'+(off?' class="el-day-off"':'')+'>'+esc(str)+'</td>';
-    }).join('')+'</tr>').join('');
+    const tbody=rows.slice(head+1).map(row=>{
+      const section=cols>=10 && /^(manager on duty|floor supervisors?|waiters?|runners?|host(?:ess)?es?|counter|cashiers?|expo|kitchen(?: crew)?|baristas?|hosts?|support|delivery)$/i.test(String(row[0]||'').trim()) && String(row[1]||'').trim()==='';
+      return '<tr'+(section?' class="el-section-row"':'')+'>'+Array.from({length:cols},(_,i)=>{
+        const str=String(row[i]||'').trim(),off=/^off$/i.test(str);
+        if(!section && dayColumns.has(i) && str)
+          return '<td class="el-day-cell'+(off?' el-day-off':'')+'"><span class="el-shift-pill '+(off?'el-off':'el-on')+'">'+esc(str)+'</span></td>';
+        return '<td>'+esc(str)+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
     return (banner?'<p class="el-schedule-caption">'+esc(banner)+'</p>':'')
       +'<div class="el-schedule-scroll" tabindex="0" aria-label="Scrollable weekly schedule"><table class="el-schedule-table"><thead><tr>'+heads+'</tr></thead><tbody>'+tbody+'</tbody></table></div>';
   }
@@ -244,9 +289,25 @@
         .eq('status','published').order('published_at',{ascending:false}).limit(120);
       if(r.error)throw r.error;
       state.published=r.data||[];
+      state.drafts={};
+      if(admin()){
+        const d=await state.db.from('schedule_publications')
+          .select('id,department,week_start,original_filename,workbook_rows,created_at')
+          .eq('status','draft').order('created_at',{ascending:false}).limit(80);
+        if(d.error)throw d.error;
+        for(const draft of d.data||[]){
+          if(state.drafts[draft.department])continue;
+          const newerPublished=state.published.find(p=>p.department===draft.department &&
+            p.week_start===draft.week_start && new Date(p.published_at)>=new Date(draft.created_at));
+          if(newerPublished)continue;
+          state.drafts[draft.department]={id:draft.id,department:draft.department,
+            week:draft.week_start,filename:draft.original_filename,rows:draft.workbook_rows};
+        }
+      }
+      state.draft=state.drafts[state.dept]||null;
       if(!state.week){
         const latest=state.published.find(x=>x.department===state.dept);
-        state.week=latest?.week_start||mondayISO(todayBeirut());
+        state.week=state.draft?.week||latest?.week_start||mondayISO(todayBeirut());
       }
       renderSchedule();
     }catch(e){$('elScheduleStatus').textContent='Could not open schedules: '+(e.message||'Try refreshing');toast('Could not load schedule: '+e.message,true)}
@@ -301,6 +362,7 @@
       }).select('id').single();
       if(created.error)throw created.error;
       state.draft={id:created.data.id,department:state.dept,week,filename:file.name,rows:data.rows};
+      state.drafts[state.dept]=state.draft;
       state.week=week;
       $('elScheduleFile').value='';
       renderSchedule();
@@ -318,6 +380,7 @@
       const r=await state.db.rpc('publish_employee_schedule',{p_publication_id:draft.id});
       if(r.error)throw r.error;
       state.draft=null;
+      delete state.drafts[draft.department];
       state.week=draft.week;
       await loadScheduleIndex();
       await state.api?.loadNotifications?.();
@@ -334,8 +397,9 @@
   }
   function showDept(dept){
     state.dept=dept;state.week=null;state.manualWeek=false;
+    state.draft=state.drafts[dept]||null;
     const first=state.published.find(x=>x.department===dept);
-    state.week=first?.week_start||mondayISO(todayBeirut());
+    state.week=state.draft?.week||first?.week_start||mondayISO(todayBeirut());
     renderSchedule();
   }
   function wire() {
@@ -366,7 +430,7 @@
   }
   function init({db,profile,setTab,toast,loadNotifications}){
     state.db=db;state.profile=profile;state.api={setTab,toast,loadNotifications};
-    state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;
+    state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;state.drafts={};
     wire();
     $('elScheduleManagement').classList.toggle('hidden',!admin());
     if($('elHealthForm'))$('elHealthForm').closest('.el-health-editor').classList.toggle('hidden',!admin());
