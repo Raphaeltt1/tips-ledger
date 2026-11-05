@@ -22,20 +22,25 @@ Deno.serve(async (req) => {
   try {
     const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
     // Only active Admin and Superuser accounts receive health-card alerts.
-    const [adminsResult, employeesResult] = await Promise.all([
+    const [adminsResult, employeesResult, cardsResult] = await Promise.all([
       db.from("profiles").select("id,role").eq("active", true).in("role", ["admin", "superuser"]),
-      db.from("profiles").select("id,full_name,role,active,health_card_expiry")
-        .eq("active", true).in("role", ["runner", "host_hostess", "counter", "expo", "kitchen_crew"])
-        .not("health_card_expiry", "is", null),
+      db.from("profiles").select("id,full_name,role,active").eq("active", true)
+        .in("role", ["runner", "host_hostess", "counter", "expo", "kitchen_crew"]),
+      db.from("employee_health_cards").select("employee_id,expires_on"),
     ]);
-    if (adminsResult.error || employeesResult.error) {
-      console.error("Health card lookup failed", adminsResult.error?.code, employeesResult.error?.code);
+    if (adminsResult.error || employeesResult.error || cardsResult.error) {
+      console.error("Health card lookup failed",
+        adminsResult.error?.code, employeesResult.error?.code, cardsResult.error?.code);
       return reply({ error: "Health-card data is not ready; apply migration first" }, 503);
     }
 
     const date = todayInBeirut();
-    const reminders = (employeesResult.data || [])
-      .map((employee: Record<string, unknown>) => healthReminder(employee, date)).filter(Boolean);
+    const employees = new Map((employeesResult.data || []).map((p: { id: string }) => [p.id, p]));
+    const reminders = (cardsResult.data || []).map((card: { employee_id: string; expires_on: string }) => {
+      const employee = employees.get(card.employee_id);
+      if (!employee) return null;
+      return healthReminder({ ...employee, health_card_expiry: card.expires_on }, date);
+    }).filter(Boolean);
     const admins = adminsResult.data || [];
     const pendingRows = reminders.flatMap((reminder: Record<string, unknown>) => admins.map((admin: { id: string }) => ({
       recipient_id: admin.id,
