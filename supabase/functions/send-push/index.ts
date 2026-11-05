@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
     const token = authorization.slice("Bearer ".length);
     const authClient = createClient(url, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: authorization } },
     });
     const { data: authData, error: authError } = await authClient.auth.getUser(token);
     if (authError || !authData.user) return json({ error: "Invalid session" }, 401);
