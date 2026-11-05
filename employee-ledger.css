@@ -94,3 +94,7 @@ html[data-theme=dark] .noir-metric.el-health-metric.el-near{background:#44351e;b
 html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-label,
 html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-value,
 html[data-theme=dark] .noir-metric.el-health-metric.el-near .noir-metric-foot{color:#ffe4ae}
+
+/* The longer Employee Ledger name fits within the existing 220px navigation rail. */
+.noir-brand{padding-left:2px;padding-right:2px}
+.noir-brand-name{font-size:14px;letter-spacing:-.6px}
