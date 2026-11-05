@@ -1,4 +1,4 @@
-/* Tips Ledger — styled, read-only payment history export.
+/* Employee Ledger — styled, read-only payment history export.
    Source data comes exclusively from the existing filtered payment list.
    ExcelJS is loaded on demand to avoid impacting app startup. */
 (() => {
@@ -109,8 +109,8 @@
     }), { hours: 0, tips: 0, advances: 0, net: 0 });
     await loadExcel();
     const wb = new window.ExcelJS.Workbook();
-    wb.creator = 'Tips Ledger';
-    wb.lastModifiedBy = 'Tips Ledger';
+    wb.creator = 'Employee Ledger';
+    wb.lastModifiedBy = 'Employee Ledger';
     wb.created = new Date();
     wb.modified = new Date();
     const ws = wb.addWorksheet('Payments', {
@@ -138,7 +138,7 @@
     ws.getRow(8).height = 22; ws.getRow(9).height = 16;
     ws.getRow(10).height = 30; ws.getRow(11).height = 32;
 
-    mergeText(ws, 'A1:G2', 'TIPS.LEDGER  /  PAYMENT RECORD', C.navy, C.white, 18, true);
+    mergeText(ws, 'A1:G2', 'EMPLOYEE.LEDGER  /  PAYMENT RECORD', C.navy, C.white, 18, true);
     mergeText(ws, 'A3:G3', 'WEEKLY PAYMENT HISTORY  |  ALL AMOUNTS IN LBP', C.navy, 'C3D5EF', 10, true);
     const day = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Beirut', day: '2-digit', month: 'long', year: 'numeric'
@@ -219,9 +219,9 @@
       C.pale, C.muted, 9);
     ws.autoFilter = { from: 'A11', to: 'G' + Math.max(lastDetail, 11) };
     ws.printTitlesRow = '10:11';
-    ws.headerFooter.oddFooter = '&L TIPS.LEDGER  |  INTERNAL USE ONLY&RPage &P of &N';
+    ws.headerFooter.oddFooter = '&L EMPLOYEE.LEDGER  |  INTERNAL USE ONLY&RPage &P of &N';
     const bytes = await wb.xlsx.writeBuffer();
-    const filename = 'tips-ledger-payments-' + new Date().toISOString().slice(0, 10) + '.xlsx';
+    const filename = 'employee-ledger-payments-' + new Date().toISOString().slice(0, 10) + '.xlsx';
     downloadBlob(bytes, filename);
     return { filename, count: entries.length, totals };
   }
@@ -268,8 +268,8 @@
     });
     await loadExcel();
     const workbook = new window.ExcelJS.Workbook();
-    workbook.creator = 'Tips Ledger';
-    workbook.lastModifiedBy = 'Tips Ledger';
+    workbook.creator = 'Employee Ledger';
+    workbook.lastModifiedBy = 'Employee Ledger';
     workbook.created = new Date();
     workbook.modified = new Date();
     const pageOptions = {
@@ -289,7 +289,7 @@
     for (const [index, height] of [[1,28],[2,29],[3,28],[4,34],[5,27],[6,11],[7,25],[8,35],[9,28],[10,32]]) {
       ws.getRow(index).height = height;
     }
-    mergeText(ws, 'A1:F2', 'TIPS.LEDGER  /  AUDIT RECORDS', C.navy, C.white, 18, true);
+    mergeText(ws, 'A1:F2', 'EMPLOYEE.LEDGER  /  AUDIT RECORDS', C.navy, C.white, 18, true);
     mergeText(ws, 'A3:F3', 'ACTIVITY & ACCOUNTABILITY  |  INTERNAL ACCESS ONLY', C.navy, 'C3D5EF', 10, true);
     const now = new Date();
     const dateLabel = new Intl.DateTimeFormat('en-GB', {
@@ -337,7 +337,7 @@
       C.pale, C.muted, 9);
     if (data.length) ws.autoFilter = { from: 'A10', to: 'F' + endRow };
     ws.printTitlesRow = '9:10';
-    ws.headerFooter.oddFooter = '&L TIPS.LEDGER  |  CONFIDENTIAL AUDIT&RPage &P of &N';
+    ws.headerFooter.oddFooter = '&L EMPLOYEE.LEDGER  |  CONFIDENTIAL AUDIT&RPage &P of &N';
 
     const raw = workbook.addWorksheet('Raw Records', {
       views: [{ state: 'frozen', ySplit: 4, activeCell: 'A5' }],
@@ -348,7 +348,7 @@
       {width:22},{width:40},{width:40},{width:30},{width:72}
     ];
     raw.getRow(1).height = 35;
-    mergeText(raw, 'A1:K1', 'TIPS.LEDGER  /  ORIGINAL AUDIT DATA', C.navy, C.white, 16, true);
+    mergeText(raw, 'A1:K1', 'EMPLOYEE.LEDGER  /  ORIGINAL AUDIT DATA', C.navy, C.white, 16, true);
     mergeText(raw, 'A2:K2', 'UNALTERED EVENT FIELDS   |   UTC TIMESTAMPS   |   INTERNAL USE ONLY',
       C.navyLight, C.white, 10, true);
     mergeText(raw, 'A3:K3', 'Includes record identifiers, original action codes and complete JSON details.',
@@ -374,10 +374,10 @@
     });
     if(data.length)raw.autoFilter={from:'A4',to:'K'+(data.length+4)};
     raw.printTitlesRow='4:4';
-    raw.headerFooter.oddFooter = '&L TIPS.LEDGER  |  CONFIDENTIAL RAW AUDIT&RPage &P of &N';
+    raw.headerFooter.oddFooter = '&L EMPLOYEE.LEDGER  |  CONFIDENTIAL RAW AUDIT&RPage &P of &N';
 
     const bytes = await workbook.xlsx.writeBuffer();
-    const filename = 'tips-ledger-audit-' + now.toISOString().slice(0,10) + '.xlsx';
+    const filename = 'employee-ledger-audit-' + now.toISOString().slice(0,10) + '.xlsx';
     downloadBlob(bytes, filename);
     return { filename, count: data.length };
   }
