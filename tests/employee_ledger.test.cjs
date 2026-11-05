@@ -59,6 +59,15 @@ test('health cards stay management-only and callbacks do not expose write to sta
   assert.match(sql,/current_user_role\(\)\) NOT IN \('admin','superuser'\)/);
   assert.match(source,/if\(!admin\(\)\)return;/);
 });
+test('health-card creation, editor, dashboard and daily worker cover every employee role',()=>{
+  const reminderSource=fs.readFileSync(path.join(root,'supabase/functions/health-card-reminders/index.ts'),'utf8');
+  assert.match(source,/return state\.people\.filter\(p=>p\.active && p\.role!=='superuser'\)/);
+  assert.match(sql,/AND active AND role <> 'superuser'/);
+  assert.match(reminderSource,/\.neq\("role", "superuser"\)/);
+  assert.match(app,/id="employeeHealthCardExpiry"/);
+  assert.match(app,/if\(newHealthDate&&data\.employee\?\.id\)/);
+  assert.doesNotMatch(app,/Health Card expiry date \(team members/);
+});
 test('Excel import selects FOH/BOH sheets independently with actual XLSX data',async()=>{
   const f=await mkfile(['BOH','FOH']);
   const foh=await m.parseExcel(f,'FOH');
