@@ -207,9 +207,9 @@
       if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(x))return x.slice(0,5);
       return '';
     };
-    const headings=['ID','Employee','Position',...days.map((day,i)=>
+    const headings=['Employee','Position',...days.map((day,i)=>
       day.slice(0,1)+day.slice(1,3).toLowerCase()+(dateSuffix(dates[starts[i]])?'\n'+dateSuffix(dates[starts[i]]):'')
-    ),'Total Hours'];
+    ),'Total Hours','Staff ID'];
     const normalized=[[String(top[1]||'Weekly Schedule')],headings];
     let section='';
     for(const row of rows.slice(2)){
@@ -219,8 +219,8 @@
       const total=hoursCol>=0?String(row[hoursCol]||'').trim():'';
       const groupName=/^(manager on duty|floor supervisors?|waiters?|runners?|host(?:ess)?es?|counter|cashiers?|expo|kitchen(?: crew)?|baristas?|hosts?|support|delivery)$/i.test(name);
       const isSection=groupName && (!id || shifts.every(x=>!x||/^\d+(?:\s*\/\s*\d+)?$/.test(x)));
-      if(isSection){section=name;normalized.push(['',name,'',...shifts,total]);continue;}
-      normalized.push([id,name,section,...shifts,total]);
+      if(isSection){section=name;normalized.push([name,'',...shifts,total,id]);continue;}
+      normalized.push([name,section,...shifts,total,id]);
     }
     return normalized.length>2?normalized:rows;
   }
@@ -267,7 +267,7 @@
     const dayColumns=new Set(Array.from({length:cols},(_,i)=>dayNames.test(String(rows[head][i]||''))?i:-1).filter(i=>i>=0));
     const heads=Array.from({length:cols},(_,i)=>'<th>'+esc(rows[head][i]||'')+'</th>').join('');
     const tbody=rows.slice(head+1).map(row=>{
-      const section=cols>=10 && String(row[0]||'').trim()==='' && String(row[1]||'').trim()!=='' && String(row[2]||'').trim()==='';
+      const section=cols>=10 && /^(manager on duty|floor supervisors?|waiters?|runners?|host(?:ess)?es?|counter|cashiers?|expo|kitchen(?: crew)?|baristas?|hosts?|support|delivery)$/i.test(String(row[0]||'').trim()) && String(row[1]||'').trim()==='';
       return '<tr'+(section?' class="el-section-row"':'')+'>'+Array.from({length:cols},(_,i)=>{
         const str=String(row[i]||'').trim(),off=/^off$/i.test(str);
         if(!section && dayColumns.has(i) && str)
