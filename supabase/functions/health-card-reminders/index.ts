@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const [adminsResult, employeesResult, cardsResult] = await Promise.all([
       db.from("profiles").select("id,role").eq("active", true).in("role", ["admin", "superuser"]),
       db.from("profiles").select("id,full_name,role,active").eq("active", true)
-        .in("role", ["runner", "host_hostess", "counter", "expo", "kitchen_crew"]),
+        .neq("role", "superuser"),
       db.from("employee_health_cards").select("employee_id,expires_on"),
     ]);
     if (adminsResult.error || employeesResult.error || cardsResult.error) {
