@@ -28,7 +28,7 @@
   }
   function cardById(id){return state.health.find(h=>h.employee_id===id)}
   function peopleForHealth() {
-    return state.people.filter(p=>p.active && teamRoles.includes(p.role));
+    return state.people.filter(p=>p.active && p.role!=='superuser');
   }
   function getHealthGroup(id) {
     const date=cardById(id)?.expires_on;
