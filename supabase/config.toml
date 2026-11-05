@@ -11,3 +11,8 @@ verify_jwt = false
 
 [functions.send-push]
 verify_jwt = true
+
+# Machine-only reminder dispatch: JWT gateway disabled so modern service secrets work;
+# Edge handler still validates the exact service-role secret before DB access.
+[functions.health-card-reminders]
+verify_jwt = false
