@@ -1,0 +1,25 @@
+name: Health Card and Schedule Notification Checks
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/notification-tests.yml'
+      - 'supabase/functions/health-card-reminders/**'
+      - 'supabase/functions/send-push/**'
+      - 'supabase/migrations/20261105_health_card_schedule_notifications.sql'
+      - 'tests/health_card_notifications.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-notification-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Lebanon-local expiry boundaries and renewal behavior
+        run: node --test tests/health_card_notifications.test.mjs
