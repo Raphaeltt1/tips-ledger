@@ -48,18 +48,46 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const eventType = body?.event_type;
     const weeklyTipId = body?.weekly_tip_id;
-    if (!["published", "received", "test"].includes(eventType) || (eventType !== "test" && !weeklyTipId)) {
+    const schedulePublicationId = body?.schedule_publication_id;
+    if (!["published", "received", "test", "schedule_published"].includes(eventType)
+        || (["published", "received"].includes(eventType) && !weeklyTipId)
+        || (eventType === "schedule_published" && !schedulePublicationId)) {
       return json({ error: "Invalid event" }, 400);
     }
 
     let recipientIds: string[] = [];
     let title = "";
     let message = "";
+    const scheduleNoticeIds = new Map<string, string>();
     if (eventType === "test") {
       // A signed-in user may only test notifications to their own devices.
       recipientIds = [profile.id];
       title = "🔔 Tips Ledger Test";
       message = "Background push is working on this device.";
+    } else if (eventType === "schedule_published") {
+      if (!["admin", "superuser", "manager"].includes(profile.role)) {
+        return json({ error: "Only management may send schedule publication notifications" }, 403);
+      }
+      // The DB is authoritative: a schedule must already be successfully published.
+      // current_user_role also respects superuser MFA.
+      const { data: callerRole, error: callerError } = await authClient.rpc("current_user_role");
+      if (callerError || callerRole !== profile.role) return json({ error: "Role verification failed" }, 403);
+      const { data: publication, error: publicationError } = await admin.from("schedule_publications")
+        .select("id,department,week_start,published_at")
+        .eq("id", schedulePublicationId).maybeSingle();
+      if (publicationError || !publication?.published_at) {
+        return json({ error: "Published schedule not found" }, 404);
+      }
+      const { data: unsent, error: noticeError } = await admin.from("notifications")
+        .select("id,recipient_id").eq("event_key", "schedule:" + publication.id)
+        .is("push_sent_at", null);
+      if (noticeError) return json({ error: "Could not load schedule alerts" }, 500);
+      recipientIds = (unsent || []).map((x: { recipient_id: string; id: string }) => {
+        scheduleNoticeIds.set(x.recipient_id, x.id);
+        return x.recipient_id;
+      });
+      title = "📅 Weekly Schedule";
+      message = "Your weekly schedule has been published";
     } else if (eventType === "published") {
       if (!["admin", "superuser", "manager"].includes(profile.role)) return json({ error: "Not authorized to publish notifications" }, 403);
       const { data: payment, error } = await admin.from("weekly_tips")
@@ -92,13 +120,15 @@ Deno.serve(async (req) => {
     let sent = 0;
     let failed = 0;
     const staleIds: string[] = [];
-    await Promise.all((subscriptions || []).map(async (row: { id: string; endpoint: string; subscription: Record<string, unknown> }) => {
+    const scheduleDelivered = new Set<string>();
+    await Promise.all((subscriptions || []).map(async (row: { id: string; user_id: string; endpoint: string; subscription: Record<string, unknown> }) => {
       try {
         await webpush.sendNotification(row.subscription, JSON.stringify({
-          title, body: message, tag: `tips-ledger-${eventType}-${weeklyTipId || profile.id}`,
+          title, body: message, tag: `tips-ledger-${eventType}-${schedulePublicationId || weeklyTipId || profile.id}`,
           url: "https://raphaeltt1.github.io/tips-ledger/"
         }));
         sent++;
+        if (eventType === "schedule_published") scheduleDelivered.add(row.user_id);
       } catch (err) {
         failed++;
         const status = (err as { statusCode?: number })?.statusCode;
@@ -107,6 +137,16 @@ Deno.serve(async (req) => {
       }
     }));
     if (staleIds.length) await admin.from("push_subscriptions").delete().in("id", staleIds);
+    if (eventType === "schedule_published") {
+      // Mark successful per-recipient delivery to avoid repeated pushes on retries.
+      await Promise.all([...scheduleDelivered].map(async userId => {
+        const noticeId = scheduleNoticeIds.get(userId);
+        if (!noticeId) return;
+        const { error } = await admin.from("notifications")
+          .update({ push_sent_at: new Date().toISOString() }).eq("id", noticeId).is("push_sent_at", null);
+        if (error) console.error("Schedule delivery receipt update failed", error.code);
+      }));
+    }
     return json({ sent, failed, reason: sent === 0 ? "All push attempts failed. Check Supabase Edge Function logs and VAPID configuration." : null, staleSubscriptionsRemoved: staleIds.length });
   } catch (error) {
     console.error("send-push failed", error);
