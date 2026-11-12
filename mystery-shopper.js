@@ -6,7 +6,7 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const state = {db:null,profile:null,notify:null,employees:[],reports:[],
-    page:0,hasMore:false,loading:false,wired:false,filter:''};
+    page:0,hasMore:false,loading:false,wired:false,filter:'',previewUrl:null};
   const PAGE_SIZE = 20;
   const BUCKET = 'mystery-shopper-reports';
   const TYPES = {pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp'};
@@ -18,6 +18,12 @@
     return new Date(date+'T00:00:00Z').toLocaleDateString('en-GB',
       {timeZone:'UTC',day:'numeric',month:'short',year:'numeric'});
   };
+  function todayBeirut() {
+    const parts=new Intl.DateTimeFormat('en-GB',
+      {timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const get=t=>parts.find(p=>p.type===t)?.value;
+    return get('year')+'-'+get('month')+'-'+get('day');
+  }
   function nameOf(id) {
     if(id===state.profile?.id)return state.profile.full_name||'You';
     return state.employees.find(p=>p.id===id)?.full_name||'Employee';
@@ -51,7 +57,7 @@
         '<h3>'+esc(r.title)+'</h3>'+name+'</div><span class="ms-file-type">'+
         esc(r.mime_type==='application/pdf'?'PDF':'Image')+'</span></div>'+
         note+'<p class="ms-file-name">'+esc(r.original_filename)+'</p>'+
-        '<div class="ms-report-actions"><button type="button" data-ms-download="'+safeId+'">View / Download report</button>'+
+        '<div class="ms-report-actions"><button type="button" data-ms-download="'+safeId+'">View report</button>'+
         (isAdmin()?'<button type="button" class="ms-delete" data-ms-delete="'+safeId+'">Delete</button>':'')+
         '</div></article>';
     }).join(''):'<div class="ms-empty">No Mystery Shopper reports available yet.</div>';
@@ -117,7 +123,7 @@
       if(record.error)throw record.error;
       uploaded=false;
       $('msUploadForm').reset();
-      $('msDate').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Beirut'});
+      $('msDate').value=todayBeirut();
       await loadReports(true);
       toast('Mystery Shopper report saved privately for '+target.full_name+'.');
     }catch(error){
@@ -128,6 +134,12 @@
       toast('Report upload failed: '+(error.message||'Please retry.'),true);
     }finally{button.disabled=false;button.textContent='Upload report'}
   }
+  function closePreview() {
+    $('msPreview').classList.add('hidden');
+    $('msPreviewBody').replaceChildren();
+    $('msSaveReport').removeAttribute('href');
+    if(state.previewUrl){URL.revokeObjectURL(state.previewUrl);state.previewUrl=null}
+  }
   async function downloadReport(id,button){
     const report=state.reports.find(x=>x.id===id);
     if(!report)return;
@@ -135,13 +147,28 @@
     try{
       const {data,error}=await state.db.storage.from(BUCKET).download(report.file_path);
       if(error)throw error;
-      const url=URL.createObjectURL(data),a=document.createElement('a');
-      a.href=url;a.download=report.original_filename;a.style.display='none';
-      document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),120000);
-      status('Report ready. Check your browser downloads or Files app.');
-    }catch(error){toast('Could not download the report: '+(error.message||'Access denied.'),true)}
-    finally{button.disabled=false;button.textContent='View / Download report'}
+      closePreview();
+      const url=URL.createObjectURL(data);
+      state.previewUrl=url;
+      const viewer=document.createElement(report.mime_type==='application/pdf'?'iframe':'img');
+      viewer.src=url;
+      if(report.mime_type==='application/pdf'){
+        viewer.title='Mystery Shopper PDF report';
+        viewer.className='ms-preview-frame';
+      }else{
+        viewer.alt=report.title;
+        viewer.className='ms-preview-image';
+      }
+      $('msPreviewBody').appendChild(viewer);
+      $('msPreviewName').textContent=report.title;
+      const download=$('msSaveReport');
+      download.href=url;
+      download.download=report.original_filename;
+      $('msPreview').classList.remove('hidden');
+      $('msClosePreview').focus();
+      status('Report opened. Choose Save file to keep a copy on your device.');
+    }catch(error){toast('Could not open the report: '+(error.message||'Access denied.'),true)}
+    finally{button.disabled=false;button.textContent='View report'}
   }
   async function deleteReport(id,button){
     if(!isAdmin())return;
@@ -164,6 +191,11 @@
     if(state.wired)return;
     state.wired=true;
     $('msUploadForm').addEventListener('submit',uploadReport);
+    $('msClosePreview').addEventListener('click',closePreview);
+    $('msPreview').addEventListener('click',event=>{if(event.target===$('msPreview'))closePreview()});
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&!$('msPreview').classList.contains('hidden'))closePreview();
+    });
     $('msEmployeeFilter').addEventListener('change',()=>{
       state.filter=$('msEmployeeFilter').value;loadReports(true);
     });
@@ -178,6 +210,7 @@
   }
   function init({db,profile,toast}){
     state.db=db;state.profile=profile;state.notify=toast;
+    closePreview();
     state.reports=[];state.employees=[];state.page=0;state.filter='';state.hasMore=false;
     $('msManagement').classList.toggle('hidden',!isAdmin());
     $('msEmployeeFilterField').classList.toggle('hidden',!isAdmin());
