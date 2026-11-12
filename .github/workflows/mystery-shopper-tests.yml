@@ -1,0 +1,46 @@
+name: Mystery Shopper and Waiter Access Checks
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'mystery-shopper.js'
+      - 'mystery-shopper.css'
+      - 'supabase/functions/create-employee-/index.ts'
+      - 'supabase/functions/delete-employee/index.ts'
+      - 'supabase/migrations/20261113_mystery_shopper_waiter_access.sql'
+      - 'tests/mystery_shopper.test.cjs'
+      - '.github/workflows/mystery-shopper-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'mystery-shopper.js'
+      - 'mystery-shopper.css'
+      - 'supabase/migrations/20261113_mystery_shopper_waiter_access.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mystery-shopper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check browser syntax and roles, report privacy and file handling
+        run: |
+          node --check mystery-shopper.js
+          node --test tests/mystery_shopper.test.cjs
+      - name: Check employee management Edge Function syntax
+        run: |
+          deno check supabase/functions/create-employee-/index.ts
+          deno check supabase/functions/delete-employee/index.ts
