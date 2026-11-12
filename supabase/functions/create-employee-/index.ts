@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
     const role =
       typeof body?.role === "string" ? body.role : "";
 
-    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew"];
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "waiter_waitress"];
     const allowedRoles = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];
