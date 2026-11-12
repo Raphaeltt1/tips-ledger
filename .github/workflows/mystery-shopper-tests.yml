@@ -10,6 +10,7 @@ on:
       - 'supabase/functions/create-employee-/index.ts'
       - 'supabase/functions/delete-employee/index.ts'
       - 'supabase/migrations/20261113_mystery_shopper_waiter_access.sql'
+      - 'supabase/migrations/20261113_fix_mystery_report_file_path.sql'
       - 'tests/mystery_shopper.test.cjs'
       - '.github/workflows/mystery-shopper-tests.yml'
   push:
