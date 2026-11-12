@@ -1,0 +1,40 @@
+name: Annual Training Ledger Access and Recurrence Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'training-ledger.js'
+      - 'training-ledger.css'
+      - 'supabase/migrations/20261113_annual_training_ledger.sql'
+      - 'tests/training_ledger.test.cjs'
+      - '.github/workflows/training-ledger-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'training-ledger.js'
+      - 'training-ledger.css'
+      - 'supabase/migrations/20261113_annual_training_ledger.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  training-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Training Ledger JavaScript and annual attendance security
+        run: |
+          node --check training-ledger.js
+          node --test tests/training_ledger.test.cjs
