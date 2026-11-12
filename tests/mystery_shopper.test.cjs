@@ -81,7 +81,11 @@ test('Reports are downloadable, listed newest first and paged',()=>{
   assert.match(frontend,/\.range\(state\.page\*PAGE_SIZE,/);
   assert.match(frontend,/original_filename/);
   assert.match(frontend,/data-ms-download/);
-  assert.match(frontend,/View \/ Download report/);
+  assert.match(frontend,/View report/);
+  assert.match(frontend,/function closePreview\(/);
+  assert.match(frontend,/msPreviewBody/);
+  assert.match(html,/id="msPreview"/);
+  assert.match(html,/id="msSaveReport"/);
 });
 test('Deletion cleanup prevents orphaned private attachments on account removal',()=>{
   assert.match(del,/storage\.from\("mystery-shopper-reports"\)/);
