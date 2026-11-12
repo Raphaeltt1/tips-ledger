@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       .eq("id", runnerId)
       .maybeSingle();
 
-    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew"];
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "waiter_waitress"];
     const allowedTargets = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];    if (
@@ -191,6 +191,40 @@ Deno.serve(async (req) => {
         error instanceof Error ? error.message : "Unknown Storage error");
     }
 
+    // Remove private Mystery Shopper files before deleting the employee login.
+    // Metadata is FK-cascaded by profile deletion; storage must be cleaned via API.
+    let reportCleanupWarning = false;
+    let reportsRemoved = 0;
+    try {
+      const reportStore = admin.storage.from("mystery-shopper-reports");
+      for (let page = 0; page < 20; page++) {
+        const { data: reportFiles, error: listError } =
+          await reportStore.list(runnerId, { limit: 100, offset: 0 });
+        if (listError) throw listError;
+        if (!reportFiles?.length) break;
+        const paths = reportFiles.map(file => {
+          if (typeof file?.name !== "string" ||
+              !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(pdf|jpg|jpeg|png|webp)$/i.test(file.name) ||
+              file.id === null) {
+            throw new Error("Unexpected object in Mystery Shopper report folder");
+          }
+          return runnerId + "/" + file.name;
+        });
+        const { error: removeError } = await reportStore.remove(paths);
+        if (removeError) throw removeError;
+        reportsRemoved += paths.length;
+      }
+      const { data: leftover, error: verifyError } =
+        await reportStore.list(runnerId, { limit: 1, offset: 0 });
+      if (verifyError || leftover?.length) {
+        throw new Error("Employee report files remain after cleanup");
+      }
+    } catch (error) {
+      reportCleanupWarning = true;
+      console.error("Employee report cleanup warning:",
+        error instanceof Error ? error.message : "Unknown Storage error");
+    }
+
     // Delete login after successful database cleanup and photo cleanup.
     const { error: deleteAuthError } =
       await admin.auth.admin.deleteUser(runnerId);
@@ -207,6 +241,7 @@ Deno.serve(async (req) => {
             "Employee history was removed, but the login account could not be deleted. Contact the system administrator before retrying.",
           historyRemoved: true,
           avatarCleanupWarning,
+          reportCleanupWarning,
         },
         500
       );
@@ -234,6 +269,8 @@ Deno.serve(async (req) => {
       auditRecorded: !auditError,
       avatarCleanupWarning,
       avatarsRemoved,
+      reportCleanupWarning,
+      reportsRemoved,
     });
   } catch (error) {
     console.error("delete-employee failed:", error);
