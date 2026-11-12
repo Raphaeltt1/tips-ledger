@@ -224,7 +224,7 @@
       },{onConflict:'employee_id,training_id,training_year'});
       if(error)throw error;
       await loadData();
-      state.toast?.(attended?'Marked Attended':'Marked Not Attended')+' for '+state.year+'.');
+      state.toast?.((attended?'Marked Attended':'Marked Not Attended')+' for '+state.year+'.');
     }catch(e){notice('Could not update training attendance: '+(e.message||'Please retry.'),true)}
     finally{button.disabled=false}
   }
