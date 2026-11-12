@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS public.employee_training_assignments (
   start_year integer NOT NULL CHECK (start_year BETWEEN 2020 AND 2100),
   assigned_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT employee_training_assignment_unique UNIQUE(employee_id,training_id),
-  CONSTRAINT employee_training_assignment_pair UNIQUE(employee_id,training_id)
+  CONSTRAINT employee_training_assignment_unique UNIQUE(employee_id,training_id)
 );
 
 CREATE TABLE IF NOT EXISTS public.employee_training_attendance (
@@ -89,8 +88,8 @@ CREATE POLICY "Only admins record yearly training attendance"
   ON public.employee_training_attendance FOR INSERT TO authenticated
   WITH CHECK ((SELECT public.is_admin()) AND recorded_by=(SELECT auth.uid())
     AND EXISTS (SELECT 1 FROM public.employee_training_assignments a
-      WHERE a.employee_id=employee_id AND a.training_id=training_id
-        AND a.start_year<=training_year));
+      WHERE a.employee_id=employee_training_attendance.employee_id AND a.training_id=employee_training_attendance.training_id
+        AND a.start_year<=employee_training_attendance.training_year));
 
 DROP POLICY IF EXISTS "Only admins update yearly training attendance" ON public.employee_training_attendance;
 CREATE POLICY "Only admins update yearly training attendance"
@@ -98,8 +97,8 @@ CREATE POLICY "Only admins update yearly training attendance"
   USING ((SELECT public.is_admin()))
   WITH CHECK ((SELECT public.is_admin()) AND recorded_by=(SELECT auth.uid())
     AND EXISTS (SELECT 1 FROM public.employee_training_assignments a
-      WHERE a.employee_id=employee_id AND a.training_id=training_id
-        AND a.start_year<=training_year));
+      WHERE a.employee_id=employee_training_attendance.employee_id AND a.training_id=employee_training_attendance.training_id
+        AND a.start_year<=employee_training_attendance.training_year));
 
 -- Keep these immutable: attendance is per-year, and an assignment's effective
 -- year should not be silently rewritten, preserving previous years' history.
