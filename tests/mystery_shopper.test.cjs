@@ -88,3 +88,10 @@ test('Deletion cleanup prevents orphaned private attachments on account removal'
   assert.match(del,/reportStore\.remove\(paths\)/);
   assert.match(del,/reportCleanupWarning/);
 });
+
+test('Follow-up migration fixes file extension matching in table and Storage policy',()=>{
+  const correction=get('supabase/migrations/20261113_fix_mystery_report_file_path.sql');
+  assert.match(correction,/DROP CONSTRAINT IF EXISTS report_path_belongs_to_employee/);
+  assert.match(correction,/\[\.\]\(pdf\|jpg\|jpeg\|png\|webp\)/);
+  assert.match(correction,/Admins upload mystery shopper files/);
+});
