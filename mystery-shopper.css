@@ -1,0 +1,37 @@
+/* Mystery Shopper report archive — keeps existing Employee Ledger light/dark palette. */
+.ms-panel{max-width:100%;overflow:hidden}
+.ms-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.ms-heading .tl-page-title{margin-bottom:4px}
+.ms-heading .tl-page-intro{max-width:650px}
+.ms-privacy{font-size:12px;font-weight:680;color:var(--tl-muted,#637b98);border:1px solid var(--tl-border,#dae2ee);background:var(--tl-card,#fff);padding:9px 12px;border-radius:999px}
+.ms-upload-card{border:1px solid var(--tl-border,#dfe6f2);background:var(--tl-card,#fff);border-radius:17px;padding:20px;margin:18px 0 24px}
+.ms-upload-card h2{font-size:18px;margin:0 0 3px}
+.ms-upload-card .row{align-items:end}
+.ms-upload-card textarea{width:100%;min-height:90px;resize:vertical;padding:12px 13px;background:var(--tl-input,#f8faff);color:var(--tl-text,#142846);border:1px solid var(--tl-border,#d7e2f0);border-radius:10px;font:inherit}
+.ms-upload-card input[type=file]{min-width:190px;padding:10px;cursor:pointer}
+.ms-upload-card .ms-explanation{font-size:12px;color:var(--tl-muted,#687d98);margin-top:6px}
+.ms-upload-card button[type=submit]{margin-top:9px}
+.ms-report-tools{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;justify-content:space-between;margin:0 0 16px}
+.ms-report-tools .field{max-width:320px;min-width:200px;margin:0}
+.ms-report-tools h2{margin:0;font-size:19px}
+.ms-counter{margin:6px 0 0;color:var(--tl-muted,#667b96);font-size:12px}
+.ms-reports-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.ms-report{padding:19px 18px 16px;border:1px solid var(--tl-border,#dae5f3);border-radius:15px;background:var(--tl-card,#fff);min-width:0;box-shadow:0 3px 14px #182d4b09}
+.ms-report-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.ms-report h3{font-size:18px;line-height:1.35;margin:5px 0 5px;overflow-wrap:anywhere;color:var(--tl-text,#182b49)}
+.ms-report-date{font-size:12px;font-weight:720;color:var(--tl-muted,#647b9e)}
+.ms-employee{display:inline-block;color:var(--tl-teal,#6c5cdd);font-size:13px;font-weight:720}
+.ms-file-type{font-size:10px;font-weight:800;letter-spacing:.04em;border-radius:7px;white-space:nowrap;padding:6px 9px;background:var(--tl-mint,#eeebff);color:var(--tl-teal,#594ac7)}
+.ms-notes{font-size:13px;color:var(--tl-text,#203954);line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;margin:13px 0 8px}
+.ms-file-name{color:var(--tl-muted,#647b9e);font-size:12px;overflow-wrap:anywhere;margin:11px 0}
+.ms-report-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.ms-report-actions button{font-size:12px;padding:9px 13px;min-height:37px}
+.ms-report-actions .ms-delete{background:transparent!important;border:1px solid #cf9096!important;color:#b02640!important}
+.ms-empty{padding:36px 18px;border:1px dashed var(--tl-border,#d6dfed);border-radius:15px;text-align:center;color:var(--tl-muted,#73849e);grid-column:1/-1}
+#msStatus{font-size:12px;color:var(--tl-muted,#5e7694);margin:10px 0;min-height:17px}
+#msStatus.ms-error{color:#bd3647}
+#msLoadMore{display:block;margin:19px auto 0}
+html[data-theme=dark] .ms-report-actions .ms-delete{color:#ffb1bd!important;border-color:#9d6376!important}
+html[data-theme=dark] .ms-upload-card textarea{background:#192940;color:#f2f7ff;border-color:#42506b}
+html[data-theme=dark] .ms-file-type{background:#332f57;color:#c3b8ff}
+@media(max-width:700px){.ms-reports-grid{grid-template-columns:1fr}.ms-upload-card{padding:14px}.ms-report{padding:16px}.ms-heading{gap:8px}.ms-privacy{font-size:11px}}
