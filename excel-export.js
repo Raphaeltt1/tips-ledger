@@ -385,15 +385,18 @@
   async function exportRequests(week,records,days){
     await loadExcel();
     const book=new window.ExcelJS.Workbook();
-    const sheet=book.addWorksheet('Weekly requests',{pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0}});
-    sheet.addRow(['Schedule requests · Week of '+week]);sheet.mergeCells('A1:H1');
-    sheet.addRow(['Employee',...days]);
-    for(const r of records)sheet.addRow([r.employee_name,...days.map(day=>r.days[day]||'')]);
-    sheet.getColumn(1).width=Math.max(25,...records.map(r=>Math.min(45,r.employee_name.length+3)));
-    for(let i=2;i<=8;i++)sheet.getColumn(i).width=13;
-    for(const i of [1,2]){const row=sheet.getRow(i);row.font=font(C.white,12,true);row.fill=fill(C.navy);row.height=23;}
-    sheet.pageSetup.printTitlesRow='1:2';sheet.views=[{state:'frozen',ySplit:2,xSplit:1}];
-    sheet.headerFooter.oddFooter='&RPage &P of &N';
+    for(const department of ['FOH','BOH']){
+      const group=records.filter(row=>row.department===department);
+      const sheet=book.addWorksheet(department,{pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0}});
+      sheet.addRow([department+' schedule requests · Week of '+week]);sheet.mergeCells('A1:H1');
+      sheet.addRow(['Employee',...days]);
+      for(const r of group)sheet.addRow([r.employee_name,...days.map(day=>r.days[day]||'')]);
+      sheet.getColumn(1).width=Math.max(25,...group.map(r=>Math.min(45,r.employee_name.length+3)));
+      for(let i=2;i<=8;i++)sheet.getColumn(i).width=13;
+      for(const i of [1,2]){const row=sheet.getRow(i);row.font=font(C.white,12,true);row.fill=fill(C.navy);row.height=23;}
+      sheet.pageSetup.printTitlesRow='1:2';sheet.views=[{state:'frozen',ySplit:2,xSplit:1}];
+      sheet.headerFooter.oddFooter='&RPage &P of &N';
+    }
     downloadBlob(await book.xlsx.writeBuffer(),'schedule-requests-'+week+'.xlsx');
   }
   window.TipsLedgerExcel = Object.freeze({ exportPayments, exportAuditLog, exportRequests });

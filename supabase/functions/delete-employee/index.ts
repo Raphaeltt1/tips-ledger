@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       .eq("id", runnerId)
       .maybeSingle();
 
-    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "waiter_waitress"];
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "driver", "waiter_waitress"];
     const allowedTargets = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];    if (

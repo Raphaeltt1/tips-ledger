@@ -30,11 +30,11 @@ test('Mystery Shopper tab and scoped management form are present',()=>{
 });
 test('Waiter / Waitress can be created, activated and deleted without payment eligibility',()=>{
   assert.match(html,/<option value="waiter_waitress">Waiter \/ Waitress<\/option>/);
-  assert.match(html,/const TEAM_MEMBER_ROLES=\[\.\.\.PAYMENT_ROLES,'waiter_waitress'\]/);
+  assert.match(html,/const TEAM_MEMBER_ROLES=\[\.\.\.PAYMENT_ROLES,'driver','waiter_waitress'\]/);
   assert.match(html,/runners=p\.data\.filter\(x=>isPaymentRole\(x\.role\)/);
   assert.match(html,/isWaiterRole\(profile\.role\)\?'mystery':'overview'/);
-  assert.match(html,/show\('paymentsTab',!isWaiterRole\(profile\.role\)\)/);
-  assert.match(html,/show\('overviewTab',!isWaiterRole\(profile\.role\)\)/);
+  assert.match(html,/show\('paymentsTab',!isWaiterRole\(profile\.role\)\&\&profile\.role!=='driver'\)/);
+  assert.match(html,/show\('overviewTab',!isWaiterRole\(profile\.role\)\&\&profile\.role!=='driver'\)/);
   assert.match(create,/const teamRoles = \[[^\]]*"waiter_waitress"\]/);
   assert.match(del,/const teamRoles = \[[^\]]*"waiter_waitress"\]/);
   assert.match(migration,/profiles_role_check/);

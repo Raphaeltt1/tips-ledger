@@ -92,7 +92,7 @@ window.ScheduleRequests = (() => {
       picker.min = picker.max = picker.value = week;
       picker.disabled = false;
       picker.onchange = () => { picker.value = week; };
-      let query = db.from('schedule_requests').select('employee_id,employee_name,days,revision').eq('week_start',week);
+      let query = db.from('schedule_requests').select('employee_id,employee_name,department,days,revision').eq('week_start',week);
       if (!manager) query = query.eq('employee_id',profile.id);
       const {data,error} = await query.order('employee_name').order('employee_id').limit(manager ? 1000 : 1);
       if (token !== generation) return;
@@ -100,7 +100,7 @@ window.ScheduleRequests = (() => {
       if (manager) {
         let records = data;
         while (records.length && records.length % 1000 === 0) {
-          const page = await db.from('schedule_requests').select('employee_id,employee_name,days,revision')
+          const page = await db.from('schedule_requests').select('employee_id,employee_name,department,days,revision')
             .eq('week_start',week).order('employee_name').order('employee_id').range(records.length,records.length+999);
           if (token !== generation) return;
           if (page.error) throw page.error;
@@ -116,7 +116,14 @@ window.ScheduleRequests = (() => {
           finally{download.disabled=false;}
         });
         body().append(download);
-        for (const record of submitted) body().append(element('h3',record.employee_name),summary(record));
+        for (const department of ['FOH','BOH']) {
+          const section=element('section');
+          section.append(element('h2',department+' requests'));
+          const group=submitted.filter(record=>record.department===department);
+          if (!group.length) section.append(element('p','No requests for this department.'));
+          for (const record of group) section.append(element('h3',record.employee_name),summary(record));
+          body().append(section);
+        }
       } else if (is_open) {
         status(message || 'Choose only the days you want to request.');
         editor(data[0],week,token);

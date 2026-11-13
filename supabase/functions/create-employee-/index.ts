@@ -109,10 +109,12 @@ Deno.serve(async (req) => {
     const role =
       typeof body?.role === "string" ? body.role : "";
 
-    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "waiter_waitress"];
+    const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "driver", "waiter_waitress"];
     const allowedRoles = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];
+    const department = body?.request_department ?? null;
+    if (department !== null && !["FOH","BOH"].includes(department)) return json({error:"Choose FOH or BOH."},400);
     if (!fullName || fullName.length > 100) {
       return json(
         { error: "Enter a valid full name (maximum 100 characters)." },
@@ -166,6 +168,7 @@ Deno.serve(async (req) => {
         id: created.user.id,
         full_name: fullName,
         role,
+        request_department: teamRoles.includes(role) ? department : null,
         active: true,
       });
 
