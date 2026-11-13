@@ -66,8 +66,8 @@ Deno.serve(async (req) => {
       title = "🔔 Employee Ledger Test";
       message = "Background push is working on this device.";
     } else if (eventType === "schedule_published") {
-      if (!["admin", "superuser"].includes(profile.role)) {
-        return json({ error: "Admin or Superuser required for schedule publication notifications" }, 403);
+      if (!["admin", "superuser", "manager"].includes(profile.role)) {
+        return json({ error: "Management access required for schedule publication notifications" }, 403);
       }
       // The DB is authoritative: a schedule must already be successfully published.
       // current_user_role also respects superuser MFA.
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
         return json({ error: "Published schedule not found" }, 404);
       }
       const { data: unsent, error: noticeError } = await admin.from("notifications")
-        .select("id,recipient_id").eq("event_key", "schedule:" + publication.id)
+        .select("id,recipient_id,body").eq("event_key", "schedule:" + publication.id)
         .is("push_sent_at", null);
       if (noticeError) return json({ error: "Could not load schedule alerts" }, 500);
       recipientIds = (unsent || []).map((x: { recipient_id: string; id: string }) => {
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
         return x.recipient_id;
       });
       title = "📅 Weekly Schedule";
-      message = "Your weekly schedule has been published";
+      message = unsent?.[0]?.body || "Your weekly schedule has been published";
     } else if (eventType === "published") {
       if (!["admin", "superuser", "manager"].includes(profile.role)) return json({ error: "Not authorized to publish notifications" }, 403);
       const { data: payment, error } = await admin.from("weekly_tips")

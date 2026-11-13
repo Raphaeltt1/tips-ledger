@@ -109,6 +109,13 @@ window.ScheduleRequests = (() => {
         }
         const submitted = records.filter(r => Object.keys(r.days).length);
         status(submitted.length ? 'Employee requests for the selected week.' : 'No requests submitted for this week.');
+        const download=button('Export requests to Excel',async()=>{
+          download.disabled=true;
+          try { await window.TipsLedgerExcel.exportRequests(week,submitted,days); }
+          catch(e){status(e.message || 'Export failed.');}
+          finally{download.disabled=false;}
+        });
+        body().append(download);
         for (const record of submitted) body().append(element('h3',record.employee_name),summary(record));
       } else if (is_open) {
         status(message || 'Choose only the days you want to request.');

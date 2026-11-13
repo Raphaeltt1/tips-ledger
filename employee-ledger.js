@@ -333,10 +333,11 @@
     $('elScheduleUploadWeek').value=week.value;
     $('elScheduleUploadDept').textContent=state.dept;
     const selected=latestForWeek();
+    window.ScheduleEditor.show(state.dept,week.value);
     $('elScheduleStatus').textContent=selected
       ?state.dept+' · Published '+new Date(selected.published_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})+' · '+selected.original_filename
       :'No '+state.dept+' schedule published for this week.';
-    $('elScheduleTable').innerHTML=selected?tableMarkup(selected.workbook_rows):
+    $('elScheduleTable').innerHTML=selected?(selected.workbook_rows?.[0]?.[0]==='schedule-grid-v1'?window.ScheduleEditor.published(selected.workbook_rows,state.week):tableMarkup(selected.workbook_rows)):
       '<div class="el-empty">No published '+state.dept+' schedule for '+esc(dateLabel(week.value))+'.</div>';
     $('elSchedulePrev').disabled=!weeks.some(x=>x<state.week);
     $('elScheduleNext').disabled=!weeks.some(x=>x>state.week);
@@ -429,6 +430,12 @@
     });
   }
   function init({db,profile,setTab,toast,loadNotifications}){
+    window.ScheduleEditor.init({db,profile,refresh:loadScheduleIndex});
+    $('scheduleNewWeek').classList.toggle('hidden',!['manager','admin','superuser'].includes(profile.role));
+    $('scheduleNewWeek').onclick=()=>{
+      const date=new Date((state.week||mondayISO(todayBeirut()))+'T12:00:00Z');
+      date.setUTCDate(date.getUTCDate()+7);state.week=date.toISOString().slice(0,10);state.manualWeek=true;renderSchedule();
+    };
     state.db=db;state.profile=profile;state.api={setTab,toast,loadNotifications};
     state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;state.drafts={};
     wire();
