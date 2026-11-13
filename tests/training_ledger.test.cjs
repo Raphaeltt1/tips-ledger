@@ -37,7 +37,7 @@ test('Training navigation works for every employee role including waiters',()=>{
   assert.match(app,/data-pane="training"/);
   assert.match(app,/if\(tab==='training'\)window\.TrainingLedger\?\.open/);
   assert.match(app,/window\.TrainingLedger\?\.init/);
-  assert.match(app,/\['schedule','training','mystery','account'\]/);
+  assert.match(app,/\['schedule','requests','training','mystery','account'\]/);
   assert.match(app,/training-ledger\.js\?v=/);
   assert.match(app,/training-ledger\.css\?v=/);
   assert.match(css,/tr-person-card/);

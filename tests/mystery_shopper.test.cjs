@@ -46,7 +46,7 @@ test('Existing Schedule remains available to Waiter / Waitress',()=>{
   assert.match(html,/data-pane="schedule"/);
   assert.match(html,/if\(tab==='schedule'\)window\.EmployeeLedger\?\.openSchedule/);
   assert.match(html,/const isWaiterRole=role=>role==='waiter_waitress'/);
-  assert.match(html,/!\['schedule','training','mystery','account'\]\.includes\(tab\)/);
+  assert.match(html,/!\['schedule','requests','training','mystery','account'\]\.includes\(tab\)/);
 });
 test('Database metadata read policy is exactly recipient or authorized management',()=>{
   assert.match(migration,/CREATE TABLE IF NOT EXISTS public\.mystery_shopper_reports/);
