@@ -106,15 +106,17 @@ Deno.serve(async (req) => {
         ? body.password
         : "";
 
-    const role =
-      typeof body?.role === "string" ? body.role : "";
+    const position = typeof body?.role === "string" ? body.role : "";
+    const managementPositions = ["floor_team_leader", "kitchen_team_leader", "floor_supervisor", "kitchen_supervisor", "floor_manager_on_duty", "kitchen_manager_on_duty"];
+    const managementPosition = managementPositions.includes(position) ? position : null;
+    const role = managementPosition ? "manager" : position === "restaurant_manager" ? "admin" : position;
 
     const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "driver", "waiter_waitress"];
     const allowedRoles = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];
-    const department = body?.request_department ?? null;
-    if (department !== null && !["FOH","BOH"].includes(department)) return json({error:"Choose FOH or BOH."},400);
+    if (position === "manager") return json({error:"Choose a floor or kitchen management position."},400);
+
     if (!fullName || fullName.length > 100) {
       return json(
         { error: "Enter a valid full name (maximum 100 characters)." },
@@ -168,7 +170,7 @@ Deno.serve(async (req) => {
         id: created.user.id,
         full_name: fullName,
         role,
-        request_department: teamRoles.includes(role) ? department : null,
+        management_position: managementPosition,
         active: true,
       });
 
@@ -204,7 +206,7 @@ Deno.serve(async (req) => {
         entity_id: created.user.id,
         target_user_id: created.user.id,
         target_name: fullName,
-        details: { role },
+        details: { role, position },
       });
 
     if (auditError) {

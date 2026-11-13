@@ -31,14 +31,14 @@
   async function loadEmployees() {
     if(!isAdmin())return;
     const {data,error}=await state.db.from('profiles')
-      .select('id,full_name,role,active').neq('role','superuser').order('full_name');
+      .select('id,full_name,role,management_position,active').neq('role','superuser').order('full_name');
     if(error){toast('Could not load the employee list: '+error.message,true);return}
     state.employees=data||[];
     const target=$('msEmployee'),filter=$('msEmployeeFilter');
     const previousTarget=target.value,previousFilter=filter.value;
     target.innerHTML='<option value="">Choose an employee</option>'+
       state.employees.filter(p=>p.active)
-        .map(p=>'<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(p.role==='waiter_waitress'?'Waiter / Waitress':p.role.replaceAll('_',' '))+'</option>').join('');
+        .map(p=>'<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(p.management_position?p.management_position.replaceAll('_',' ').replace(/\b[a-z]/g,c=>c.toUpperCase()).replace(' On ',' on '):({admin:'Restaurant Manager',manager:'Management',waiter_waitress:'Waiter / Waitress'})[p.role]||p.role.replaceAll('_',' '))+'</option>').join('');
     filter.innerHTML='<option value="">All employees</option>'+
       state.employees.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.full_name)+(p.active?'':' · inactive')+'</option>').join('');
     if(state.employees.some(p=>p.id===previousTarget&&p.active))target.value=previousTarget;
@@ -84,7 +84,7 @@
       state.hasMore=(data||[]).length===PAGE_SIZE;
       state.page++;
       render();
-      status('Private reports — visible only to the assigned employee and Admin/Superuser.');
+      status('Private reports — visible only to the assigned employee and Restaurant Manager/Superuser.');
     }catch(error){
       render();
       toast('Could not load reports: '+(error.message||'Please try again.'),true);

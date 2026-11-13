@@ -15,9 +15,9 @@
     if(out){out.textContent=message;out.classList.toggle('tr-error',bad)}
     if(bad)state.toast?.(message,true);
   };
-  const roleLabel=role=>({superuser:'Superuser',admin:'Admin',manager:'Manager',
+  const roleLabel=role=>({superuser:'Superuser',admin:'Restaurant Manager',manager:'Management',driver:'Driver',
     waiter_waitress:'Waiter / Waitress',host_hostess:'Host/Hostess',runner:'Runner',
-    counter:'Counter',expo:'Expo',kitchen_crew:'Kitchen Crew'})[role]||role;
+    counter:'Counter',expo:'Expo',kitchen_crew:'Kitchen Crew'})[role]||String(role).replaceAll('_',' ').replace(/\b[a-z]/g,c=>c.toUpperCase()).replace(' On ',' on ');
   const courseFor=id=>state.courses.find(c=>c.id===id);
   const attendanceFor=(employeeId,courseId)=>state.attendance.find(a=>
     a.employee_id===employeeId&&a.training_id===courseId);
@@ -42,12 +42,12 @@
     const dropdown=$('trFilterEmployee'),before=dropdown.value;
     dropdown.innerHTML='<option value="">All employees</option>'+
       state.people.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.full_name)+
-      ' · '+esc(roleLabel(p.role))+(p.active?'':' (inactive)')+'</option>').join('');
+      ' · '+esc(roleLabel(p.management_position||p.role))+(p.active?'':' (inactive)')+'</option>').join('');
     if(state.people.some(p=>p.id===before))dropdown.value=before;
     const select=$('trAssignEmployee'),prior=select.value;
     select.innerHTML='<option value="">Choose an employee</option>'+
       state.people.filter(p=>p.active).map(p=>
-       '<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(roleLabel(p.role))+'</option>').join('');
+       '<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(roleLabel(p.management_position||p.role))+'</option>').join('');
     if(state.people.some(p=>p.id===prior&&p.active))select.value=prior;
   }
   function renderCourseOptions(){
@@ -115,7 +115,7 @@
         body='<tr><td colspan="'+(admin()?4:3)+'" class="tr-empty-cell">'+reason+'</td></tr>';
       }
       const heading=admin()?'<div class="tr-person-heading"><strong>'+esc(p.full_name)+
-        '</strong><span>'+esc(roleLabel(p.role))+(p.active?'':' · Inactive')+'</span></div>':'';
+        '</strong><span>'+esc(roleLabel(p.management_position||p.role))+(p.active?'':' · Inactive')+'</span></div>':'';
       sections.push('<section class="tr-person-card">'+heading+'<div class="tr-table-scroll"><table class="tr-table"><thead><tr>'+
         '<th>Training name</th><th>Year</th><th>Attendance</th>'+(admin()?'<th>Action</th>':'')+
         '</tr></thead><tbody>'+body+'</tbody></table></div></section>');
@@ -144,7 +144,7 @@
           .eq('training_year',year)
       ];
       if(admin())queries.push(state.db.from('profiles')
-        .select('id,full_name,role,active').order('full_name'));
+        .select('id,full_name,role,management_position,active').order('full_name'));
       const results=await Promise.all(queries);
       if(id!==state.loadId)return;
       const failure=results.find(x=>x.error);
