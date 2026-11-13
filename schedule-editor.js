@@ -3,20 +3,40 @@ window.ScheduleEditor = (() => {
   const blank=()=>days.map(()=>['','','']);
   const node=(tag,text)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;return x;};
   const button=(text,click)=>{const x=node('button',text);x.type='button';x.onclick=click;return x;};
-  function normalize(value){return value.trim().toUpperCase().replace(/[–—]/g,'-').replace(/\s*-\s*/g,'-').replace(/\s*\/\s*/g,' / ');}
+  function normalize(value){
+    return value.trim().toUpperCase().split(/\s*\/\s*/).map(part=>
+      part.replace(/\s*[-–—]+\s*|\s+/g,'-')
+    ).join(' / ');
+  }
   function hours(value){
     const shift=normalize(value);
     if(!shift||shift==='OFF')return 0;
     const parts=shift.split(' / ');
     if(parts.length>2)return NaN;
-    let total=0;
+    let minutes=0;
     for(const part of parts){
-      const m=/^(1[0-2]|[1-9])(?::([0-5]\d))?-(1[0-2]|[1-9])(?::([0-5]\d))?$/.exec(part);
+      const m=/^(\d{1,2})(?::([0-5]\d))?-(\d{1,2})(?::([0-5]\d))?$/.exec(part);
       if(!m)return NaN;
-      const interval=((Number(m[3])%12-Number(m[1])%12)*60+Number(m[4]||0)-Number(m[2]||0)+720)%720;
-      total+=(interval||720)/60;
+      const start=Number(m[1])*60+Number(m[2]||0),end=Number(m[3])*60+Number(m[4]||0);
+      if(start>=1440||end>1440||start===end)return NaN;
+      minutes+=end>start?end-start:1440+end-start;
     }
-    return total;
+    return minutes/60;
+  }
+  function upgradeLegacy(value){
+    if(!value||value==='OFF')return value;
+    return value.split(' / ').map(part=>{
+      const [from,to]=part.split('-').map(t=>t.split(':').map(Number));
+      const start=(from[0]<9?from[0]+12:from[0])*60+(from[1]||0);
+      const delta=((to[0]-from[0])*60+(to[1]||0)-(from[1]||0)+1440)%720||720;
+      const clock=min=>String(Math.floor(min/60)%24)+(min%60?':'+String(min%60).padStart(2,'0'):'');
+      return clock(start)+'-'+clock(start+delta);
+    }).join(' / ');
+  }
+  function loadRoster(sheet){
+    if(!sheet)return [];
+    if(sheet.time_format===24)return sheet.roster;
+    return sheet.roster.map(p=>({...p,days:p.days.map(([l,s,r])=>[l,upgradeLegacy(s),r])}));
   }
   const usd=new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'});
   function dayTitle(day,i,week){
@@ -48,12 +68,13 @@ window.ScheduleEditor = (() => {
       let model=cache.get(key);
       if(!model){
         const table=()=>ctx.db.from('schedule_workweeks').select('*').eq('department',dept);
-        const [current,previous]=await Promise.all([table().eq('week_start',week).maybeSingle(),table().lt('week_start',week).order('week_start',{ascending:false}).limit(1).maybeSingle()]);
+        const [current,previous]=await Promise.all([table().eq('week_start',week).maybeSingle(),table().lt('week_start',week).not('sales','is',null).order('week_start',{ascending:false}).limit(1).maybeSingle()]);
         if(current.error||previous.error)throw current.error||previous.error;
         let seed=previous.data;
         if(!current.data&&!seed){const other=await table().order('week_start',{ascending:false}).limit(1).maybeSingle();if(other.error)throw other.error;seed=other.data;}
         model=current.data||{revision:0,sales:'',target:'',warned:false,roster:(seed?.roster||[]).map(r=>({...r,days:blank()}))};
-        model.previous=previous.data?.roster||[];model.dept=dept;model.week=week;
+        if(current.data){model.roster=loadRoster(current.data);model.sales??='';model.target??='';}
+        model.previous=loadRoster(previous.data);model.dept=dept;model.week=week;
         if(token!==epoch)return;
         cache.set(key,model);
       }
@@ -64,7 +85,7 @@ window.ScheduleEditor = (() => {
     host.replaceChildren();
     const form=node('form'),fieldset=node('fieldset'),top=node('div'),budget=node('div'),stats=node('strong'),message=node('p');
     fieldset.style.cssText='border:0;padding:0;min-width:0';top.className='se-top';budget.className='se-budget';message.setAttribute('role','status');
-    const title=node('div');title.append(node('h2',m.dept+' schedule editor'),node('p','Week of '+m.week+' · Enter shifts as 1-6, 6-12, 12-12 or OFF.'));
+    const title=node('div');title.append(node('h2',m.dept+' schedule editor'),node('p','Week of '+m.week+' · Enter 24-hour shifts, e.g. 10-14, 16-23, 12-00 or OFF.'));
     function input(type,value,label,change){
       const x=node('input');x.type=type;x.setAttribute('aria-label',label);
       if(type==='checkbox')x.checked=value;else x.value=value??'';
@@ -109,7 +130,7 @@ window.ScheduleEditor = (() => {
         p.days.forEach((d,i)=>{
           const group=node('div');group.className='se-triplet';tr.insertCell().append(group);
           d.forEach((v,j)=>{const x=input('text',v,days[i]+' '+['left section','shift','right section'][j],value=>{
-            d[j]=value;if(j===1)x.setCustomValidity(Number.isFinite(hours(value))?'':'Use 1-6, 6-12, OFF or two shifts separated by /.');
+            d[j]=value;if(j===1)x.setCustomValidity(Number.isFinite(hours(value))?'':'Use 24-hour times, e.g. 10-14, 18-00, OFF or two shifts separated by /.');
             x.classList.toggle('marked',j!==1&&!!value);x.classList.toggle('se-off',j===1&&normalize(value)==='OFF');
           });
           if(j!==1){x.maxLength=2;x.classList.toggle('marked',!!v);}else x.classList.toggle('se-off',v==='OFF');
@@ -130,7 +151,7 @@ window.ScheduleEditor = (() => {
       fieldset.disabled=true;
       try{
         const roster=m.roster.map(p=>({...p,id:p.id.trim(),name:p.name.trim(),rate:Number(p.rate),days:p.days.map(([l,s,r])=>[l.trim(),normalize(s),r.trim()])}));
-        const result=await ctx.db.rpc('save_schedule_week',{p_department:m.dept,p_week:m.week,p_revision:m.revision,p_sales:Number(m.sales),p_target:Number(m.target),p_roster:roster,p_warned:m.warned,p_publish:publish});
+        const result=await ctx.db.rpc('save_schedule_week_24',{p_department:m.dept,p_week:m.week,p_revision:m.revision,p_sales:Number(m.sales),p_target:Number(m.target),p_roster:roster,p_warned:m.warned,p_publish:publish});
         if(result.error)throw result.error;
         m.revision=result.data.revision;
         for(const [k,other] of cache)if(other!==m&&other.dept===m.dept&&other.week>m.week&&!other.dirty)cache.delete(k);
@@ -140,8 +161,21 @@ window.ScheduleEditor = (() => {
         }else message.textContent='Draft saved.';
       }catch(e){message.textContent=e.message;}finally{fieldset.disabled=false;}
     }
+    async function deleteSchedule(){
+      if(!confirm('Delete the '+m.dept+' schedule for '+m.week+', including its published versions? The saved staff roster will be kept.'))return;
+      fieldset.disabled=true;
+      try{
+        const result=await ctx.db.rpc('delete_schedule_week',{p_department:m.dept,p_week:m.week,p_revision:m.revision});
+        if(result.error)throw result.error;
+        m.revision=result.data;m.sales='';m.target='';m.warned=false;m.dirty=false;
+        m.roster.forEach(p=>p.days=blank());
+        try{localStorage.removeItem(warnKey);}catch{}
+        for(const [key,other] of cache)if(other!==m&&other.dept===m.dept&&!other.dirty)cache.delete(key);
+        if(token===epoch){draw(host,m,token);await ctx.refresh();}
+      }catch(e){message.textContent=e.message;}finally{fieldset.disabled=false;}
+    }
     form.oninput=()=>{m.dirty=true;};form.onsubmit=e=>e.preventDefault();
-    const actions=node('div');actions.className='row';actions.append(add,copy,button('Save draft',()=>save(false)),button('Publish and notify',()=>save(true)),button('Reload saved version',()=>{if(confirm('Reload and discard unsaved changes?')){cache.delete(active);active='';show(m.dept,m.week);}}));
+    const actions=node('div');actions.className='row';actions.append(add,copy,button('Save draft',()=>save(false)),button('Publish and notify',()=>save(true)),button('Delete schedule',deleteSchedule),button('Reload saved version',()=>{if(confirm('Reload and discard unsaved changes?')){cache.delete(active);active='';show(m.dept,m.week);}}));
     fieldset.append(top,wrap,actions,message);form.append(fieldset);host.append(form);rows();calculate();
   }
   return {init,show,published,hours};
