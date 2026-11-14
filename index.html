@@ -425,7 +425,7 @@ try{if(await requireMfa())return}catch(e){show('app',false);show('login',false);
 show('mfaGate',false);
 const r=await db.from('profiles').select('id,full_name,role,management_position,active,avatar_path').eq('id',user.id).single();if(r.error||!r.data?.active){document.body.classList.remove('tl-logged-in');show('tlHeaderCurrencyToggle',false);msg('Your account has no active profile. Contact the Restaurant Manager.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
 profile=r.data;document.body.classList.add('tl-logged-in');show('tlHeaderCurrencyToggle',!isWaiterRole(profile.role));show('tlHeaderSignOut',false);$('pushTroubleshooting').open=false;show('noticeToggle',true);show('tlProfileShortcut',true);show('tlNewDraftAction',!isTeamMemberRole(profile.role));$('tlPaymentHeader').classList.toggle('tl-no-create',isTeamMemberRole(profile.role));updateMobileProfile();await refreshPushStatus();show('login',false);show('app',true);show('logout',true);show('overviewTab',!isWaiterRole(profile.role)&&profile.role!=='driver');show('paymentsTab',!isWaiterRole(profile.role)&&profile.role!=='driver');show('mysteryTab',profile.role!=='driver');show('admin',['admin','superuser'].includes(profile.role));show('adminRoleOption',profile.role==='superuser');$('adminRoleOption').disabled=profile.role!=='superuser';show('editor',['superuser','admin','manager'].includes(profile.role));show('runnerFilterField',!isTeamMemberRole(profile.role));show('employeesTab',['admin','superuser'].includes(profile.role));show('auditTab',['admin','superuser'].includes(profile.role));show('auditPanel',['admin','superuser'].includes(profile.role));show('exportAuditExcel',['admin','superuser'].includes(profile.role));show('runnerSummary',isTeamMemberRole(profile.role));show('runnerPaymentTable',isTeamMemberRole(profile.role));show('tlPaymentToolbar',!isTeamMemberRole(profile.role));show('records',!isTeamMemberRole(profile.role));configureRunnerLayout();show('mfaSettings',profile.role==='superuser');show('backupPanel',profile.role==='superuser');show('exportExcel',['manager','admin','superuser'].includes(profile.role));window.EmployeeLedger?.init?.({db,profile,setTab,toast:msg,loadNotifications});window.MysteryShopper?.init?.({db,profile,toast:msg});window.LaborControl.init({db,profile});window.ScheduleRequests.init({db,profile});window.TrainingLedger?.init?.({db,profile,toast:msg});setTab(profile.role==='driver'?'schedule':isWaiterRole(profile.role)?'mystery':'overview');const displayName=String(profile.full_name||'').trim().replace(/^raffi(?=\\s|$)/i,'Raphael')||'Raphael';const displayRole=roleLabel(profile.management_position||profile.role);$('welcome').textContent=isTeamMemberRole(profile.role)?'Your tips. Clearly in view.':'Every payout. Fully in control.';$('role').textContent='Welcome, '+displayName+' · '+displayRole+' workspace';await refresh();await loadOwnRate();await loadNotifications();if(new URLSearchParams(location.search).get('tab')==='schedule')setTab('schedule');if(new URLSearchParams(location.search).get('tab')==='mystery')setTab('mystery');if(new URLSearchParams(location.search).get('tab')==='training')setTab('training');msg('')}
-async function loadOwnRate(){show('ownRate',isPaymentRole(profile?.role));if(!isPaymentRole(profile?.role))return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
+async function loadOwnRate(){show('ownRate',isTeamMemberRole(profile?.role));if(!isTeamMemberRole(profile?.role))return;const now=new Date();const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',profile.id).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);$('ownRateValue').textContent=r.error?'Could not load your rate.':r.data?.length?money(r.data[0].hourly_rate)+' / hour':'No active hourly rate configured.'}
 async function loadNotifications(){if(!profile)return;const r=await db.from('notifications').select('id,title,body,created_at,read_at,event_key').eq('recipient_id',profile.id).order('created_at',{ascending:false}).limit(60);if(r.error){$('noticeList').textContent='Notifications are not configured yet.';return}notifications=r.data||[];const unread=notifications.filter(n=>!n.read_at).length;$('noticeCount').textContent=unread>99?'99+':String(unread);show('noticeCount',unread>0);$('noticeList').innerHTML=notifications.length?notifications.map(n=>'<div class="notice-item '+(n.read_at?'':'unread')+'"><div>'+esc(n.title)+'</div><div>'+esc(n.body)+'</div>'+(String(n.event_key||'').startsWith('schedule:')?'<button type="button" class="tl-secondary-button" data-open-schedule>Open schedule</button>':'')+'<small>'+new Date(n.created_at).toLocaleString()+'</small>'+(!n.read_at?'<button type="button" class="notice-delete" data-notice-read="'+esc(n.id)+'" style="background:#2563eb;right:77px">Read</button>':'')+'<button type="button" class="notice-delete" data-notice-delete="'+esc(n.id)+'" aria-label="Delete notification">Delete</button></div>').join('') :'No notifications yet.';renderNoirActivity()}
 $('noticeToggle').onclick=()=>{$('notificationsPanel').classList.contains('hidden')?openMobileNotices():closeMobileNotices()};
 $('noticeList').onclick=async e=>{const del=e.target.closest('button[data-notice-delete]'),read=e.target.closest('button[data-notice-read]');if(!del&&!read||!profile)return;const b=del||read;b.disabled=true;try{const q=db.from('notifications');const res=del?await q.delete().eq('recipient_id',profile.id).eq('id',del.dataset.noticeDelete).select('id'):await q.update({read_at:new Date().toISOString()}).eq('recipient_id',profile.id).eq('id',read.dataset.noticeRead).select('id');if(res.error)throw res.error;if(!res.data?.length)throw Error('Notification could not be updated. Verify database permissions.');await loadNotifications();msg(del?'Notification deleted.':'Notification marked as read.')}catch(err){msg(err.message||'Could not update notification.',true)}finally{b.disabled=false}};
@@ -852,7 +852,7 @@ async function loadEmployeeRates(people){
   defined.add(rate.runner_id);
   if(rate.effective_from<=today&&!current.has(rate.runner_id))current.set(rate.runner_id,rate.hourly_rate);
  }
- const unrated=people.filter(p=>isPaymentRole(p.role)&&p.active&&!defined.has(p.id));
+ const unrated=people.filter(p=>isTeamMemberRole(p.role)&&p.active&&!defined.has(p.id));
  const selected=dropdown.value;
  dropdown.innerHTML=unrated.length?unrated.map(p=>
   '<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(roleLabel(p.management_position||p.role))+'</option>'
@@ -865,8 +865,8 @@ async function loadEmployeeRates(people){
   :'All active team members have an hourly rate. Use Employee hourly rates & individual edits to make changes.';
  body.innerHTML=people.map(x=>
   '<tr><td>'+esc(x.full_name)+'</td><td>'+esc(roleLabel(x.management_position||x.role))+'</td><td>'+esc(x.active?'Active':'Inactive')+'</td><td>'+
-  (isPaymentRole(x.role)?(current.has(x.id)?money(current.get(x.id)):defined.has(x.id)?'Scheduled':'Not configured'):'N/A')+
-  '</td><td>'+(isPaymentRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'" data-rate-value="'+esc(current.get(x.id)??'')+'">Edit rate</button>':'—')+'</td></tr>'
+  (isTeamMemberRole(x.role)?(current.has(x.id)?money(current.get(x.id)):defined.has(x.id)?'Scheduled':'Not configured'):'N/A')+
+  '</td><td>'+(isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'" data-rate-value="'+esc(current.get(x.id)??'')+'">Edit rate</button>':'—')+'</td></tr>'
  ).join('')||'<tr><td colspan="5">No employees found.</td></tr>';
 }
 async function saveCurrentRate(id,rate){
@@ -875,10 +875,12 @@ async function saveCurrentRate(id,rate){
  const r=await db.rpc('set_runner_hourly_rate_today',{p_runner_id:id,p_hourly_rate:n});
  if(r.error)throw r.error;
 }
-$('employeeRatesRows').onclick=async e=>{
+async function editEmployeeRate(e){
  const b=e.target.closest('button[data-rate-edit]');if(!b)return;
  const name=b.dataset.rateName;
- const input=prompt('Set hourly rate for '+name+' (LBP / hour):',b.dataset.rateValue);
+ let currentRate=b.dataset.rateValue;
+ if(currentRate===undefined){const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Beirut'}).format(new Date());const r=await db.from('runner_rates').select('hourly_rate').eq('runner_id',b.dataset.rateEdit).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);if(r.error){msg('Could not load hourly rate.',true);return}currentRate=r.data?.[0]?.hourly_rate??'';}
+ const input=prompt('Set hourly rate for '+name+' (LBP / hour):',currentRate);
  if(input===null)return;
  if(!input.trim()||!Number.isFinite(Number(input))||Number(input)<0){msg('Enter a valid hourly rate.',true);return}
  if(!confirm('Set '+moneyLBP(input)+' per hour for '+name+'? Existing payments will not be changed.'))return;
@@ -887,6 +889,8 @@ $('employeeRatesRows').onclick=async e=>{
  catch(err){msg('Could not save rate: '+err.message,true)}
  finally{b.disabled=false}
 };
+$('employeeRatesRows').onclick=editEmployeeRate;
+$('people').addEventListener('click',editEmployeeRate);
 function canManageEmployee(actor,target){
  if(!actor||!target||actor.id===target.id)return false;
  if(actor.role==='superuser')return ['admin','manager',...TEAM_MEMBER_ROLES].includes(target.role);
@@ -900,6 +904,7 @@ function renderManageableEmployees(people){
   const roleName=roleLabel(x.management_position||x.role);
   const status=x.active?'Active':'Inactive';
   return '<p class="employee-entry"><span class="tl-person-main"><span class="tl-person-avatar" aria-hidden="true">'+tlAvatarHtml(x.full_name,x.avatar_path)+'</span><span><strong class="tl-person-name">'+esc(x.full_name)+'</strong><span class="tl-person-meta" style="display:block">'+esc(roleName)+' · '+esc(status)+'</span></span></span><span class="tl-person-actions">'+
+   (isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'">Edit hourly rate</button>':'')+
    '<button type="button" data-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'" data-active="'+(!x.active)+'">'+(x.active?'Deactivate':'Reactivate')+'</button>'+
    '<button type="button" data-delete-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'">Delete permanently</button>'+
    '</span></p>';
