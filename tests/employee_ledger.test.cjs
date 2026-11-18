@@ -43,7 +43,9 @@ test('main inline browser script parses after wiring new navigation hooks',()=>{
 });
 test('visible Employee Ledger brand and both schedule selectors',()=>{
   assert.match(app,/<title>Employee Ledger<\/title>/);
-  assert.match(app,/<div class="tl-brand-title">Employee Ledger<\/div>/);
+  assert.match(app,/<div class="tl-brand-title">EMPLOYEE LEDGER<\/div>/);
+  assert.match(app, /id="tlHeaderRole" class="tl-brand-role">ROADSTER DINER</);
+  assert.ok(app.includes("$('tlHeaderRole').textContent='ROADSTER DINER'"));
   assert.match(app,/id="elScheduleFoh"/);
   assert.match(app,/id="elScheduleBoh"/);
   assert.match(app,/data-tab="schedule"/);

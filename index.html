@@ -39,7 +39,7 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <p id="vapidStatus" role="status"></p></div>
 </div>
 <header class="tl-topbar"><div class="tl-topbar-inner"><div id="noirTopCrumb" class="noir-top-crumb">CONTROL CENTER <span> / WORKSPACE</span></div>
-<div class="tl-brand"><div class="tl-logo" aria-hidden="true">◈<span style="display:none">.</span></div><div><div class="tl-brand-title">Employee Ledger</div><div id="tlHeaderRole" class="tl-brand-role">SECURE WORKSPACE</div></div></div>
+<div class="tl-brand"><div class="tl-logo" aria-hidden="true">◈<span style="display:none">.</span></div><div><div class="tl-brand-title">EMPLOYEE LEDGER</div><div id="tlHeaderRole" class="tl-brand-role">ROADSTER DINER</div></div></div>
 <div class="tl-header-actions">
 <button id="tlHeaderCurrencyToggle" type="button" class="tl-currency-toggle hidden" aria-label="Show USD equivalents" title="1 USD = 90,000 LBP (BDL reference rate; not live)">LBP</button>
 <button id="tlHeaderThemeToggle" type="button" class="tl-icon-button" aria-label="Switch to dark mode" title="Toggle light and dark mode">☀</button>
@@ -435,7 +435,7 @@ async function checkBackups(){
 }
 $('backupCheck').onclick=checkBackups;
 
-async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;window.MenuSearch.reset();show('menuTab',false);show('mfaGate',false);show('mfaSettings',false);show('backupPanel',false);document.body.classList.remove('tl-logged-in');$('tlHeaderRole').textContent='SECURE WORKSPACE';show('tlHeaderCurrencyToggle',false);show('noticeToggle',false);show('tlProfileShortcut',false);show('tlHeaderSignOut',false);closeMobileNotices();show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
+async function load(){if(recoveryMode){showRecovery();return}const {data:{user},error}=await db.auth.getUser();if(error||!user){profile=null;window.MenuSearch.reset();show('menuTab',false);show('mfaGate',false);show('mfaSettings',false);show('backupPanel',false);document.body.classList.remove('tl-logged-in');$('tlHeaderRole').textContent='ROADSTER DINER';show('tlHeaderCurrencyToggle',false);show('noticeToggle',false);show('tlProfileShortcut',false);show('tlHeaderSignOut',false);closeMobileNotices();show('login',true);show('app',false);show('logout',false);msg('Sign in to continue.');return}
 try{if(await requireMfa())return}catch(e){show('app',false);show('login',false);show('mfaGate',true);$('mfaGateError').textContent=e.message||'Could not verify session';return}
 show('mfaGate',false);
 const r=await db.from('profiles').select('id,full_name,role,management_position,active,avatar_path').eq('id',user.id).single();if(r.error||!r.data?.active){document.body.classList.remove('tl-logged-in');show('tlHeaderCurrencyToggle',false);msg('Your account has no active profile. Contact the Restaurant Manager.',true);show('login',false);show('app',false);show('logout',false);show('tlHeaderSignOut',true);return}
