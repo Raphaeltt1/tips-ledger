@@ -61,12 +61,16 @@
   function render() {
     const results = el('menuResults');
     const query = normalize(el('menuQuery').value);
-    const matched = catalog.filter(item => normalize(item.name).includes(query));
-    if (query) matched.sort((a,b) => Number(normalize(b.name) === query) - Number(normalize(a.name) === query));
     el('menuDetail').replaceChildren();
     el('menuDetail').hidden = true;
-    results.hidden = false;
     results.replaceChildren();
+    results.hidden = !query;
+    if (!query) {
+      el('menuStatus').textContent = '';
+      return;
+    }
+    const matched = catalog.filter(item => normalize(item.name).includes(query));
+    matched.sort((a,b) => Number(normalize(b.name) === query) - Number(normalize(a.name) === query));
     el('menuStatus').textContent = matched.length ? matched.length + ' results' : 'No matching items.';
     for (const item of matched) {
       const entry = button(item.name, () => showDetail(item));
