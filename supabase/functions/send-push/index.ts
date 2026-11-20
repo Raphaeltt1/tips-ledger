@@ -1,5 +1,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import webpush from "npm:web-push";
+import * as webPushModule from "npm:web-push@3.6.7";
+
+const webpush = "sendNotification" in webPushModule ? webPushModule : webPushModule.default;
+if (typeof webpush?.sendNotification !== "function" || typeof webpush?.setVapidDetails !== "function") {
+  throw new Error("Web Push delivery methods are unavailable");
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "https://raphaeltt1.github.io",
