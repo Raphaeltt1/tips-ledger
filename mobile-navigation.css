@@ -1,19 +1,20 @@
 @media (max-width: 680px) {
   #tabs.tabbar {
-    position: fixed !important;
-    inset: auto 0 0;
+    position: relative !important;
+    inset: auto;
+    border-radius: 15px;
     z-index: 45;
     justify-content: flex-start !important;
-    padding: 5px 8px calc(5px + env(safe-area-inset-bottom)) !important;
-    background: linear-gradient(to bottom, transparent 14px, #182538 14px, #101a29 100%) !important;
+    padding: 4px 8px !important;
+    background: #172437 !important;
     isolation: isolate;
   }
-  body.tl-logged-in .noir-content { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+
   #tabs.tabbar button {
     --tab-color: #afe666;
-    min-height: 60px !important;
-    color: #d2dce8 !important;
-    gap: 7px !important;
+    min-height: 69px !important;
+    color: #a4b2c3 !important;
+    gap: 6px !important;
     background: transparent !important;
     z-index: 1;
   }
@@ -22,29 +23,45 @@
   #tabs.tabbar [data-tab="schedule"], #tabs.tabbar [data-tab="audit"] { --tab-color: #88c5ff; }
   #tabs.tabbar [data-tab="requests"], #tabs.tabbar [data-tab="account"] { --tab-color: #ff90bd; }
   #tabs.tabbar [data-tab="training"], #tabs.tabbar [data-tab="mystery"] { --tab-color: #c0a8ff; }
-  #tabs.tabbar button.active {
+  #tabs.tabbar button.active, #tabs.tabbar button:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #tabs.tabbar button { justify-content: flex-end !important; }
+  #tabs.tabbar button .tab-icon { width: 15px !important; height: 15px !important; }
+  #tabs.tabbar button[data-preview] span { font-size: 11px; font-weight: 800; }
+  #tabs.tabbar button[data-preview] {
     color: var(--tab-color) !important;
     background: transparent !important;
     box-shadow: none !important;
   }
-  #tabs:has(.mobile-tab-indicator:not([hidden])) button.active .tab-icon { opacity: 0; }
+  #tabs.tabbar button[data-preview] .tab-icon { opacity: 0; }
   .mobile-tab-indicator:not([hidden]) {
     position: absolute;
-    top: 3px;
+    top: 4px;
     left: 0;
-    width: 34px;
-    height: 34px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     display: grid;
     place-items: center;
     color: #142233;
     background-color: var(--active-color);
     box-shadow: 0 3px 9px #0004, 0 8px 18px color-mix(in srgb, var(--active-color) 45%, transparent);
-    pointer-events: none;
-    transition: transform 360ms cubic-bezier(.22,.85,.24,1.08), background-color 300ms;
+    z-index: 2;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: grab;
+    translate: calc(var(--center) - 50%) 0;
+    scale: var(--stretch, 1) var(--squash, 1);
+    transform-origin: var(--origin, center) center;
+    transition: translate 360ms cubic-bezier(.22,.85,.24,1.08), background-color 200ms, scale 340ms cubic-bezier(.2,1.7,.4,1);
   }
-  .mobile-tab-indicator .tab-icon { width: 18px; height: 18px; }
+  .mobile-tab-indicator[data-held] { transition: background-color 140ms, scale 90ms; cursor: grabbing; }
+  .mobile-tab-indicator .tab-icon { width: 25px; height: 25px; stroke-width: 2.6; }
   @media (prefers-reduced-motion: reduce) {
-    .mobile-tab-indicator:not([hidden]) { transition: none; }
+    .mobile-tab-indicator:not([hidden]) { transition: none; scale: 1; }
   }
 }
