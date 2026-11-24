@@ -107,11 +107,19 @@ Deno.serve(async (req) => {
         : "";
 
     const position = typeof body?.role === "string" ? body.role : "";
+    const staffId = typeof body?.staff_id === "string" ? body.staff_id.trim() : null;
+    const hourlyRate = body?.hourly_rate ?? null;
+    if ((body?.staff_id != null && staffId === null) || (staffId && staffId.length > 80)) {
+      return json({error: "Employee ID must be at most 80 characters."}, 400);
+    }
     const managementPositions = ["floor_team_leader", "kitchen_team_leader", "floor_supervisor", "kitchen_supervisor", "floor_manager_on_duty", "kitchen_manager_on_duty"];
     const managementPosition = managementPositions.includes(position) ? position : null;
     const role = managementPosition ? "manager" : position === "restaurant_manager" ? "admin" : position;
 
     const teamRoles = ["runner", "host_hostess", "counter", "expo", "kitchen_crew", "driver", "waiter_waitress"];
+    if (hourlyRate !== null && (!teamRoles.includes(role) || !Number.isSafeInteger(hourlyRate) || hourlyRate < 0 || hourlyRate > 100000000)) {
+      return json({error: "Enter a valid team member hourly rate in whole LBP."}, 400);
+    }
     const allowedRoles = actor.role === "superuser"
       ? ["admin", "manager", ...teamRoles]
       : ["manager", ...teamRoles];
@@ -171,6 +179,7 @@ Deno.serve(async (req) => {
         full_name: fullName,
         role,
         management_position: managementPosition,
+        staff_id: staffId || null,
         active: true,
       });
 
@@ -186,6 +195,9 @@ Deno.serve(async (req) => {
         rollback.error?.message
       );
 
+      if (!rollback.error && profileError.code === "23505" && profileError.message.includes("profiles_staff_id_unique")) {
+        return json({error: "This employee ID is already in use."}, 409);
+      }
       return json(
         {
           error:
@@ -193,6 +205,19 @@ Deno.serve(async (req) => {
         },
         500
       );
+    }
+
+    if (hourlyRate !== null) {
+      const {error: rateError} = await authClient.rpc("set_runner_hourly_rate_today", {
+        p_runner_id: created.user.id,
+        p_hourly_rate: hourlyRate,
+      });
+      if (rateError) {
+        const rollback = await admin.auth.admin.deleteUser(created.user.id);
+        return json({error: rollback.error
+          ? "Hourly rate could not be saved. Check the employee directory before retrying."
+          : "Could not save the hourly rate. The account was rolled back."}, 500);
+      }
     }
 
     const { error: auditError } = await admin
