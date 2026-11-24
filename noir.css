@@ -819,3 +819,30 @@ html[data-theme="dark"] #auditPanel #clearAuditFilters{
     to { opacity: 1; translate: 0 0; }
   }
 }
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  .tab-pane.active .tl-chart-line {
+    stroke-dasharray: 1 1;
+    animation: ledger-line-draw 900ms ease-out 120ms backwards;
+  }
+  @keyframes ledger-line-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .tab-pane.active .tl-chart-area { animation: ledger-area-reveal 900ms ease-out 120ms backwards; }
+  @keyframes ledger-area-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+  .tab-pane.active .tl-trend-svg circle { animation: ledger-content-enter 200ms ease-out 720ms backwards; }
+
+  .tab-pane.active :is(.tl-recent-card,.noir-activity-row,.tl-quick,.ms-report,.tr-person-card,.tr-summary-item,tbody > tr:nth-child(-n+8)) {
+    animation: ledger-list-enter 280ms ease-out var(--entry-delay, 100ms) backwards;
+  }
+  .tab-pane.active :where(.tl-recent-list,.noir-activity-list,.tl-quick-grid,.ms-reports-grid,.tr-summary,tbody) > :nth-child(1) { --entry-delay: 0ms; }
+  .tab-pane.active :where(.tl-recent-list,.noir-activity-list,.tl-quick-grid,.ms-reports-grid,.tr-summary,tbody) > :nth-child(2) { --entry-delay: 35ms; }
+  .tab-pane.active :where(.tl-recent-list,.noir-activity-list,.tl-quick-grid,.ms-reports-grid,.tr-summary,tbody) > :nth-child(3) { --entry-delay: 70ms; }
+  @keyframes ledger-list-enter { from { opacity: .25; } to { opacity: 1; } }
+
+  .tab-pane.active :is(.noir-metric-value,.noir-receipt-inner strong,.stat > b,.tr-summary-item strong) {
+    animation: ledger-count-entry 1ms;
+  }
+  @keyframes ledger-count-entry { from { opacity: .99; } to { opacity: 1; } }
+  .ledger-count-source { opacity: 0; }
+  .ledger-count-frame { position: absolute; inset: 0; pointer-events: none; text-align: inherit; }
+  .ledger-count-host { position: relative; }
+}
