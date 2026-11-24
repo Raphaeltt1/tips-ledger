@@ -773,3 +773,49 @@ html[data-theme="dark"] #auditPanel #clearAuditFilters{
   color:#fff!important;
   border-color:transparent!important;
 }
+
+@property --receipt-reveal {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* Uncover the actual segments clockwise, keeping the center label readable. */
+  .tab-pane.active .noir-receipt-donut:not(.no-data) {
+    position: relative;
+    isolation: isolate;
+  }
+  .tab-pane.active .noir-receipt-donut:not(.no-data)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(transparent 0 var(--receipt-reveal), var(--noir-donut-rest) var(--receipt-reveal) 360deg);
+    animation: ledger-receipt-sweep 950ms cubic-bezier(.24,.64,.3,1) 120ms backwards;
+  }
+  @keyframes ledger-receipt-sweep {
+    from { --receipt-reveal: 0deg; }
+    to { --receipt-reveal: 360deg; }
+  }
+
+  .tab-pane.active .noir-metric,
+  .tab-pane.active .noir-analytics-grid > div,
+  .tab-pane.active .noir-lower-grid > div,
+  .tab-pane.active:not([data-pane="overview"]) > :is(.row, .scroll, form, h1, .tl-page-intro) {
+    animation: ledger-content-enter 300ms ease-out backwards;
+  }
+  .tab-pane.active .noir-metric:nth-child(2),
+  .tab-pane.active:not([data-pane="overview"]) > .row { animation-delay: 45ms; }
+  .tab-pane.active .noir-metric:nth-child(3),
+  .tab-pane.active .noir-analytics-grid > div:first-child { animation-delay: 90ms; }
+  .tab-pane.active .noir-metric:nth-child(4),
+  .tab-pane.active .noir-analytics-grid > div:nth-child(2) { animation-delay: 135ms; }
+  .tab-pane.active .noir-lower-grid > div { animation-delay: 170ms; }
+  @keyframes ledger-content-enter {
+    from { opacity: .1; translate: 0 5px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+}
