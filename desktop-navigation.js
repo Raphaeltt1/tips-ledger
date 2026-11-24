@@ -1,6 +1,7 @@
 (() => {
   const desktop = matchMedia('(min-width: 681px)');
   const nav = document.getElementById('tabs');
+  const sidebar = nav.closest('.noir-sidebar');
   const brand = document.querySelector('.noir-brand');
   const indicator = document.createElement('span');
   indicator.className = 'desktop-nav-light';
@@ -9,18 +10,22 @@
   toggle.className = 'desktop-nav-toggle';
   toggle.type = 'button';
   toggle.setAttribute('aria-controls', nav.id);
-  toggle.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M9 4v16m8-11-3 3 3 3"/></svg>';
+  toggle.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m14 3 7 7-3 1-3 4-1 3-8-8 3-1 4-3 1-3ZM9.5 14.5 4 20"/></svg>';
   const buttons = [...nav.querySelectorAll('button[data-tab]')];
   const originalTitles = buttons.map(button => button.getAttribute('title'));
-  const key = 'ledger-desktop-sidebar';
-  let preference;
-  try { preference = localStorage.getItem(key); } catch {}
+  const key = 'ledger-desktop-sidebar-pinned';
+  let pinned = false;
+  try { pinned = localStorage.getItem(key) === 'true'; } catch {}
+  let hovering = false;
+  let keyboardFocus = false;
   let active, animation;
 
   function setLayout(compact) {
     document.body.dataset.desktopNav = compact ? 'compact' : 'expanded';
-    toggle.title = compact ? 'Expand sidebar' : 'Collapse sidebar';
-    toggle.setAttribute('aria-label', toggle.title);
+    document.body.dataset.sidebarPinned = String(pinned);
+    toggle.title = pinned ? 'Unpin sidebar' : 'Pin sidebar';
+    toggle.setAttribute('aria-label', 'Pin sidebar');
+    toggle.setAttribute('aria-pressed', String(pinned));
     toggle.setAttribute('aria-expanded', String(!compact));
     buttons.forEach((button, index) => {
       const title = compact ? button.getAttribute('aria-label') || button.textContent.trim() : originalTitles[index];
@@ -28,11 +33,35 @@
       else button.removeAttribute('title');
     });
   }
+  function refreshLayout() {
+    if (desktop.matches) setLayout(!(pinned || hovering || keyboardFocus));
+  }
+  sidebar.addEventListener('pointerenter', event => {
+    hovering = event.pointerType === 'mouse' || event.pointerType === 'pen';
+    refreshLayout();
+  });
+  sidebar.addEventListener('pointerleave', () => {
+    hovering = false;
+    refreshLayout();
+  });
+  sidebar.addEventListener('pointerdown', () => {
+    keyboardFocus = false;
+    refreshLayout();
+  });
+  sidebar.addEventListener('focusin', event => {
+    keyboardFocus = event.target.matches(':focus-visible');
+    refreshLayout();
+  });
+  sidebar.addEventListener('focusout', event => {
+    if (!sidebar.contains(event.relatedTarget)) {
+      keyboardFocus = false;
+      refreshLayout();
+    }
+  });
   toggle.onclick = () => {
-    const compact = document.body.dataset.desktopNav !== 'compact';
-    preference = compact ? 'compact' : 'expanded';
-    try { localStorage.setItem(key, preference); } catch {}
-    setLayout(compact);
+    pinned = !pinned;
+    try { localStorage.setItem(key, String(pinned)); } catch {}
+    refreshLayout();
   };
 
   function align() {
@@ -67,7 +96,7 @@
     if (desktop.matches) {
       brand.prepend(toggle);
       nav.prepend(indicator);
-      setLayout(preference ? preference === 'compact' : matchMedia('(max-width: 980px)').matches);
+      refreshLayout();
       changes.observe(nav, {subtree: true, attributes: true, attributeFilter: ['class']});
       sizes.observe(nav);
       align();
@@ -77,7 +106,9 @@
       animation?.cancel();
       active = null;
       if (toggle.isConnected) setLayout(false);
+      hovering = keyboardFocus = false;
       delete document.body.dataset.desktopNav;
+      delete document.body.dataset.sidebarPinned;
       toggle.remove();
       indicator.remove();
     }
