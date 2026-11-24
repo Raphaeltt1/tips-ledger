@@ -1,10 +1,11 @@
 (() => {
   const el = id => document.getElementById('td'+id);
   const options = (node, rows) => node.replaceChildren(...rows.map(([text,value]) => new Option(text,value)));
-  let db, push, refreshPayments, people, rates, weeks, week, busy=false;
+  let db, push, refreshPayments, people, weeks, week, busy=false;
   const fmt = n => n.toLocaleString('en-US');
-  const rateFor = (id,date) => Number(rates.find(r=>r.runner_id===id && r.effective_from<=date)?.hourly_rate || 0);
-  const active = () => people.filter(p=>p.active && p.role===el('Position').value);
+  let department='FOH';
+  const roles={runner:'Runner',expo:'Expo',host_hostess:'Host / Hostess',counter:'Counter',waiter_waitress:'Waiter / Waitress',driver:'Driver',kitchen_crew:'Kitchen Crew'};
+  const positions=()=>department==='BOH'?['kitchen_crew']:Object.keys(roles).filter(r=>r!=='kitchen_crew');
   const locked = () => Object.keys(week.payments).length>0;
   async function query(request) {
     const {data,error}=await request;
@@ -23,12 +24,13 @@
   function selectPosition() {
     week=null;
     el('Editor').hidden=true;
-    options(el('History'),[['Choose week',''],...weeks.filter(w=>w.position===el('Position').value).map(w=>[w.week_start,w.week_start])]);
+    options(el('History'),[['Choose week',''],...Array.from(new Set(weeks.map(w=>w.week_start)),date=>[date,date])]);
   }
   function load(w) {
     week=structuredClone(w);
     el('Date').value=w.week_start;
     el('History').value=w.week_start;
+    el('PoolLabel').textContent=department+' total tips (LBP)';
     el('Pool').value=w.pool;
     el('Editor').hidden=false;
     draw();
@@ -47,17 +49,15 @@
   function updateAmounts(){
     const shares=amounts();
     [...el('Rows').rows].forEach((tr,i)=>{
-      tr.cells[4].textContent=fmt(shares[i]);
-      tr.cells[6].textContent=fmt(shares[i]-week.members[i].advance);
+      tr.cells[5].textContent=fmt(shares[i]);
+      tr.cells[7].textContent=fmt(shares[i]-week.members[i].advance);
     });
   }
   function draw(){
     const frozen=locked();
     el('Pool').disabled=frozen;
     el('Save').disabled=frozen;
-    const available=active().filter(p=>!week.members.some(m=>m.id===p.id));
-    options(el('Person'),available.map(p=>[p.full_name,p.id]));
-    el('Add').disabled=frozen||!available.length;
+    el('Add').disabled=frozen;
     el('Rows').replaceChildren();
     for(const m of week.members){
       const row=el('Rows').insertRow();
@@ -70,53 +70,82 @@
         row.insertCell().append(field);
       }
       input('code','text');
-      row.insertCell().textContent=m.name;
+      input('name','text');
+      const position=document.createElement('select');
+      options(position,positions().map(r=>[roles[r],r]));
+      position.value=m.position;position.disabled=frozen;
+      position.onchange=()=>{m.position=position.value;m.account=null;draw();};
+      row.insertCell().append(position);
       input('hours','number','0.01');
-      row.insertCell().textContent=fmt(m.rate);
+      input('rate','number','0.01');
       row.insertCell();input('advance','number','1');row.insertCell();
       const actions=row.insertCell();
       function button(text,fn){const b=document.createElement('button');b.textContent=text;b.onclick=fn;actions.append(b);}
       if(week.payments[m.id]) actions.textContent='Published';
-      else button('Publish',()=>run(()=>save(m.id)));
+      else {
+        const accounts=document.createElement('select');
+        options(accounts,[['Select payment account',''],...people.filter(p=>p.active&&p.role===m.position).map(p=>[p.full_name,p.id])]);
+        accounts.value=m.account||'';
+        actions.append(accounts);
+        button('Publish',()=>run(async()=>{
+          if(!accounts.value)throw Error('Select the employee account to publish this payment.');
+          await save(m.id,accounts.value);
+        }));
+      }
       if(!frozen)button('Remove',()=>{week.members=week.members.filter(x=>x!==m);draw();});
+      [...row.cells].forEach((cell,i)=>cell.dataset.label=row.closest('table').tHead.rows[0].cells[i].textContent);
     }
     updateAmounts();
   }
-  function member(p,date,code=''){
-    return {id:p.id,name:p.full_name,code,hours:0,rate:rateFor(p.id,date),advance:0};
+  function newSheet(date){
+    const previous=weeks.find(w=>w.position===department&&w.week_start<date);
+    return {week_start:date,position:department,revision:0,pool:0,payments:{},
+      members:(previous?.members||[]).map(m=>({...m,hours:0,advance:0}))};
   }
-  async function save(id=null){
+  function choose(date){
+    load(weeks.find(w=>w.position===department&&w.week_start===date)||newSheet(date));
+  }
+  async function save(id=null,account=null){
     if([...el('Editor').querySelectorAll('input')].some(field=>!field.reportValidity()))return;
-    const result=await query(db.rpc('tip_distribution_action',{w:week.week_start,pos:week.position,rev:week.revision,total:week.pool,roster:week.members,recipient:id}));
+    const result=await query(db.rpc('department_distribution_action',{w:week.week_start,pos:week.position,rev:week.revision,total:week.pool,roster:week.members,recipient:id,account}));
     weeks=[result.week,...weeks.filter(w=>w.week_start!==week.week_start||w.position!==week.position)].sort((a,b)=>b.week_start.localeCompare(a.week_start));
     selectPosition();load(result.week);
     el('Status').textContent=id?'Payment published.':'Draft saved.';
     if(result.published){await push('published',result.published);await refreshPayments();}
+    return true;
   }
   async function open(client,sendPush,refresh){
     db=client;push=sendPush;refreshPayments=refresh;
     await run(async()=>{
       el('Editor').hidden=true;
-      [people,rates,weeks]=await Promise.all([
+      [people,weeks]=await Promise.all([
         query(db.from('profiles').select('id,full_name,role,active').order('full_name')),
-        query(db.from('runner_rates').select('runner_id,hourly_rate,effective_from').order('effective_from',{ascending:false})),
         query(db.from('tip_distributions').select('*').order('week_start',{ascending:false}))]);
       selectPosition();
       el('Date').onchange=()=>{el('Editor').hidden=true;el('History').value='';};
-      el('Position').onchange=selectPosition;
-      el('History').onchange=()=>{const w=weeks.find(x=>x.week_start===el('History').value && x.position===el('Position').value);if(w)load(w);else selectPosition();};
+      for(const dept of ['FOH','BOH']){
+        el(dept).setAttribute('aria-pressed',String(dept===department));
+        el(dept).onclick=()=>run(async()=>{
+          if(department===dept)return;
+          const date=el('Editor').hidden?'':week?.week_start;
+          if(date && !locked()){
+            if(week.members.some(m=>!m.name.trim()))throw Error('Enter the employee name or remove the empty row first.');
+            if(!(await save()))return;
+          }
+          department=dept;
+          for(const key of ['FOH','BOH'])el(key).setAttribute('aria-pressed',String(key===dept));
+          if(date)choose(date);
+        });
+      }
+      el('History').onchange=()=>{if(el('History').value)choose(el('History').value);else selectPosition();};
       el('New').onclick=()=>run(async()=>{
-        const date=el('Date').value,pos=el('Position').value;
+        const date=el('Date').value;
         if(!date)throw Error('Choose a week date.');
-        const existing=weeks.find(w=>w.week_start===date&&w.position===pos);
-        if(existing){load(existing);return;}
-        const prior=weeks.find(w=>w.position===pos&&w.week_start<date);
-        const roster=prior?prior.members.flatMap(m=>{const p=active().find(p=>p.id===m.id);return p?[member(p,date,m.code)]:[];}):active().map(p=>member(p,date));
-        load({week_start:date,position:pos,members:roster,pool:0,revision:0,payments:{}});
-        await save();
+        choose(date);
+        if(!week.revision)await save();
       });
       el('Pool').oninput=()=>{week.pool=Math.max(0,Math.trunc(Number(el('Pool').value)||0));updateAmounts();};
-      el('Add').onclick=()=>{const p=active().find(x=>x.id===el('Person').value);if(p){week.members.push(member(p,week.week_start));draw();}};
+      el('Add').onclick=()=>{week.members.push({id:crypto.randomUUID(),code:'',name:'',position:positions()[0],hours:0,rate:0,advance:0});draw();};
       el('Save').onclick=()=>run(()=>save());
     });
   }
