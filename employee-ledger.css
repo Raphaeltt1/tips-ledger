@@ -194,3 +194,18 @@ html[data-theme=dark] .el-schedule-table tbody tr.el-section-row:nth-child(even)
 #individualActions { margin-top: 18px; }
 #individualActions [data-delete-employee] { color: var(--tl-danger) !important; }
 #people [hidden] { display: none !important; }
+
+#elSchedulePanel .el-segments { flex-wrap: wrap; }
+#elSchedulePanel [hidden] { display: none !important; }
+.labor-result { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:16px 0; padding:14px; border:1px solid var(--tl-border); border-radius:12px; background:var(--tl-card); }
+.labor-verdict { display:inline-flex; align-items:center; gap:8px; font-weight:750; }
+.labor-signal:empty { display:none; }
+.labor-signal { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; font-size:21px; line-height:1; }
+[data-result="within"] .labor-signal { background:#126441; color:white; box-shadow:0 0 0 4px #32b87a30; }
+[data-result="over"] .labor-signal { background:#ad2740; color:white; box-shadow:0 0 0 4px #ef546630; }
+@media (prefers-reduced-motion:no-preference) {
+  [data-result="within"] .labor-signal { animation:labor-within 450ms ease-out; }
+  [data-result="over"] .labor-signal { animation:labor-over 380ms ease-out; }
+  @keyframes labor-within { from { scale:.75; } 65% { scale:1.12; } to { scale:1; } }
+  @keyframes labor-over { from { translate:-3px; } 35% { translate:3px; } 70% { translate:-1px; } to { translate:0; } }
+}

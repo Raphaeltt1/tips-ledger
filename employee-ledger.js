@@ -7,7 +7,7 @@
   const teamRoles = ['runner','host_hostess','counter','expo','kitchen_crew'];
   const admin = () => ['admin','superuser'].includes(state.profile?.role);
   const state = {db:null, profile:null, api:null, wired:false, health:[], people:[], filter:'all',
-    dept:'FOH', week:null, manualWeek:false, published:[], draft:null, drafts:{}, scheduleLoading:false};
+    publishedView:false, publishedDept:'FOH', publishedWeek:'', dept:'FOH', week:null, manualWeek:false, published:[], draft:null, drafts:{}, scheduleLoading:false};
   const toast = (message,bad=false) => state.api?.toast?.(message,bad);
   function todayBeirut() {
     const parts = new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
@@ -288,16 +288,38 @@
     }catch(e){$('elScheduleStatus').textContent='Could not open schedules: '+(e.message||'Try refreshing');toast('Could not load schedule: '+e.message,true)}
     finally{state.scheduleLoading=false}
   }
-  function latestForWeek() {
-    return state.published.find(x=>x.department===state.dept&&x.week_start===state.week);
+  function renderPublished() {
+    const dept=state.publishedDept;
+    const records=state.published.filter(row=>row.department===dept);
+    const dates=[...new Set(records.map(row=>row.week_start))].sort().reverse();
+    if(!dates.includes(state.publishedWeek))state.publishedWeek=dates[0]||'';
+    const weeks=$('elPublishedWeek');
+    weeks.replaceChildren(...dates.map(date=>new Option(dateLabel(date),date)));
+    weeks.value=state.publishedWeek;
+    weeks.disabled=!dates.length;
+    $('elPublishedDept').value=dept;
+    const selected=records.find(row=>row.week_start===state.publishedWeek);
+    $('elScheduleStatus').textContent=selected
+      ?dept+' · Published '+new Date(selected.published_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})+' · '+selected.original_filename
+      :'No published '+dept+' schedules available.';
+    $('elScheduleTable').innerHTML=selected?(selected.workbook_rows?.[0]?.[0]==='schedule-grid-v1'
+      ?window.ScheduleEditor.published(selected.workbook_rows,state.publishedWeek):tableMarkup(selected.workbook_rows)):'';
+  }
+  function syncScheduleView(){
+    $('elEditorView').hidden=state.publishedView;
+    $('elPublishedView').hidden=!state.publishedView;
+    for(const [id,selected] of [['elScheduleFoh',!state.publishedView&&state.dept==='FOH'],['elScheduleBoh',!state.publishedView&&state.dept==='BOH'],['elPublishedTab',state.publishedView]]){
+      $(id).classList.toggle('selected',selected);
+      $(id).setAttribute('aria-pressed',String(selected));
+    }
   }
   function scheduleWeeks() {
     return [...new Set(state.published.filter(x=>x.department===state.dept).map(x=>x.week_start))].sort((a,b)=>b.localeCompare(a));
   }
   function renderSchedule() {
     if(!$('elScheduleTable'))return;
-    $('elScheduleFoh').classList.toggle('selected',state.dept==='FOH');
-    $('elScheduleBoh').classList.toggle('selected',state.dept==='BOH');
+    syncScheduleView();
+    if(state.publishedView){renderPublished();return;}
     const weeks=scheduleWeeks();
     if(!state.week||(!weeks.includes(state.week) && weeks.length && !state.draft && !state.manualWeek)){
       state.week=weeks[0];
@@ -307,13 +329,7 @@
     $('elScheduleWeekLabel').textContent=dateLabel(week.value);
     $('elScheduleUploadWeek').value=week.value;
     $('elScheduleUploadDept').textContent=state.dept;
-    const selected=latestForWeek();
     window.ScheduleEditor.show(state.dept,week.value);
-    $('elScheduleStatus').textContent=selected
-      ?state.dept+' · Published '+new Date(selected.published_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})+' · '+selected.original_filename
-      :'No '+state.dept+' schedule published for this week.';
-    $('elScheduleTable').innerHTML=selected?(selected.workbook_rows?.[0]?.[0]==='schedule-grid-v1'?window.ScheduleEditor.published(selected.workbook_rows,state.week):tableMarkup(selected.workbook_rows)):
-      '<div class="el-empty">No published '+state.dept+' schedule for '+esc(dateLabel(week.value))+'.</div>';
     $('elSchedulePrev').disabled=!weeks.some(x=>x<state.week);
     $('elScheduleNext').disabled=!weeks.some(x=>x>state.week);
     $('elScheduleDraft').classList.toggle('hidden',!admin()||!state.draft||state.draft.department!==state.dept);
@@ -372,6 +388,8 @@
     finally{b.disabled=false;b.textContent='Publish schedule'}
   }
   function showDept(dept){
+    state.publishedView=false;
+    if(state.dept===dept){renderSchedule();return;}
     state.dept=dept;state.week=null;state.manualWeek=false;
     state.draft=state.drafts[dept]||null;
     const first=state.published.find(x=>x.department===dept);
@@ -387,6 +405,12 @@
     });
     $('elScheduleFoh').onclick=()=>showDept('FOH');
     $('elScheduleBoh').onclick=()=>showDept('BOH');
+    $('elPublishedTab').onclick=()=>{
+      if(!state.publishedView){state.publishedDept=state.dept;state.publishedWeek=state.week||'';}
+      state.publishedView=true;renderSchedule();loadScheduleIndex();
+    };
+    $('elPublishedDept').onchange=()=>{state.publishedDept=$('elPublishedDept').value;state.publishedWeek='';renderPublished();};
+    $('elPublishedWeek').onchange=()=>{state.publishedWeek=$('elPublishedWeek').value;renderPublished();};
     $('elScheduleRefresh').onclick=loadScheduleIndex;
     $('elScheduleWeek').onchange=()=>{
       state.week=mondayISO($('elScheduleWeek').value);state.manualWeek=true;renderSchedule();
@@ -396,7 +420,7 @@
     $('elScheduleImport').onclick=importSchedule;
     $('elSchedulePublish').onclick=publishSchedule;
     $('noticeList').addEventListener('click',e=>{
-      if(e.target.closest('[data-open-schedule]'))state.api?.setTab?.('schedule');
+      if(e.target.closest('[data-open-schedule]')){state.publishedView=true;syncScheduleView();state.api?.setTab?.('schedule');}
     });
   }
   function init({db,profile,setTab,toast,loadNotifications}){
@@ -409,6 +433,10 @@
     state.health=[];state.people=[];state.healthReady=false;
     state.db=db;state.profile=profile;state.api={setTab,toast,loadNotifications};
     state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;state.drafts={};
+    const editor=['manager','admin','superuser'].includes(profile.role);
+    state.publishedView=!editor;state.publishedDept='FOH';state.publishedWeek='';
+    for(const id of ['elScheduleFoh','elScheduleBoh'])$(id).classList.toggle('hidden',!editor);
+    syncScheduleView();
     wire();
     $('elScheduleManagement').classList.toggle('hidden',!admin());
 
