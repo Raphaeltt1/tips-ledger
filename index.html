@@ -21,7 +21,7 @@ html[data-theme="dark"] .graph-shell{background:linear-gradient(180deg,#162943,#
 html[data-theme="dark"] .graph-kpi{color:#ecf4ff}
 html[data-theme="dark"] .graph-legend{color:#b1c6df}
 @media(max-width:430px){.graph-shell{padding:11px}.graph-kpi{font-size:16px}}
-</style><link rel="stylesheet" href="./noir.css?v=tab-data-20261124"><link rel="stylesheet" href="./schedule-editor.css?v=2"><link rel="stylesheet" href="./employee-ledger.css?v=20261105-design-b"><link rel="stylesheet" href="./mystery-shopper.css?v=20261113"><link rel="stylesheet" href="./training-ledger.css?v=20261113a"><style>
+</style><link rel="stylesheet" href="./noir.css?v=tab-data-20261124"><link rel="stylesheet" href="./schedule-editor.css?v=2"><link rel="stylesheet" href="./employee-ledger.css?v=directory-20261124"><link rel="stylesheet" href="./mystery-shopper.css?v=20261113"><link rel="stylesheet" href="./training-ledger.css?v=20261113a"><style>
 #menuResults:not([hidden]){display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
 #menuResults button{display:grid;gap:.25rem;text-align:left}
 #menuResults small{font-weight:400}
@@ -60,7 +60,13 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
  <div class="noir-brand"><span class="noir-logo" aria-hidden="true">◈</span><span class="noir-brand-copy"><span class="noir-brand-name">EMPLOYEE LEDGER</span><span class="noir-brand-sub">ROADSTER DINER</span></span></div>
  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><symbol id="tl-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol><symbol id="tl-payments" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="14" rx="2"/><path d="M16 13h5M4 6V4h15"/></symbol><symbol id="tl-employees" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 11a3 3 0 0 0 0-6M17 15a5 5 0 0 1 4 5"/></symbol><symbol id="tl-audit" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 15h6M9 19h3"/></symbol><symbol id="tl-account" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></symbol><symbol id="tl-schedule" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 2v6M17 2v6M3 10h18M7 14h3M14 14h3M7 18h3"/></symbol><symbol id="tl-training" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM7 9h10M7 13h6M7 17h3M17 17l2 2 3-3"/></symbol><symbol id="tl-mystery" viewBox="0 0 24 24"><path d="M7 3h10l3 3v15H4V3h3zM15 3v4h5M8 11h8M8 15h8M8 19h5"/></symbol></svg><nav id="tabs" class="tabbar" aria-label="Workspace navigation"><button type="button" data-tab="overview" id="overviewTab" class="active" aria-current="page"><svg aria-hidden="true" class="tab-icon"><use href="#tl-overview"></use></svg><span>Overview</span></button><button type="button" data-tab="payments" id="paymentsTab"><svg aria-hidden="true" class="tab-icon"><use href="#tl-payments"></use></svg><span>Payments</span></button><button type="button" data-tab="employees" id="employeesTab"><svg aria-hidden="true" class="tab-icon"><use href="#tl-employees"></use></svg><span>Employees</span></button><button type="button" data-tab="schedule"><svg aria-hidden="true" class="tab-icon"><use href="#tl-schedule"></use></svg><span>Schedule</span></button><button type="button" data-tab="labor"><svg aria-hidden="true" class="tab-icon"><use href="#tl-payments"></use></svg><span id="laborLabel">Total Hours</span></button><button type="button" data-tab="requests"><svg aria-hidden="true" class="tab-icon"><use href="#tl-schedule"></use></svg><span>Schedule Requests</span></button><button type="button" id="distributionTab" class="hidden" data-tab="distribution"><svg aria-hidden="true" class="tab-icon"><use href="#tl-payments"></use></svg><span>Tips Distribution</span></button><button type="button" id="menuTab" class="hidden" data-tab="menu" aria-label="Menu Search"><svg aria-hidden="true" class="tab-icon" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Menu Search</span></button><button type="button" data-tab="training" id="trainingTab"><svg aria-hidden="true" class="tab-icon"><use href="#tl-training"></use></svg><span>Training</span></button><button type="button" data-tab="mystery" id="mysteryTab" aria-label="Mystery Shopper"><svg aria-hidden="true" class="tab-icon"><use href="#tl-mystery"></use></svg><span>Mystery Shopper</span></button><button type="button" data-tab="audit" id="auditTab" class="hidden"><svg aria-hidden="true" class="tab-icon"><use href="#tl-audit"></use></svg><span>Audit log</span></button><button type="button" data-tab="account"><svg aria-hidden="true" class="tab-icon"><use href="#tl-account"></use></svg><span>Settings</span></button></nav><div class="noir-sidebar-footer"><div class="noir-sidebar-caption">EMPLOYEE LEDGER WORKSPACE</div><div class="noir-sidebar-person"><div id="noirSidebarAvatar" class="noir-sidebar-avatar">TL</div><div><strong id="noirSidebarName">Account</strong><small id="noirSidebarRole">Secure access</small></div></div></div></aside><div class="noir-content">
 <div id="tlModalBackdrop" class="hidden"></div>
-<div class="tl-greeting tab-pane active" data-pane="overview"><span class="tl-eyebrow">EMPLOYEE LEDGER / CONTROL CENTER</span><h2 id="welcome"></h2><p id="role" class="muted"></p></div><section id="admin" class="card hidden tab-pane" data-pane="employees"><div id="tlEmployeeHeader"><span class="tl-eyebrow">OUR PEOPLE</span><h1 class="tl-page-title">The team</h1><p class="tl-page-intro">People, permissions and hourly rates.</p><button id="tlAddEmployeeAction" type="button">＋ Add employee</button></div><div class="tl-section-head"><h2>Employee directory</h2></div><div id="tlTeamStats" class="tl-team-counts"></div><div class="field"><label for="tlTeamSearch">Find an employee</label><input id="tlTeamSearch" type="search" placeholder="Search by name or role"></div><div id="people"></div><details id="tlRatesDetails" class="tl-collapsible"><summary>Employee hourly rates & individual edits</summary><div class="tl-collapsible-body"><h2>Employee hourly rates</h2><p class="muted" style="font-size:13px">Current hourly rate for each team member. Saved rates apply to new payment drafts whose week starts on or after the new rate date. Existing payment records remain unchanged.</p><div class="scroll"><table id="employeeRatesTable"><thead><tr><th>Employee</th><th>Role</th><th>Status</th><th>Hourly rate</th><th>Action</th></tr></thead><tbody id="employeeRatesRows"><tr><td colspan="5">Loading rates…</td></tr></tbody></table></div></div></details><details id="tlCreateDetails" class="tl-collapsible"><summary>Add employee account</summary><div class="tl-collapsible-body"><h2>Add employee</h2><p class="muted">Creates a team member or management login. Use a unique email and a temporary password of at least 12 characters. Share credentials privately.</p><form id="employeeForm"><div class="row"><div class="field"><label for="employeeName">Full name</label><input id="employeeName" maxlength="100" required></div><div class="field"><label for="employeeEmail">Email</label><input id="employeeEmail" type="email" autocomplete="off" required></div><div class="field"><label for="employeeRole">Position</label><select id="employeeRole" required><option value="" selected disabled>Select position</option><option value="host_hostess">Host/Hostess</option><option value="waiter_waitress">Waiter / Waitress</option><option value="runner">Runner</option><option value="driver">Driver</option><option value="counter">Counter</option><option value="expo">Expo</option><option value="kitchen_crew">Kitchen Crew</option><option value="floor_team_leader">Floor Team Leader</option><option value="kitchen_team_leader">Kitchen Team Leader</option><option value="floor_supervisor">Floor Supervisor</option><option value="kitchen_supervisor">Kitchen Supervisor</option><option value="floor_manager_on_duty">Floor Manager on Duty</option><option value="kitchen_manager_on_duty">Kitchen Manager on Duty</option><option id="adminRoleOption" value="restaurant_manager" class="hidden" disabled>Restaurant Manager</option></select></div><div class="field"><label for="employeePassword">Temporary password</label><input id="employeePassword" type="password" minlength="12" autocomplete="new-password" required></div><div class="field"><label for="employeeHealthCardExpiry">Health Card expiry date (optional)</label><input id="employeeHealthCardExpiry" type="date"></div></div><p class="muted" style="margin:0 0 10px;font-size:12px">Floor and kitchen leaders can manage weekly tips. Restaurant Managers and Superusers manage employees.</p><button type="submit">Create employee</button></form></div></details><details id="tlRateDetails" class="tl-collapsible"><summary>Set team member hourly rate</summary><div class="tl-collapsible-body"><h2>Set first hourly rate</h2><p id="tlUnratedNotice" role="status" class="tl-caption">Only team members without an hourly rate appear here.</p><form id="rateForm"><div class="row"><div class="field"><label for="rateRunner">Team Member</label><select id="rateRunner" required></select></div><div class="field"><label for="hourlyRate">Hourly rate (LBP)</label><input id="hourlyRate" type="number" min="0" step="1" required></div></div><button type="submit">Save hourly rate</button></form></div></details></section>
+<div class="tl-greeting tab-pane active" data-pane="overview"><span class="tl-eyebrow">EMPLOYEE LEDGER / CONTROL CENTER</span><h2 id="welcome"></h2><p id="role" class="muted"></p></div><section id="admin" class="card hidden tab-pane" data-pane="employees"><div id="tlEmployeeHeader"><span class="tl-eyebrow">OUR PEOPLE</span><h1 class="tl-page-title">Employee directory</h1></div><div id="tlTeamStats" class="tl-team-counts"></div><div class="field"><label for="tlTeamSearch">Find an employee</label><input id="tlTeamSearch" type="search" placeholder="Search by name or role"></div><details name="employee-workflow" id="tlCreateDetails" class="tl-collapsible"><summary>Add Employee Account</summary><div class="tl-collapsible-body"><h2>Add employee</h2><p class="muted">Creates a team member or management login. Use a unique email and a temporary password of at least 12 characters. Share credentials privately.</p><form id="employeeForm"><div class="row"><div class="field"><label for="employeeName">Full name</label><input id="employeeName" maxlength="100" required></div><div class="field"><label for="employeeEmail">Email</label><input id="employeeEmail" type="email" autocomplete="off" required></div><div class="field"><label for="employeeRole">Position</label><select id="employeeRole" required><option value="" selected disabled>Select position</option><option value="host_hostess">Host/Hostess</option><option value="waiter_waitress">Waiter / Waitress</option><option value="runner">Runner</option><option value="driver">Driver</option><option value="counter">Counter</option><option value="expo">Expo</option><option value="kitchen_crew">Kitchen Crew</option><option value="floor_team_leader">Floor Team Leader</option><option value="kitchen_team_leader">Kitchen Team Leader</option><option value="floor_supervisor">Floor Supervisor</option><option value="kitchen_supervisor">Kitchen Supervisor</option><option value="floor_manager_on_duty">Floor Manager on Duty</option><option value="kitchen_manager_on_duty">Kitchen Manager on Duty</option><option id="adminRoleOption" value="restaurant_manager" class="hidden" disabled>Restaurant Manager</option></select></div><div class="field"><label for="employeePassword">Temporary password</label><input id="employeePassword" type="password" minlength="12" autocomplete="new-password" required></div><div class="field"><label for="employeeHealthCardExpiry">Health Card expiry date (optional)</label><input id="employeeHealthCardExpiry" type="date"></div></div><p class="muted" style="margin:0 0 10px;font-size:12px">Floor and kitchen leaders can manage weekly tips. Restaurant Managers and Superusers manage employees.</p><button type="submit">Create employee</button></form></div></details><details name="employee-workflow" id="tlIndividualEdits" class="tl-collapsible"><summary>Employee and Individual Edits</summary><div class="tl-collapsible-body">
+<div id="elHealthFilterBanner" class="el-filter-banner hidden"><span id="elHealthFilterDescription"></span><button type="button" id="elHealthFilterReset">Show all employees</button></div>
+<div id="people"><div id="employeeList" class="scroll"><table aria-label="Employee directory"><thead><tr><th>Employee</th><th>Position</th><th>Status</th><th>Action</th></tr></thead><tbody id="employeeDirectoryRows"></tbody></table><p id="employeeNoMatches" hidden>No matching employees.</p></div>
+<section id="individualEditor" hidden><button id="employeeBack" type="button" class="tl-secondary-button">Back to employees</button><h3 id="individualName"></h3><p id="individualPosition" class="muted"></p>
+<form id="individualRateForm" hidden><label for="individualRate">Hourly rate (LBP)</label><input id="individualRate" type="number" min="0" max="100000000" step="1" required><button type="submit">Save hourly rate</button><p id="individualRateStatus" role="status" class="muted"></p></form>
+<form id="elHealthForm" hidden><label for="elHealthDate">Health card expiry</label><input id="elHealthDate" type="date"><button id="elHealthSave" type="submit">Save expiry date</button> <button id="elHealthClear" type="button" class="tl-secondary-button">Clear date</button></form>
+<div id="individualActions" class="row"></div></section></div></div></details></section>
 <section id="editor" class="tl-modal hidden"><div class="tl-sheet-handle"></div><div class="tl-sheet-title-row"><h2>New weekly draft</h2><button type="button" id="tlCloseDraft" class="tl-sheet-close" aria-label="Close draft form">×</button></div><form id="draftForm"><div class="row"><div class="field"><label>Team Member</label><select id="runner" required></select></div><div class="field"><label>Week start</label><input id="week" type="date" required></div></div><div class="row"><div class="field"><label>Hours worked</label><input id="hours" type="number" min="0" step=".25" required></div><div class="field"><label>Tips (LBP)</label><input id="tips" type="number" min="0" step="1" required></div><div class="field"><label>Advance (LBP)</label><input id="advance" type="number" min="0" step="1" required></div></div><div class="tl-total-preview"><span>Remaining tips <small style="display:block;color:var(--tl-muted)">Tips minus advance</small></span><strong id="tlDraftTotal" aria-live="polite">LBP 0</strong></div><p class="muted">Remaining tips = Tips − Advance. Drafts are invisible to team members until published.</p><button>Save draft</button></form></section>
 <section id="editPanel" class="tl-modal hidden"><div class="tl-sheet-handle"></div><div class="tl-sheet-title-row"><h2>Edit weekly payment</h2><button type="button" id="tlCloseEdit" class="tl-sheet-close" aria-label="Close edit form">×</button></div><p class="muted">Restaurant Managers can edit until the team member confirms receipt.</p><form id="editForm"><input id="editId" type="hidden"><div class="row"><div class="field"><label>Hours worked</label><input id="editHours" type="number" min="0" step=".25" required></div><div class="field"><label>Tips (LBP)</label><input id="editTips" type="number" min="0" step="1" required></div><div class="field"><label>Advance (LBP)</label><input id="editAdvance" type="number" min="0" step="1" required></div></div><div class="row"><button type="submit">Save changes</button><button type="button" id="cancelEdit" style="background:#64748b">Cancel</button></div></form></section>
 <section id="historyPanel" class="card tab-pane active" data-pane="overview"><div id="pendingAlert" class="pending-alert hidden"></div>
@@ -193,7 +199,7 @@ html[data-theme="dark"] .graph-legend{color:#b1c6df}
 <p id="tlPhotoStatus" role="status" aria-live="polite" class="tl-caption">Optional. Photos are visible to your team.</p>
 </div>
 <h2 class="tl-section-head" style="margin-top:22px">Account settings</h2><div id="ownRate" class="hidden" aria-live="polite"><h3>My current hourly rate</h3><p id="ownRateValue" class="muted">Loading…</p><p class="muted" style="font-size:13px">Read-only; contact a Restaurant Manager for changes.</p></div><div class="push-setting"><h3 style="margin:0 0 5px">🔔 Push notifications</h3><p class="muted">Get alerts when your weekly tips are published or a team member confirms receipt. This device must support browser notifications.</p><p id="pushStatus" class="muted" role="status">Checking notification support…</p><button type="button" id="enablePush" class="hidden">Enable notifications</button><details id="pushTroubleshooting" class="push-troubleshooting"><summary>Notification troubleshooting</summary><div class="push-troubleshooting-body"><p class="muted" style="font-size:13px">Only use these options if alerts stop arriving or you need to test this device.</p><button type="button" id="reregisterPush" class="secondary-action hidden">Re-register this device</button><button type="button" id="testPush" class="secondary-action hidden">Send test push</button><button type="button" id="disablePush" class="secondary-action hidden">Disable on this device</button><p class="muted" style="font-size:12px">For iPhone alerts, open Employee Ledger from its Home Screen icon and allow notifications. Device settings may sometimes delay delivery.</p></div></details></div><section id="mfaSettings" class="push-setting hidden"><h3>🔐 Superuser two-step verification</h3><p class="muted">Add a six-digit authenticator code to protect your sign-in. Register a second trusted authenticator for backup; Supabase does not provide recovery codes automatically.</p><p id="mfaStatus" role="status">Not checked yet.</p><button id="mfaEnrollStart" type="button">Set up authenticator</button><div id="mfaEnrollBox" class="hidden"><p class="muted">Scan the QR code, or copy the manual key if you are using this same iPhone. Never share the key.</p><img id="mfaQr" alt="Authenticator QR setup" style="display:block;width:min(230px,100%);margin:10px auto;background:white;padding:8px;border-radius:10px"><div class="field"><label>Manual setup key (keep private)</label><input id="mfaSecret" readonly style="font-family:monospace"></div><button id="mfaCopyKey" type="button" class="secondary-action">Copy key</button><form id="mfaEnrollForm"><div class="field"><label>Six-digit code from authenticator</label><input id="mfaEnrollCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div><button type="submit">Activate verification</button><button id="mfaEnrollCancel" type="button" class="secondary-action">Cancel</button></form></div><p id="mfaEnrollError" role="status"></p></section><section id="backupPanel" class="push-setting hidden"><h3>💾 Backup monitoring</h3><p class="muted">Daily automatic encrypted backup is scheduled at 11:00 PM Beirut time. GitHub jobs may start late. A successful run verifies the encrypted archive, but is not a complete disaster restore.</p><p id="backupStatus" role="status">Not checked yet.</p><p id="backupLast" class="muted"></p><p id="backupSuccess" class="muted"></p><p id="backupScheduled" class="muted"></p><button id="backupCheck" type="button">Refresh backup status</button> <a id="backupRunLink" class="secondary-action hidden" target="_blank" rel="noopener noreferrer">View GitHub run ↗</a></section><form id="passwordForm"><div class="field"><label for="currentPassword">Current password</label><input id="currentPassword" type="password" autocomplete="current-password" required></div><div class="field"><label for="newPassword">New password (12 characters minimum)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required></div><div class="field"><label for="confirmPassword">Confirm new password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" required></div><button type="submit">Change password</button></form><button id="logout" type="button" class="hidden">Sign out</button></section></div></div></section></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="./excel-export.js?v=styled-20261101&amp;requests=2"></script><script src="./receipt-pdf.js?v=iphonefix-20261101b"></script><script src="./schedule-editor.js?v=2"></script><script src="./employee-ledger.js?studio=1&amp;v=20261105-design-b"></script><script src="./mystery-shopper.js?v=positions-20261113"></script><script src="./labor-control.js?v=1"></script><script src="./schedule-requests.js?v=3"></script><script src="./tip-distribution.js?v=3"></script><script src="./menu-search.js?v=2"></script><script src="./training-ledger.js?v=positions-20261113a"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="./excel-export.js?v=styled-20261101&amp;requests=2"></script><script src="./receipt-pdf.js?v=iphonefix-20261101b"></script><script src="./schedule-editor.js?v=2"></script><script src="./employee-ledger.js?v=directory-20261124"></script><script src="./mystery-shopper.js?v=positions-20261113"></script><script src="./labor-control.js?v=1"></script><script src="./schedule-requests.js?v=3"></script><script src="./tip-distribution.js?v=3"></script><script src="./menu-search.js?v=2"></script><script src="./training-ledger.js?v=positions-20261113a"></script>
 <script>
 (()=>{'use strict';
 const URL='https://qvwgmybocjyhldwnrqqt.supabase.co',KEY='sb_publishable_QfqtXc7KTnV3SAy2vQ6qIA_3N9cbSd8';
@@ -260,6 +266,9 @@ function setTab(tab){
  if(profile?.role==='driver'&&!['schedule','requests','labor','training','account'].includes(tab))tab='schedule';
  if(profile?.role==='waiter_waitress'&&!['schedule','requests','labor','training','mystery','menu','account'].includes(tab))tab='mystery';
  if(['employees','audit'].includes(tab)&&profile&&!['superuser','admin'].includes(profile.role))tab='overview';
+ if(tab==='employees'&&activeTab!==tab){
+  closeEmployeeEditor();$('tlTeamSearch').value='';$('tlIndividualEdits').open=false;$('tlCreateDetails').open=false;window.EmployeeLedger?.resetDirectoryFilter();
+ }
  activeTab=tab;closeMobileSheets();closeMobileNotices();
  document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===tab;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
  document.querySelectorAll('[data-pane]').forEach(p=>p.classList.toggle('active',p.dataset.pane===tab));
@@ -300,8 +309,13 @@ $('tlNewDraftAction').onclick=()=>{updateDraftTotal();openMobileSheet('editor')}
 $('tlCloseDraft').onclick=closeMobileSheets;$('tlCloseEdit').onclick=closeMobileSheets;
 $('tlModalBackdrop').onclick=closeMobileSheets;
 $('tlCloseNotices').onclick=closeMobileNotices;$('tlNoticeBackdrop').onclick=closeMobileNotices;
-$('tlAddEmployeeAction').onclick=()=>{$('tlCreateDetails').open=true;$('tlCreateDetails').scrollIntoView({behavior:'smooth',block:'start'})};
-$('tlTeamSearch').oninput=()=>{const q=$('tlTeamSearch').value.trim().toLowerCase();$('people').querySelectorAll('.employee-entry').forEach(e=>e.classList.toggle('hidden',!e.textContent.toLowerCase().includes(q)))};
+
+$('tlTeamSearch').oninput=()=>{
+ closeEmployeeEditor();
+ if($('tlTeamSearch').value.trim())$('tlIndividualEdits').open=true;
+ window.EmployeeLedger?.filterDirectory();
+};
+$('employeeBack').onclick=closeEmployeeEditor;
 $('tlQuickActions').onclick=e=>{
  const b=e.target.closest('button[data-tl-quick]');if(!b)return;
  const target=b.dataset.tlQuick;
@@ -862,81 +876,78 @@ function openMobileNotices(){
  loadNotifications();
 }
 
-async function loadEmployeeRates(people){
- if(!['admin','superuser'].includes(profile?.role))return;
- // Include future rates when detecting if an initial rate has EVER been defined.
- const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
- const r=await db.from('runner_rates').select('runner_id,hourly_rate,effective_from').order('effective_from',{ascending:false});
- const body=$('employeeRatesRows'),dropdown=$('rateRunner'),submit=$('rateForm').querySelector('button[type="submit"], button');
- if(r.error){
-  body.innerHTML='<tr><td colspan="5">Could not load rates: '+esc(r.error.message)+'</td></tr>';
-  dropdown.innerHTML='<option value="">Cannot load rates</option>';dropdown.disabled=true;
-  if(submit)submit.disabled=true;
-  $('tlUnratedNotice').textContent='Could not load team member rate history. Please refresh.';
-  return;
- }
- const defined=new Set(),current=new Map();
- for(const rate of r.data||[]){
-  defined.add(rate.runner_id);
-  if(rate.effective_from<=today&&!current.has(rate.runner_id))current.set(rate.runner_id,rate.hourly_rate);
- }
- const unrated=people.filter(p=>isTeamMemberRole(p.role)&&p.active&&!defined.has(p.id));
- const selected=dropdown.value;
- dropdown.innerHTML=unrated.length?unrated.map(p=>
-  '<option value="'+esc(p.id)+'">'+esc(p.full_name)+' · '+esc(roleLabel(p.management_position||p.role))+'</option>'
- ).join(''):'<option value="">No unrated team members</option>';
- dropdown.disabled=!unrated.length;
- if(submit)submit.disabled=!unrated.length;
- if(unrated.some(x=>x.id===selected))dropdown.value=selected;
- $('tlUnratedNotice').textContent=unrated.length
-  ?unrated.length+' team member'+(unrated.length===1?'':'s')+' without any hourly rate. Once you save a rate, edit future changes in the table above.'
-  :'All active team members have an hourly rate. Use Employee hourly rates & individual edits to make changes.';
- body.innerHTML=people.map(x=>
-  '<tr><td>'+esc(x.full_name)+'</td><td>'+esc(roleLabel(x.management_position||x.role))+'</td><td>'+esc(x.active?'Active':'Inactive')+'</td><td>'+
-  (isTeamMemberRole(x.role)?(current.has(x.id)?money(current.get(x.id)):defined.has(x.id)?'Scheduled':'Not configured'):'N/A')+
-  '</td><td>'+(isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'" data-rate-value="'+esc(current.get(x.id)??'')+'">Edit rate</button>':'—')+'</td></tr>'
- ).join('')||'<tr><td colspan="5">No employees found.</td></tr>';
-}
 async function saveCurrentRate(id,rate){
  if(!['admin','superuser'].includes(profile?.role))throw Error('Restaurant Manager access required');
  const n=Number(rate);if(!Number.isFinite(n)||n<0||n>100000000)throw Error('Enter a valid hourly rate');
  const r=await db.rpc('set_runner_hourly_rate_today',{p_runner_id:id,p_hourly_rate:n});
  if(r.error)throw r.error;
 }
-async function editEmployeeRate(e){
- const b=e.target.closest('button[data-rate-edit]');if(!b)return;
- const name=b.dataset.rateName;
- let currentRate=b.dataset.rateValue;
- if(currentRate===undefined){const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Beirut'}).format(new Date());const r=await db.from('runner_rates').select('hourly_rate').eq('runner_id',b.dataset.rateEdit).lte('effective_from',today).order('effective_from',{ascending:false}).limit(1);if(r.error){msg('Could not load hourly rate.',true);return}currentRate=r.data?.[0]?.hourly_rate??'';}
- const input=prompt('Set hourly rate for '+name+' (LBP / hour):',currentRate);
- if(input===null)return;
- if(!input.trim()||!Number.isFinite(Number(input))||Number(input)<0){msg('Enter a valid hourly rate.',true);return}
- if(!confirm('Set '+moneyLBP(input)+' per hour for '+name+'? Existing payments will not be changed.'))return;
- b.disabled=true;
- try{await saveCurrentRate(b.dataset.rateEdit,input);await refresh();msg('Hourly rate saved.')}
- catch(err){msg('Could not save rate: '+err.message,true)}
- finally{b.disabled=false}
+let rateRequest=0;
+async function showIndividualRate(person){
+ const form=$('individualRateForm'), field=$('individualRate'), status=$('individualRateStatus');
+ const request=++rateRequest;
+ form.hidden=!person.active||!isTeamMemberRole(person.role);
+ if(form.hidden)return;
+ field.value='';field.disabled=true;form.querySelector('button').disabled=true;
+ status.textContent='Loading current rate…';
+ try{
+  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Beirut'}).format(new Date());
+  const r=await db.from('runner_rates').select('hourly_rate,effective_from').eq('runner_id',person.id).order('effective_from',{ascending:false});
+  if(request!==rateRequest||selectedEmployeeId!==person.id)return;
+  if(r.error)throw r.error;
+  const current=r.data.find(rate=>rate.effective_from<=today);
+  field.value=current?.hourly_rate??'';
+  status.textContent=r.data[0]?.effective_from>today?'A future rate is scheduled for '+r.data[0].effective_from+'.':current?'':'No hourly rate set.';
+  field.disabled=false;form.querySelector('button').disabled=false;
+ }catch(error){if(request===rateRequest)status.textContent='Could not load hourly rate. '+error.message;}
+}
+$('individualRateForm').onsubmit=async event=>{
+ event.preventDefault();
+ const id=selectedEmployeeId, field=$('individualRate'), button=event.currentTarget.querySelector('button');
+ const person=directoryEmployees.find(x=>x.id===id);
+ if(!person?.active||!isTeamMemberRole(person.role)||field.disabled||!field.reportValidity())return;
+ const value=field.value;
+ if(!confirm('Set '+moneyLBP(value)+' per hour for '+person.full_name+'? Existing payments will keep their recorded amounts.'))return;
+ button.disabled=true;
+ try{await saveCurrentRate(id,value);if(selectedEmployeeId===id)await showIndividualRate(person);await refresh();msg('Hourly rate saved.')}
+ catch(error){msg(error.message,true)}
+ finally{if(selectedEmployeeId===id&&!field.disabled)button.disabled=false;}
 };
-$('employeeRatesRows').onclick=editEmployeeRate;
-$('people').addEventListener('click',editEmployeeRate);
 function canManageEmployee(actor,target){
  if(!actor||!target||actor.id===target.id)return false;
  if(actor.role==='superuser')return ['admin','manager',...TEAM_MEMBER_ROLES].includes(target.role);
  if(actor.role==='admin')return ['manager',...TEAM_MEMBER_ROLES].includes(target.role);
  return false;
 }
-function renderManageableEmployees(people){
- const allowed=people.filter(x=>canManageEmployee(profile,x));
- if(!allowed.length)return '<p class="muted">No employees available to manage.</p>';
- return allowed.map(x=>{
-  const roleName=roleLabel(x.management_position||x.role);
-  const status=x.active?'Active':'Inactive';
-  return '<p class="employee-entry"><span class="tl-person-main"><span class="tl-person-avatar" aria-hidden="true">'+tlAvatarHtml(x.full_name,x.avatar_path)+'</span><span><strong class="tl-person-name">'+esc(x.full_name)+'</strong><span class="tl-person-meta" style="display:block">'+esc(roleName)+' · '+esc(status)+'</span></span></span><span class="tl-person-actions">'+
-   (isTeamMemberRole(x.role)&&x.active?'<button type="button" data-rate-edit="'+esc(x.id)+'" data-rate-name="'+esc(x.full_name)+'">Edit hourly rate</button>':'')+
-   '<button type="button" data-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'" data-active="'+(!x.active)+'">'+(x.active?'Deactivate':'Reactivate')+'</button>'+
-   '<button type="button" data-delete-employee="'+esc(x.id)+'" data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'">Delete permanently</button>'+
-   '</span></p>';
- }).join('');
+let directoryEmployees=[], selectedEmployeeId='';
+function closeEmployeeEditor(){
+ selectedEmployeeId='';
+ $('individualEditor').hidden=true;
+ $('employeeList').hidden=false;
+}
+function selectEmployee(id){
+ const x=directoryEmployees.find(person=>person.id===id);
+ if(!x){closeEmployeeEditor();return}
+ selectedEmployeeId=id;
+ $('employeeList').hidden=true;
+ $('individualEditor').hidden=false;
+ $('individualName').textContent=x.full_name;
+ $('individualPosition').textContent=roleLabel(x.management_position||x.role)+' · '+(x.active?'Active':'Inactive');
+ const attrs=' data-role="'+esc(x.role)+'" data-name="'+esc(x.full_name)+'"';
+ $('individualActions').innerHTML=(canManageEmployee(profile,x)?'<button type="button" data-employee="'+esc(id)+'"'+attrs+' data-active="'+(!x.active)+'">'+(x.active?'Deactivate':'Activate')+'</button> <button type="button" class="tl-secondary-button" data-delete-employee="'+esc(id)+'"'+attrs+'>Delete permanently</button>':'');
+ showIndividualRate(x);
+ window.EmployeeLedger?.selectHealthEmployee(x);
+}
+function renderEmployeeDirectory(people){
+ const previous=directoryEmployees.find(x=>x.id===selectedEmployeeId);
+ directoryEmployees=people.filter(x=>canManageEmployee(profile,x)||(x.active&&x.role!=='superuser'));
+ $('employeeDirectoryRows').innerHTML=directoryEmployees.map(x=>'<tr data-person-id="'+esc(x.id)+'"><td>'+esc(x.full_name)+'</td><td>'+esc(roleLabel(x.management_position||x.role))+'</td><td>'+(x.active?'Active':'Inactive')+'</td><td><button type="button" data-select-employee="'+esc(x.id)+'" aria-label="Edit '+esc(x.full_name)+'">Edit</button></td></tr>').join('');
+ window.EmployeeLedger?.filterDirectory();
+ if(selectedEmployeeId){
+  const next=directoryEmployees.find(x=>x.id===selectedEmployeeId);
+  if(!next)closeEmployeeEditor();
+  else if(['active','full_name','role','management_position'].some(k=>previous?.[k]!==next[k]))selectEmployee(next.id);
+ }
 }
 
 function renderPaymentRows(){
@@ -956,7 +967,7 @@ function renderPaymentRows(){
 $('tlPaymentShowMore').onclick=()=>{paymentRowsShown+=PAYMENT_PAGE_SIZE;renderPaymentRows()};
 
 async function refresh(){if(!profile)return;
-if(!isTeamMemberRole(profile.role)){const p=await db.from('profiles').select('id,full_name,role,management_position,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>isPaymentRole(x.role)&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.management_position||x.role))+'</option>').join('');$('historyRunner').innerHTML='<option value="">All team members</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.management_position||x.role))+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){$('people').innerHTML=renderManageableEmployees(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active team members</span><b>'+p.data.filter(x=>isPaymentRole(x.role)&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>';$('tlTeamSearch').oninput();await loadEmployeeRates(p.data)}}
+if(!isTeamMemberRole(profile.role)){const p=await db.from('profiles').select('id,full_name,role,management_position,active,avatar_path').order('full_name');if(p.error){msg(p.error.message,true);return}employeeNames=new Map(p.data.map(x=>[x.id,x.full_name]));populateAuditPeople(p.data);runners=p.data.filter(x=>isPaymentRole(x.role)&&x.active);const selectedHistoryRunner=$('historyRunner').value;$('runner').innerHTML=runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.management_position||x.role))+'</option>').join('');$('historyRunner').innerHTML='<option value="">All team members</option>'+runners.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.full_name)+' · '+esc(roleLabel(x.management_position||x.role))+'</option>').join('');$('historyRunner').value=selectedHistoryRunner;if(['admin','superuser'].includes(profile.role)){renderEmployeeDirectory(p.data);$('tlTeamStats').innerHTML='<div class="tl-team-count"><span>Active team members</span><b>'+p.data.filter(x=>isPaymentRole(x.role)&&x.active).length+'</b><span>Eligible for weekly payments</span></div><div class="tl-team-count"><span>Manageable accounts</span><b>'+p.data.filter(x=>canManageEmployee(profile,x)).length+'</b><span>Based on your role permissions</span></div>'}}
 let payQuery=db.from('weekly_tips').select('id,runner_id,week_start,hours_worked,tips_amount,advances,net_payout,published').order('week_start',{ascending:false}).order('created_at',{ascending:false});if(isTeamMemberRole(profile.role))payQuery=payQuery.eq('runner_id',profile.id).eq('published',true);const r=await payQuery;if(r.error){msg(r.error.message,true);return}rows=r.data||[];
 let confirmed=[];let receiptQuery=db.from('receipt_confirmations').select('weekly_tip_id');if(isTeamMemberRole(profile.role))receiptQuery=receiptQuery.eq('runner_id',profile.id);const c=await receiptQuery;if(c.error){msg('Could not load receipt confirmations: '+c.error.message,true);return}confirmed=(c.data||[]).map(x=>x.weekly_tip_id)
 if(!isTeamMemberRole(profile.role)){const pending=rows.filter(x=>x.published&&!confirmed.includes(x.id));const alert=$('pendingAlert');alert.classList.toggle('hidden',false);alert.classList.toggle('clear',pending.length===0);alert.innerHTML=pending.length?'<div><strong>'+pending.length+' unconfirmed payment'+(pending.length===1?'':'s')+'</strong><div>Published payments awaiting team member confirmation</div></div><button type="button" id="viewPending">View pending</button>':'<div><strong>All published payments confirmed</strong><div>No outstanding receipts</div></div>';if(pending.length)$('viewPending').onclick=()=>{$('from').value='';$('to').value='';$('historyRunner').value='';$('historyStatus').value='published';setTab('payments');refresh()}}else{show('pendingAlert',false)}
@@ -977,6 +988,8 @@ renderPaymentRows();
 
 $('people').onclick=async e=>{
  if(!['admin','superuser'].includes(profile?.role))return;
+ const select=e.target.closest('button[data-select-employee]');
+ if(select){selectEmployee(select.dataset.selectEmployee);$('employeeBack').focus();return}
  const del=e.target.closest('button[data-delete-employee]');
  const toggle=e.target.closest('button[data-employee]');
  if(!del&&!toggle)return;
@@ -1020,8 +1033,7 @@ $('people').onclick=async e=>{
  }catch(err){msg(err.message||'Could not update employee status.',true)}
  finally{b.disabled=false}
 };
-$('employeeForm').onsubmit=async e=>{e.preventDefault();if(!['admin','superuser'].includes(profile?.role)){msg('Restaurant Manager access required.',true);return}if(!$('employeeRole').value){msg('Please select a position before creating the account.',true);$('employeeRole').focus();return}const b=e.target.querySelector('button');b.disabled=true;msg('Creating employee…');try{const {data,error}=await db.functions.invoke('create-employee-',{body:{full_name:$('employeeName').value.trim(),email:$('employeeEmail').value.trim(),password:$('employeePassword').value,role:$('employeeRole').value}});if(error)throw error;if(!data?.success)throw Error(data?.error||'Could not create employee');let healthWarning='';const newHealthDate=$('employeeHealthCardExpiry').value;if(newHealthDate&&data.employee?.id){const hr=await db.rpc('set_employee_health_card_expiry',{p_employee_id:data.employee.id,p_expiry_date:newHealthDate});if(hr.error)healthWarning=' Health card expiry was not saved: '+hr.error.message+'. Edit it in Employees.';}e.target.reset();await refresh();msg('Employee created successfully.'+(isPaymentRole(data.employee?.role)?' Set their hourly rate below.':'')+healthWarning,!!healthWarning)}catch(err){msg(err.message||'Could not create employee',true)}finally{b.disabled=false}};
-$('rateForm').onsubmit=async e=>{e.preventDefault();if(!['admin','superuser'].includes(profile?.role)){msg('Restaurant Manager access required.',true);return}const b=e.target.querySelector('button');b.disabled=true;try{await saveCurrentRate($('rateRunner').value,$('hourlyRate').value);await refresh();msg('Hourly rate saved successfully.');$('hourlyRate').value=''}catch(err){msg(err.message,true)}finally{b.disabled=false}};
+$('employeeForm').onsubmit=async e=>{e.preventDefault();if(!['admin','superuser'].includes(profile?.role)){msg('Restaurant Manager access required.',true);return}if(!$('employeeRole').value){msg('Please select a position before creating the account.',true);$('employeeRole').focus();return}const b=e.target.querySelector('button');b.disabled=true;msg('Creating employee…');try{const {data,error}=await db.functions.invoke('create-employee-',{body:{full_name:$('employeeName').value.trim(),email:$('employeeEmail').value.trim(),password:$('employeePassword').value,role:$('employeeRole').value}});if(error)throw error;if(!data?.success)throw Error(data?.error||'Could not create employee');let healthWarning='';const newHealthDate=$('employeeHealthCardExpiry').value;if(newHealthDate&&data.employee?.id){const hr=await db.rpc('set_employee_health_card_expiry',{p_employee_id:data.employee.id,p_expiry_date:newHealthDate});if(hr.error)healthWarning=' Health card expiry was not saved: '+hr.error.message+'. Edit it in Employees.';}e.target.reset();await refresh();msg('Employee created successfully.'+(isPaymentRole(data.employee?.role)?' Open Employee and Individual Edits to set their hourly rate.':'')+healthWarning,!!healthWarning)}catch(err){msg(err.message||'Could not create employee',true)}finally{b.disabled=false}};
 let recoveryMode=window.location.hash.includes('type=recovery')||new URLSearchParams(window.location.search).get('type')==='recovery';function showRecovery(){document.body.classList.remove('tl-logged-in');recoveryMode=true;show('login',false);show('app',false);show('logout',false);show('recoveryPanel',true);msg('Enter your new password.')}function clearRecovery(){recoveryMode=false;show('recoveryPanel',false);history.replaceState(null,'',location.pathname+location.search)}$('forgotToggle').onclick=()=>{show('forgotForm',true);$('resetEmail').value=$('email').value;$('resetEmail').focus()};$('backToLogin').onclick=()=>show('forgotForm',false);$('forgotForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button[type=submit]');b.disabled=true;try{const redirectTo=location.origin+location.pathname;const r=await db.auth.resetPasswordForEmail($('resetEmail').value.trim(),{redirectTo});if(r.error)throw r.error;msg('If this email has an account, a password reset link will be sent. Check your inbox and spam folder.');show('forgotForm',false)}catch(err){msg(err.message||'Could not send reset email.',true)}finally{b.disabled=false}};$('recoveryForm').onsubmit=async e=>{e.preventDefault();const pw=$('recoveryPassword').value;if(pw!==$('recoveryConfirm').value){msg('Passwords do not match.',true);return}if(pw.length<12){msg('Password must be at least 12 characters.',true);return}const b=e.target.querySelector('button');b.disabled=true;try{const r=await db.auth.updateUser({password:pw});if(r.error)throw r.error;await db.auth.signOut();e.target.reset();clearRecovery();await load();msg('Password updated. Sign in using your new password.')}catch(err){msg(err.message||'Could not update password.',true)}finally{b.disabled=false}};
 $('loginForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;msg('Signing in…');try{const r=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(r.error)throw r.error;$('password').value='';await load()}catch(err){msg(err.message,true)}finally{b.disabled=false}};
 $('cancelEdit').onclick=closeMobileSheets;

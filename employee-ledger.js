@@ -56,44 +56,20 @@
         +(expired?'<button type="button" class="noir-metric el-health-metric el-expired" data-health-jump="expired" aria-label="View '+expired+' expired health cards"><span class="noir-metric-head"><span class="noir-metric-label">Expired Health Cards</span><span class="noir-metric-icon">!</span></span><span class="noir-metric-value">'+expired+'</span><span class="noir-metric-foot">Critical · View expired cards</span></button>':'');
       while(box.firstChild)metrics.appendChild(box.firstChild);
     }
-    const select=$('elHealthEmployee');
-    if(select){
-      const selected=select.value;
-      select.innerHTML='<option value="">Select an employee</option>'+active.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.full_name)+'</option>').join('');
-      if(active.some(p=>p.id===selected))select.value=selected;
-    }
-    const people=$('people');
-    if(people){
-      people.querySelectorAll('.employee-entry').forEach(el=>{
-        el.querySelectorAll('.el-health-tag,.el-health-edit').forEach(x=>x.remove());
-        const button=el.querySelector('button[data-employee]');
-        const id=button?.dataset.employee;
-        if(!id || !active.some(p=>p.id===id))return;
-        const group=getHealthGroup(id);
-        el.dataset.healthGroup=group;
-        const label=document.createElement('span');
-        label.className='el-health-tag el-health-'+group;
-        label.textContent=healthLabel(id);
-        el.appendChild(label);
-        const edit=document.createElement('button');
-        edit.type='button'; edit.className='tl-secondary-button el-health-edit';
-        edit.dataset.healthEdit=id;edit.textContent='Edit health card';
-        el.appendChild(edit);
-      });
-    }
     applyHealthFilter();
-    const summary=$('elHealthEditorSummary');
-    if(summary)summary.textContent=near+' near expiry · '+expired+' expired · '+active.length+' active team members';
   }
   function applyHealthFilter() {
     const people=$('people');
     if(!people)return;
     const q=($('tlTeamSearch')?.value||'').trim().toLowerCase();
-    people.querySelectorAll('.employee-entry').forEach(el=>{
-      const matchesText=!q||el.textContent.toLowerCase().includes(q);
-      const matchesGroup=state.filter==='all'||el.dataset.healthGroup===state.filter;
-      el.classList.toggle('hidden',!matchesText||!matchesGroup);
+    const eligible=state.filter==='all'?null:new Set(peopleForHealth().map(p=>p.id));
+    let count=0;
+    people.querySelectorAll('tr[data-person-id]').forEach(row=>{
+      const visible=(!q||row.textContent.toLowerCase().includes(q))&&(!eligible||eligible.has(row.dataset.personId)&&getHealthGroup(row.dataset.personId)===state.filter);
+      row.hidden=!visible;
+      if(visible)count++;
     });
+    $('employeeNoMatches').hidden=count>0;
     const banner=$('elHealthFilterBanner');
     if(banner){
       banner.classList.toggle('hidden',state.filter==='all');
@@ -102,63 +78,62 @@
   }
   async function onRefresh() {
     if(!admin())return;
+    const actor=state.profile;
     const [people,health]=await Promise.all([
       state.db.from('profiles').select('id,full_name,role,active').order('full_name'),
       state.db.from('employee_health_cards').select('employee_id,expires_on,updated_at')
     ]);
+    if(state.profile!==actor)return;
     if(people.error||health.error){
       toast('Health card records could not be loaded: '+(people.error?.message||health.error?.message),true);
       return;
     }
     state.people=people.data||[];state.health=health.data||[];
+    state.healthReady=true;
+    const form=$('elHealthForm');
+    if(!form.hidden && !$('elHealthDate').dataset.dirty)$('elHealthDate').value=cardById(form.dataset.employee)?.expires_on||'';
     renderHealth();
   }
-  function editHealth(id) {
-    const p=state.people.find(x=>x.id===id);
-    if(!p)return;
-    $('elHealthEmployee').value=id;
-    $('elHealthDate').value=cardById(id)?.expires_on||'';
-    $('elHealthForm').scrollIntoView({behavior:'smooth',block:'center'});
-    $('elHealthDate').focus();
+  function selectHealthEmployee(person){
+    const form=$('elHealthForm');
+    form.hidden=!admin()||!person.active||person.role==='superuser';
+    delete $('elHealthDate').dataset.dirty;
+    form.dataset.employee=person.id;
+    $('elHealthDate').value=cardById(person.id)?.expires_on||'';
   }
   async function saveHealth(clear=false) {
     if(!admin())return;
-    const id=$('elHealthEmployee').value;
+    const id=$('elHealthForm').dataset.employee;
     const date=clear?null:($('elHealthDate').value||null);
-    if(!id){toast('Select an employee first.',true);return}
+    if(!id||$('elHealthForm').hidden)return;
+    if(!state.healthReady){toast('Health cards are still loading. Refresh and try again.',true);return}
     if(!clear&&!date){toast('Choose an expiry date, or select Clear date.',true);return}
     const b=$('elHealthSave');b.disabled=true;$('elHealthClear').disabled=true;
     try{
       const r=await state.db.rpc('set_employee_health_card_expiry',{p_employee_id:id,p_expiry_date:date});
       if(r.error)throw r.error;
       await onRefresh();
-      if(clear)$('elHealthDate').value='';
+      if($('elHealthForm').dataset.employee===id)$('elHealthDate').value=cardById(id)?.expires_on||'';
       toast(date?'Health card expiry updated. Old reminders were cleared.':'Health card expiry cleared. Old reminders were cleared.');
       await state.api?.loadNotifications?.();
     }catch(e){toast('Could not update health card: '+(e.message||'Please retry.'),true)}
     finally{b.disabled=false;$('elHealthClear').disabled=false}
   }
-  function addHealthEditor() {
-    if(!$('people')||$('elHealthForm'))return;
-    const section=document.createElement('section');
-    section.className='el-health-editor';
-    section.innerHTML='<div class="el-section-intro"><div><strong>Health Card Expiry</strong><p class="muted" id="elHealthEditorSummary">Loading health cards…</p></div></div>'
-      +'<form id="elHealthForm"><div class="row"><div class="field"><label for="elHealthEmployee">Employee</label><select id="elHealthEmployee" required><option value="">Select an employee</option></select></div><div class="field"><label for="elHealthDate">Expiry date</label><input id="elHealthDate" type="date"></div></div>'
-      +'<div class="row"><button type="submit" id="elHealthSave">Save expiry date</button><button type="button" id="elHealthClear" class="tl-secondary-button">Clear date</button></div></form>'
-      +'<div id="elHealthFilterBanner" class="el-filter-banner hidden"><span id="elHealthFilterDescription"></span><button type="button" id="elHealthFilterReset" class="tl-secondary-button">Show all employees</button></div>';
-    $('people').parentNode.insertBefore(section,$('people'));
+  function wireHealthEditor() {
+    $('elHealthDate').oninput=()=>{$('elHealthDate').dataset.dirty='1'};
     $('elHealthForm').addEventListener('submit',e=>{e.preventDefault();saveHealth(false)});
     $('elHealthClear').addEventListener('click',()=>{
       if(!confirm('Remove the saved expiry date and all expiry reminders for this employee?'))return;
       saveHealth(true);
     });
-    $('elHealthEmployee').addEventListener('change',()=>{$('elHealthDate').value=cardById($('elHealthEmployee').value)?.expires_on||''});
     $('elHealthFilterReset').addEventListener('click',()=>{state.filter='all';applyHealthFilter()});
   }
   function healthJump(group) {
+    state.api?.setTab?.('employees');
     state.filter=group;
     $('tlTeamSearch').value='';
-    state.api?.setTab?.('employees');
+    $('employeeBack').click();
+    $('tlIndividualEdits').open=true;
     renderHealth();
     $('tlEmployeeHeader')?.scrollIntoView({behavior:'smooth',block:'start'});
   }
@@ -405,16 +380,11 @@
   }
   function wire() {
     if(state.wired)return;state.wired=true;
-    addHealthEditor();
+    wireHealthEditor();
     $('tlHomeHero').addEventListener('click',e=>{
       const b=e.target.closest('[data-health-jump]');
       if(b&&admin())healthJump(b.dataset.healthJump);
     });
-    $('people').addEventListener('click',e=>{
-      const b=e.target.closest('[data-health-edit]');
-      if(b&&admin())editHealth(b.dataset.healthEdit);
-    });
-    $('tlTeamSearch').addEventListener('input',applyHealthFilter);
     $('elScheduleFoh').onclick=()=>showDept('FOH');
     $('elScheduleBoh').onclick=()=>showDept('BOH');
     $('elScheduleRefresh').onclick=loadScheduleIndex;
@@ -436,11 +406,12 @@
       const date=new Date((state.week||mondayISO(todayBeirut()))+'T12:00:00Z');
       date.setUTCDate(date.getUTCDate()+7);state.week=date.toISOString().slice(0,10);state.manualWeek=true;renderSchedule();
     };
+    state.health=[];state.people=[];state.healthReady=false;
     state.db=db;state.profile=profile;state.api={setTab,toast,loadNotifications};
     state.filter='all';state.dept='FOH';state.week=null;state.manualWeek=false;state.published=[];state.draft=null;state.drafts={};
     wire();
     $('elScheduleManagement').classList.toggle('hidden',!admin());
-    if($('elHealthForm'))$('elHealthForm').closest('.el-health-editor').classList.toggle('hidden',!admin());
+
   }
-  window.EmployeeLedger=Object.freeze({init,onRefresh,openSchedule:loadScheduleIndex});
+  window.EmployeeLedger=Object.freeze({init,onRefresh,selectHealthEmployee,filterDirectory:applyHealthFilter,resetDirectoryFilter(){state.filter='all';applyHealthFilter()},openSchedule:loadScheduleIndex});
 })();
