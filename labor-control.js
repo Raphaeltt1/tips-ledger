@@ -48,7 +48,10 @@ window.LaborControl = (() => {
       const label=el('label',control.getAttribute('aria-label')); label.className='field'; label.append(control); fields.append(label);
     }
     const {wrap,body}=grid(['Staff ID','Name','Rate (USD/hour)','Hours worked','Labor cost (USD)','']);
-    const entries=[], result=el('p'); result.setAttribute('role','status');
+    const entries=[], result=el('div'), figures=el('strong'), badge=el('span'), icon=el('span'), verdict=el('span');
+    result.className='labor-result'; result.setAttribute('role','status');
+    badge.className='labor-verdict'; icon.className='labor-signal'; icon.setAttribute('aria-hidden','true');
+    badge.append(icon,verdict); result.append(figures,badge);
     function totals() {
       let total=0;
       for (const e of entries) {
@@ -56,11 +59,18 @@ window.LaborControl = (() => {
         total+=cost; e.cost.textContent=money.format(cost);
       }
       let summary='Total labor cost '+money.format(total);
-      if (Number(sales.value)>0 && target.value!=='') {
+      let state='pending';
+      if (Number(sales.value)>0 && sales.validity.valid && target.validity.valid && entries.every(e=>!e.rate.validity.rangeUnderflow&&!e.hours.validity.rangeUnderflow)) {
         const actual=total*100/Number(sales.value);
-        summary+=' · Actual '+actual.toFixed(2)+'% · '+(actual<=Number(target.value)+1e-10?'Within target':'Over target');
-      } else summary+=' · Enter positive sales and a target to compare.';
-      result.textContent=summary;
+        summary+=' · Actual '+actual.toFixed(2)+'%';
+        state=actual<=Number(target.value)+1e-10?'within':'over';
+      }
+      figures.textContent=summary;
+      if(result.dataset.result!==state){
+        result.dataset.result=state;
+        icon.textContent=state==='within'?'✓':state==='over'?'×':'';
+        verdict.textContent=state==='within'?'Within target':state==='over'?'Over target':'Enter valid sales, hours, rates and a target to compare.';
+      }
     }
     function row(record) {
       const tr=body.insertRow();
