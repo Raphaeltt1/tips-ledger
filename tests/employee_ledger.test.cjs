@@ -13,8 +13,8 @@ const sql=fs.readFileSync(path.join(root,'supabase/migrations/20261105_health_ca
 function internals(){
   const window={ExcelJS};
   const modified=source.replace(
-    'window.EmployeeLedger=Object.freeze({init,onRefresh,openSchedule:loadScheduleIndex});',
-    'window.__test={parseExcel,tableMarkup,mondayISO,dayDelta,getHealthGroup};'
+    'window.EmployeeLedger=Object.freeze(',
+    'window.__test={parseExcel,tableMarkup,mondayISO,dayDelta,getHealthGroup}; window.EmployeeLedger=Object.freeze('
   );
   assert.notEqual(modified,source,'test hook failed');
   vm.runInNewContext(modified,{window,document:{getElementById:()=>null},Date,Intl,console,setTimeout,clearTimeout},{timeout:3000});

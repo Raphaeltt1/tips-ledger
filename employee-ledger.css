@@ -185,3 +185,12 @@ html[data-theme=dark] .el-schedule-table tbody tr.el-section-row td:first-child,
 html[data-theme=dark] .el-schedule-table tbody tr.el-section-row:nth-child(even) td:first-child{
   background:#3c3157;color:#e9dafa
 }
+
+#admin #tlEmployeeHeader { min-height: auto; padding-right: 0; }
+#employeeList table { min-width: 360px; width: 100%; }
+#individualEditor form:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--tl-border); }
+#individualEditor form label { flex-basis: 100%; }
+#individualEditor form input { width: min(100%, 220px); }
+#individualActions { margin-top: 18px; }
+#individualActions [data-delete-employee] { color: var(--tl-danger) !important; }
+#people [hidden] { display: none !important; }
