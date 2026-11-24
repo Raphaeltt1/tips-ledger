@@ -1,7 +1,7 @@
 (() => {
   const el = id => document.getElementById('td'+id);
   const options = (node, rows) => node.replaceChildren(...rows.map(([text,value]) => new Option(text,value)));
-  let db, push, refreshPayments, people, weeks, week, busy=false;
+  let db, weeks, week, busy=false;
   const fmt = n => n.toLocaleString('en-US');
   let department='FOH';
   const roles={runner:'Runner',expo:'Expo',host_hostess:'Host / Hostess',counter:'Counter',waiter_waitress:'Waiter / Waitress',driver:'Driver',kitchen_crew:'Kitchen Crew'};
@@ -82,16 +82,6 @@
       const actions=row.insertCell();
       function button(text,fn){const b=document.createElement('button');b.textContent=text;b.onclick=fn;actions.append(b);}
       if(week.payments[m.id]) actions.textContent='Published';
-      else {
-        const accounts=document.createElement('select');
-        options(accounts,[['Select payment account',''],...people.filter(p=>p.active&&p.role===m.position).map(p=>[p.full_name,p.id])]);
-        accounts.value=m.account||'';
-        actions.append(accounts);
-        button('Publish',()=>run(async()=>{
-          if(!accounts.value)throw Error('Select the employee account to publish this payment.');
-          await save(m.id,accounts.value);
-        }));
-      }
       if(!frozen)button('Remove',()=>{week.members=week.members.filter(x=>x!==m);draw();});
       [...row.cells].forEach((cell,i)=>cell.dataset.label=row.closest('table').tHead.rows[0].cells[i].textContent);
     }
@@ -105,22 +95,19 @@
   function choose(date){
     load(weeks.find(w=>w.position===department&&w.week_start===date)||newSheet(date));
   }
-  async function save(id=null,account=null){
+  async function save(){
     if([...el('Editor').querySelectorAll('input')].some(field=>!field.reportValidity()))return;
-    const result=await query(db.rpc('department_distribution_action',{w:week.week_start,pos:week.position,rev:week.revision,total:week.pool,roster:week.members,recipient:id,account}));
+    const result=await query(db.rpc('department_distribution_action',{w:week.week_start,pos:week.position,rev:week.revision,total:week.pool,roster:week.members,recipient:null,account:null}));
     weeks=[result.week,...weeks.filter(w=>w.week_start!==week.week_start||w.position!==week.position)].sort((a,b)=>b.week_start.localeCompare(a.week_start));
     selectPosition();load(result.week);
-    el('Status').textContent=id?'Payment published.':'Draft saved.';
-    if(result.published){await push('published',result.published);await refreshPayments();}
+    el('Status').textContent='Draft saved.';
     return true;
   }
-  async function open(client,sendPush,refresh){
-    db=client;push=sendPush;refreshPayments=refresh;
+  async function open(client){
+    db=client;
     await run(async()=>{
       el('Editor').hidden=true;
-      [people,weeks]=await Promise.all([
-        query(db.from('profiles').select('id,full_name,role,active').order('full_name')),
-        query(db.from('tip_distributions').select('*').order('week_start',{ascending:false}))]);
+      weeks=await query(db.from('tip_distributions').select('*').order('week_start',{ascending:false}));
       selectPosition();
       el('Date').onchange=()=>{el('Editor').hidden=true;el('History').value='';};
       for(const dept of ['FOH','BOH']){
