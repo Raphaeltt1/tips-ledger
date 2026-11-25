@@ -65,3 +65,91 @@
     .mobile-tab-indicator:not([hidden]) { transition: none; scale: 1; }
   }
 }
+
+@media (max-width: 680px) {
+  body:has(#login:not(.hidden)) {
+    background: #050817;
+  }
+
+  #login.card {
+    color-scheme: dark;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 12px auto;
+    padding: clamp(26px, 8vw, 46px) clamp(20px, 6vw, 36px) clamp(72px, 20vw, 106px);
+    border: 2px solid transparent;
+    border-radius: 28px;
+    color: #faf9ff;
+    background:
+      radial-gradient(ellipse at top left, #23367e, transparent 49%) padding-box,
+      linear-gradient(148deg, #101737, #040b1b 68%, #1c1045) padding-box,
+      linear-gradient(130deg, #ae80fa, #637cff 38%, #c87aff) border-box;
+    box-shadow: 0 12px 34px #02031280, inset 0 0 20px #8059ec24;
+  }
+
+  #login::before {
+    content: "F";
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 18px;
+    border: 1px solid #8285ef;
+    border-radius: 23px;
+    background: linear-gradient(145deg, #183d7d, #101632 60%, #322063);
+    box-shadow: inset 0 2px 10px #738dff60, 0 6px 18px #0005;
+    color: #dd9aff;
+    font: 800 46px/1 system-ui, sans-serif;
+  }
+
+  #login::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: clamp(62px, 17vw, 90px);
+    z-index: -1;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 90' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='w' x2='1' y2='.6'%3E%3Cstop stop-color='%234759d8'/%3E%3Cstop offset='1' stop-color='%2351219c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23w)' opacity='.72' d='M0 65 Q70 28 145 52 T290 32 Q350 -8 400 4 V90 H0Z'/%3E%3Cpath fill='url(%23w)' stroke='%239b73f5' d='M17 92 Q85 8 148 39 T285 70 Q350 70 405 50 V94Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  }
+
+  #login h2, #login > .muted {
+    text-align: center;
+  }
+
+  #login h2 {
+    color: #fff;
+    font-size: 1.8rem;
+    margin: 0 0 6px;
+  }
+
+  #login > .muted {
+    color: #d6d9eb;
+    margin: 0 0 24px;
+  }
+
+  #login .field label { color: #e1d9f6; }
+  #login .field input {
+    color: #fff;
+    background: #0e1831;
+    border: 1px solid #465272;
+    border-radius: 13px;
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  #login form button:not(.secondary-action) {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 13px;
+    color: white;
+    background: linear-gradient(105deg, #444cdc, #822bd8 55%, #aa24c0);
+    font-weight: 700;
+  }
+
+  #login > form + p { text-align: right; }
+  #login .secondary-action { color: #edb2ff; background: transparent; }
+  #login :is(input, button):focus-visible { outline: 2px solid #cf9bff; outline-offset: 3px; }
+}
