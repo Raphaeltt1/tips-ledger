@@ -13,6 +13,6 @@ verify_jwt = false
 verify_jwt = true
 
 # Machine-only reminder dispatch: JWT gateway disabled so modern service secrets work;
-# Edge handler still validates the exact service-role secret before DB access.
+# Edge handler verifies a dedicated scheduler token or the service-role credential.
 [functions.health-card-reminders]
 verify_jwt = false

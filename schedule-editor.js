@@ -157,7 +157,7 @@ window.ScheduleEditor = (() => {
         for(const [k,other] of cache)if(other!==m&&other.dept===m.dept&&other.week>m.week&&!other.dirty)cache.delete(k);
         m.dirty=false;
         if(publish){const push=await ctx.db.functions.invoke('send-push',{body:{event_type:'schedule_published',schedule_publication_id:result.data.publication}});
-          if(token===epoch){message.textContent=push.error||push.data?.error?'Published with in-app alerts. Device push could not be confirmed.':'Published. Employees have been notified.';await ctx.refresh();}
+          if(token===epoch){await ctx.refresh();const summary=scheduleNotificationSummary(push);message.textContent=summary;ctx.toast(summary,!!push.error||!!push.data?.failed);}
         }else message.textContent='Draft saved.';
       }catch(e){message.textContent=e.message;}finally{fieldset.disabled=false;}
     }
@@ -178,5 +178,10 @@ window.ScheduleEditor = (() => {
     const actions=node('div');actions.className='row';actions.append(add,copy,button('Save draft',()=>save(false)),button('Publish and notify',()=>save(true)),button('Delete schedule',deleteSchedule),button('Reload saved version',()=>{if(confirm('Reload and discard unsaved changes?')){cache.delete(active);active='';show(m.dept,m.week);}}));
     fieldset.append(top,wrap,actions,message);form.append(fieldset);host.append(form);rows();calculate();
   }
-  return {init,show,published,hours};
+function scheduleNotificationSummary(push){
+ const data=push?.data;
+ if(push?.error||!Number.isInteger(data?.bellCount))return 'Schedule published. Notification counts could not be verified.';
+ return 'Schedule published. In-app alerts: '+data.bellCount+'. Device pushes accepted: '+data.sent+'. Failed: '+data.failed+'. Accounts without a registered device: '+data.withoutDevice+'.';
+}
+  return {init,show,published,hours,scheduleNotificationSummary};
 })();

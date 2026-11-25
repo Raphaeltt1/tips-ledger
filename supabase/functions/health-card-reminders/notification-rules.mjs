@@ -11,8 +11,8 @@ export function daysUntil(expiryISO, todayISO) {
 
 export function reminderStage(expiryISO, todayISO) {
   const days = daysUntil(expiryISO, todayISO);
-  if (days >= 4 && days <= 10) return '10';
-  if (days >= 0 && days <= 3) return '3';
+  if (days === 10) return '10';
+  if (days === 3) return '3';
   return null;
 }
 

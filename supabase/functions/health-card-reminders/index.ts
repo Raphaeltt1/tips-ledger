@@ -1,17 +1,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import webpush from "npm:web-push@3.6.7";
+import * as webPushModule from "npm:web-push@3.6.7";
+const webpush = "sendNotification" in webPushModule ? webPushModule : webPushModule.default;
 import { healthReminder, todayInBeirut } from "./notification-rules.mjs";
 
 const reply = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
 // Machine-only endpoint. No browser/user JWT can trigger bulk reminders.
-// Called by a scheduled GitHub Action using an existing repository secret.
+// Supabase Cron authenticates with a short-lived, single-use token.
 Deno.serve(async (req) => {
   if (req.method !== "POST") return reply({ error: "Method not allowed" }, 405);
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const supplied = req.headers.get("Authorization")?.replace(/^Bearer /, "");
-  if (!key || !supplied || supplied !== key) return reply({ error: "Unauthorized" }, 401);
+  if (!key || !supplied || supplied.length > 512) return reply({ error: "Unauthorized" }, 401);
 
   const url = Deno.env.get("SUPABASE_URL");
   const vapidPublic = Deno.env.get("VAPID_PUBLIC_KEY");
@@ -21,6 +22,12 @@ Deno.serve(async (req) => {
 
   try {
     const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+    if (supplied !== key) {
+      const check = await db.rpc("verify_health_card_scheduler", { p_token: supplied });
+      if (check.error || check.data !== true) return reply({ error: "Unauthorized" }, 401);
+    }
+    if (!vapidPublic || !vapidPrivate) return reply({error: "Push configuration missing"}, 503);
+    webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
     // Only active Admin and Superuser accounts receive health-card alerts.
     const [adminsResult, employeesResult, cardsResult] = await Promise.all([
       db.from("profiles").select("id,role").eq("active", true).in("role", ["admin", "superuser"]),
@@ -70,8 +77,7 @@ Deno.serve(async (req) => {
     if (eventError) return reply({ error: "Unable to load queued alerts" }, 500);
 
     let pushed = 0, failed = 0, staleRemoved = 0;
-    if (events?.length && vapidPublic && vapidPrivate) {
-      webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+    if (events?.length) {
       const recipientIds = [...new Set(events.map((row: { recipient_id: string }) => row.recipient_id))];
       const { data: subscriptions, error: subError } = await db.from("push_subscriptions")
         .select("id,user_id,subscription").in("user_id", recipientIds);

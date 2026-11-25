@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
     }
 
     let recipientIds: string[] = [];
+    let bellCount = 0;
     let title = "";
     let message = "";
     const scheduleNoticeIds = new Map<string, string>();
@@ -84,11 +85,12 @@ Deno.serve(async (req) => {
       if (publicationError || !publication?.published_at) {
         return json({ error: "Published schedule not found" }, 404);
       }
-      const { data: unsent, error: noticeError } = await admin.from("notifications")
-        .select("id,recipient_id,body").eq("event_key", "schedule:" + publication.id)
-        .is("push_sent_at", null);
+      const { data: notices, error: noticeError } = await admin.from("notifications")
+        .select("id,recipient_id,body,push_sent_at").eq("event_key", "schedule:" + publication.id);
       if (noticeError) return json({ error: "Could not load schedule alerts" }, 500);
-      recipientIds = (unsent || []).map((x: { recipient_id: string; id: string }) => {
+      bellCount = notices?.length || 0;
+      const unsent = (notices || []).filter(row => !row.push_sent_at);
+      recipientIds = unsent.map((x: { recipient_id: string; id: string }) => {
         scheduleNoticeIds.set(x.recipient_id, x.id);
         return x.recipient_id;
       });
@@ -116,12 +118,12 @@ Deno.serve(async (req) => {
       message = `Team member ${profile.full_name || "Unknown"} confirmed receiving their weekly payment.`;
     }
 
-    if (!recipientIds.length) return json({ sent: 0, failed: 0, reason: "No active recipients" });
+    if (!recipientIds.length) return json({ bellCount, withoutDevice: 0, sent: 0, failed: 0, reason: "No active recipients" });
     webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
     const { data: subscriptions, error: subError } = await admin.from("push_subscriptions")
       .select("id,user_id,endpoint,subscription").in("user_id", recipientIds);
     if (subError) return json({ error: "Could not load push subscriptions" }, 500);
-    if (!subscriptions?.length) return json({sent: 0, failed: 0, reason: "No registered device subscriptions for the recipient(s). Enable or re-register push on each device."});
+    if (!subscriptions?.length) return json({bellCount, withoutDevice: recipientIds.length, sent: 0, failed: 0, reason: "No registered device subscriptions for the recipient(s). Enable or re-register push on each device."});
 
     let sent = 0;
     let failed = 0;
@@ -153,7 +155,9 @@ Deno.serve(async (req) => {
         if (error) console.error("Schedule delivery receipt update failed", error.code);
       }));
     }
-    return json({ sent, failed, reason: sent === 0 ? "All push attempts failed. Check Supabase Edge Function logs and VAPID configuration." : null, staleSubscriptionsRemoved: staleIds.length });
+    const registeredUsers = new Set(subscriptions.map(row => row.user_id));
+    const withoutDevice = recipientIds.filter(id => !registeredUsers.has(id)).length;
+    return json({ bellCount, withoutDevice, sent, failed, reason: sent === 0 ? "All push attempts failed. Check Supabase Edge Function logs and VAPID configuration." : null, staleSubscriptionsRemoved: staleIds.length });
   } catch (error) {
     console.error("send-push failed", error);
     return json({ error: "Push notification delivery failed" }, 500);

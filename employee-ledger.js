@@ -379,11 +379,7 @@
       const push=await state.db.functions.invoke('send-push',{body:{
         event_type:'schedule_published',schedule_publication_id:draft.id
       }});
-      if(push.error||push.data?.error){
-        toast('Schedule published. All employees have in-app alerts, but push delivery needs a retry.',true);
-      }else{
-        toast('Schedule published. All active employees received an in-app alert'+(push.data?.sent?' and '+push.data.sent+' push delivery attempt(s) succeeded.':'.'));
-      }
+      toast(window.ScheduleEditor.scheduleNotificationSummary(push),!!push.error||!!push.data?.failed);
     }catch(e){toast('Schedule was not published: '+(e.message||'Please retry.'),true)}
     finally{b.disabled=false;b.textContent='Publish schedule'}
   }
@@ -424,7 +420,7 @@
     });
   }
   function init({db,profile,setTab,toast,loadNotifications}){
-    window.ScheduleEditor.init({db,profile,refresh:loadScheduleIndex});
+    window.ScheduleEditor.init({db,profile,toast,refresh:loadScheduleIndex});
     $('scheduleNewWeek').classList.toggle('hidden',!['manager','admin','superuser'].includes(profile.role));
     $('scheduleNewWeek').onclick=()=>{
       const date=new Date((state.week||mondayISO(todayBeirut()))+'T12:00:00Z');
