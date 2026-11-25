@@ -139,15 +139,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (body.pin !== undefined && (typeof body.pin !== "string" || !/^[0-9]{4}$/.test(body.pin))) {
+    if (password.length < 12) {
       return json(
-        { error: "Enter exactly four digits for the PIN." },
+        { error: "Password must be at least 12 characters." },
         400
       );
-    }
-
-    if (body.pin === undefined && password.length < 12) {
-      return json({error:"Enter a four-digit PIN or use the existing password form."}, 400);
     }
 
     if (!allowedRoles.includes(role)) {
@@ -157,19 +153,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    let credential = password;
-    if (body.pin !== undefined) {
-      const { data, error } = await admin.rpc("ledger_pin_credential", {
-        account_email: email, account_pin: body.pin
-      });
-      if (error || !data) return json({error:"PIN service unavailable"}, 503);
-      credential = data;
-    }
-
     const { data: created, error: createError } =
       await admin.auth.admin.createUser({
         email,
-        password: credential,
+        password,
         email_confirm: true,
         user_metadata: { full_name: fullName },
       });
