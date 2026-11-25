@@ -16,3 +16,6 @@ verify_jwt = true
 # Edge handler still validates the exact service-role secret before DB access.
 [functions.health-card-reminders]
 verify_jwt = false
+
+[functions.employee-pin]
+verify_jwt = false
