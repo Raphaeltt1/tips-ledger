@@ -53,3 +53,6 @@ html[data-theme=dark] .ms-file-type{background:#332f57;color:#c3b8ff}
  .ms-preview-header{padding:11px;gap:8px}
  .ms-preview-frame{height:75dvh}
 }
+
+/* Summary-only evaluations */
+.ms-score{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:18px 12px;margin:12px 0;background:var(--surface-secondary,#eaf1f9);border-radius:14px;color:#183452;text-align:center}.ms-score strong{font-size:clamp(30px,5vw,46px);font-weight:850;line-height:1.1;font-variant-numeric:tabular-nums}.ms-score span{font-size:13px;font-weight:650}.ms-score-large{margin-top:0;padding:26px}.ms-summary-document{max-width:760px;margin:auto;padding:16px}.ms-no-point{padding:13px 15px;margin:12px 0;border:1px solid #c4a1a5;border-left:4px solid #b42338;border-radius:10px}.ms-no-point strong{color:#b42338;font-size:13px}.ms-no-point p{margin:7px 0 0;white-space:pre-wrap}.ms-summary-document h3{font-size:17px}html[data-theme=dark] .ms-score{background:#223652;color:#edf4ff}html[data-theme=dark] .ms-no-point strong{color:#ff99a5}

@@ -55,9 +55,10 @@ Deno.serve(async (req) => {
     const eventType = body?.event_type;
     const weeklyTipId = body?.weekly_tip_id;
     const schedulePublicationId = body?.schedule_publication_id;
-    if (!["published", "received", "test", "schedule_published"].includes(eventType)
+    const mysterySummaryId = body?.mystery_summary_id;
+    if (!["published", "received", "test", "schedule_published", "mystery_published"].includes(eventType)
         || (["published", "received"].includes(eventType) && !weeklyTipId)
-        || (eventType === "schedule_published" && !schedulePublicationId)) {
+        || (eventType === "schedule_published" && !schedulePublicationId) || (eventType === "mystery_published" && !mysterySummaryId)) {
       return json({ error: "Invalid event" }, 400);
     }
 
@@ -71,6 +72,17 @@ Deno.serve(async (req) => {
       recipientIds = [profile.id];
       title = "🔔 Employee Ledger Test";
       message = "Background push is working on this device.";
+    } else if (eventType === "mystery_published") {
+      if (!["admin", "superuser"].includes(profile.role)) return json({ error: "Management access required" }, 403);
+      const { data: callerRole, error: callerError } = await authClient.rpc("current_user_role");
+      if (callerError || callerRole !== profile.role) return json({ error: "Role verification failed" }, 403);
+      const { data: summary, error: summaryError } = await authClient.from("mystery_shopper_summaries").select("id,employee_id,uploaded_by").eq("id",mysterySummaryId).maybeSingle();
+      if (summaryError || !summary || summary.uploaded_by !== profile.id) return json({ error: "Assigned summary not found" }, 404);
+      const { data: notices, error: noticeError } = await admin.from("notifications").select("id,recipient_id,push_sent_at").eq("event_key","mystery:"+summary.id).eq("recipient_id",summary.employee_id);
+      if (noticeError) return json({ error: "Could not load evaluation notification" }, 500);
+      bellCount=notices?.length||0;
+      recipientIds=(notices||[]).filter(row=>!row.push_sent_at).map(row=>{scheduleNoticeIds.set(row.recipient_id,row.id);return row.recipient_id});
+      title="Mystery Shopper"; message="Your new Mystery Shopper evaluation is available.";
     } else if (eventType === "schedule_published") {
       if (!["admin", "superuser", "manager"].includes(profile.role)) {
         return json({ error: "Management access required for schedule publication notifications" }, 403);
@@ -132,11 +144,11 @@ Deno.serve(async (req) => {
     await Promise.all((subscriptions || []).map(async (row: { id: string; user_id: string; endpoint: string; subscription: Record<string, unknown> }) => {
       try {
         await webpush.sendNotification(row.subscription, JSON.stringify({
-          title, body: message, tag: `tips-ledger-${eventType}-${schedulePublicationId || weeklyTipId || profile.id}`,
+          title, body: message, tag: `tips-ledger-${eventType}-${mysterySummaryId || schedulePublicationId || weeklyTipId || profile.id}`,
           url: eventType === "schedule_published" ? "https://raphaeltt1.github.io/tips-ledger/?tab=schedule" : "https://raphaeltt1.github.io/tips-ledger/"
         }));
         sent++;
-        if (eventType === "schedule_published") scheduleDelivered.add(row.user_id);
+        if (["schedule_published","mystery_published"].includes(eventType)) scheduleDelivered.add(row.user_id);
       } catch (err) {
         failed++;
         const status = (err as { statusCode?: number })?.statusCode;
@@ -145,7 +157,7 @@ Deno.serve(async (req) => {
       }
     }));
     if (staleIds.length) await admin.from("push_subscriptions").delete().in("id", staleIds);
-    if (eventType === "schedule_published") {
+    if (["schedule_published","mystery_published"].includes(eventType)) {
       // Mark successful per-recipient delivery to avoid repeated pushes on retries.
       await Promise.all([...scheduleDelivered].map(async userId => {
         const noticeId = scheduleNoticeIds.get(userId);

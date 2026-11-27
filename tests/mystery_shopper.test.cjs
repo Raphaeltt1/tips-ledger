@@ -57,35 +57,38 @@ test('Database metadata read policy is exactly recipient or authorized managemen
   assert.match(migration,/Only admin and superuser can assign mystery reports/);
   assert.match(migration,/uploaded_by = \(SELECT auth\.uid\(\)\)/);
 });
-test('Private report files cannot be accessed by another employee',()=>{
-  assert.match(migration,/VALUES \('mystery-shopper-reports','mystery-shopper-reports',false/);
-  assert.match(migration,/Read only owned mystery reports or all for admin/);
-  assert.match(migration,/r\.file_path = name/);
-  assert.match(migration,/r\.employee_id = \(SELECT auth\.uid\(\)\)/);
-  assert.match(migration,/Admins upload mystery shopper files/);
-  assert.match(migration,/Admins remove mystery shopper files/);
-  assert.match(frontend,/\.storage\.from\(BUCKET\)\.download\(report\.file_path\)/);
-  assert.doesNotMatch(frontend,/getPublicUrl\(/);
+test('New evaluations are summary-only, not source file uploads',()=>{
+  const summary=get('supabase/migrations/20261127_mystery_shopper_summary_only.sql');
+  assert.match(summary,/ENABLE ROW LEVEL SECURITY/);
+  assert.match(summary,/employee_id=\(SELECT auth.uid\(\)\)/);
+  assert.match(summary,/No new original mystery attachments/);
+  assert.match(frontend,/state.db.from\(TABLE\)/);
+  assert.match(frontend,/total_grade:summary.grade,no_points:summary.noPoints/);
+  assert.doesNotMatch(frontend,/storage\.from\(/);
+  assert.match(frontend,/event_type:'mystery_published'/);
+  assert.match(html,/accept="\.pdf,application\/pdf"/);
+  assert.match(html,/Download Word/);
 });
-test('Upload path is randomized and accepts supported PDF and images only',()=>{
-  assert.match(frontend,/crypto\.randomUUID\(\)/);
-  assert.match(frontend,/employeeId\+'\/'\+id\+'\.'\+ext/);
-  assert.match(frontend,/upsert:false/);
-  assert.match(frontend,/file\.size>12582912/);
-  assert.match(frontend,/mime_type:mime,file_size:file\.size/);
-  assert.match(frontend,/upload\(path,file/);
+test('Answer parser rejects ambiguous selections and requires the full template',()=>{
+  const ctx={window:{}};
+  vm.runInNewContext(get('mystery-pdf.js'),ctx);
+  const {classify,ids}=ctx.window.MysteryPDF;
+  assert.equal(ids.length,59);
+  const centers=[420.4,446.2,470.8];
+  const read=(x,y)=>{const dist=Math.min(...centers.map(c=>Math.abs(c-x)));return (dist>=3&&dist<=4.3)||(Math.abs(x-centers[1])<2.5&&Math.abs(y-100)<2.5)?0:255};
+  assert.equal(classify(read,102.4),1);
+  assert.throws(()=>classify(()=>255,102.4));
+  assert.throws(()=>classify(()=>0,102.4));
 });
-test('Reports are downloadable, listed newest first and paged',()=>{
-  assert.match(frontend,/\.order\('report_date',\{ascending:false\}\)/);
-  assert.match(frontend,/const PAGE_SIZE = 20/);
-  assert.match(frontend,/\.range\(state\.page\*PAGE_SIZE,/);
-  assert.match(frontend,/original_filename/);
-  assert.match(frontend,/data-ms-download/);
-  assert.match(frontend,/View report/);
-  assert.match(frontend,/function closePreview\(/);
-  assert.match(frontend,/msPreviewBody/);
-  assert.match(html,/id="msPreview"/);
-  assert.match(html,/id="msSaveReport"/);
+test('Word export creates a ZIP-based document without PDF content',async()=>{
+  const ctx={window:{},TextEncoder,Blob,Uint8Array,DataView};
+  vm.runInNewContext(get('mystery-word.js'),ctx);
+  const blob=ctx.window.MysteryWord.create({report_date:'2026-11-01',total_grade:90.91,no_points:[{code:'W12',section:'Waiters Performance',text:'Test <point>'}]},'Example');
+  assert.equal(blob.type,'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  const bytes=Buffer.from(await blob.arrayBuffer());
+  assert.equal(bytes.readUInt32LE(0),0x04034b50);
+  assert.ok(bytes.includes(Buffer.from('word/document.xml')));
+  assert.ok(bytes.includes(Buffer.from('Test &lt;point&gt;')));
 });
 test('Deletion cleanup prevents orphaned private attachments on account removal',()=>{
   assert.match(del,/storage\.from\("mystery-shopper-reports"\)/);
